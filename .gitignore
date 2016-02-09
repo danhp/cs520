@@ -1,0 +1,5 @@
+*.o
+*.tab.*
+*.yy.*
+
+src/golite

@@ -1,0 +1,2 @@
+/* greedy /* comment */
+package main
