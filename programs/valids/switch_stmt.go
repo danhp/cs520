@@ -2,14 +2,20 @@
 package swith
 
 func main() {
-    switch i++; a { }
+	switch i++; a {
+	}
 
-    switch expression {
-    case condition:
-        ;;
-    case otherCondition:
-    default:
+	switch exp {
+	case condition:
 
-    }
+	case otherCondition:
+	default:
+
+	}
+
+	// single line
+	switch a {
+	case condition:
+	}
 
 }

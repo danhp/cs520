@@ -1,2 +1,6 @@
 /* greedy /* comment */
 package main
+
+func main () {
+    a + b := 1
+}

@@ -4,5 +4,6 @@
 
 #include "y.tab.h"
 
-void yyerror(char *msg);
+void yyerror(const char *msg);
 void printError(char *msg, YYLTYPE loc);
+void printErrorMsg(char *msg);

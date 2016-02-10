@@ -15,6 +15,7 @@ type (
     basicOperand int
     point3D struct {
         x, y, z float64
+        a int
     }
 )
 

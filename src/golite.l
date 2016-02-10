@@ -2,23 +2,22 @@ D [0-9]
 O [0-7]
 L [a-zA-Z_]
 H [a-fA-F0-9]
-IS (u|U|l|L)*
 
-%array
-%option yylineno
 %{
 #include "y.tab.h"
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
 
 int yycolumn = 1;
 int shouldInsert = 0;
+int lineno = 1;
 
 static void update_loc() {
-	yylloc.first_line = yylloc.last_line = yylineno;
+	yylloc.first_line = yylloc.last_line = lineno;
 	yylloc.first_column = yycolumn;
-	yylloc.last_column = yycolumn + yyleng-1;
+	yylloc.last_column = yycolumn + yyleng - 1;
 	yycolumn += yyleng;
 }
 
@@ -28,12 +27,13 @@ void lexBlockComment();
 int lexQuotedString();
 void append_yytext(char c);
 %}
+%array
 
 %%
 [ \t]+          /* ignore */
 \r              { shouldInsert = 0; yycolumn = 1; }
-\n              { yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
-\/\/[^\n]*\n    { yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
+\n              { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
+\/\/[^\n]*\n    { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
 \/\*            { lexBlockComment(); }
 
 break           { shouldInsert = 1; return BREAK; }
@@ -53,13 +53,13 @@ if              { shouldInsert = 0; return IF; }
 import          { shouldInsert = 0; return IMPORT; }
 interface       { shouldInsert = 0; return INTERFACE; }
 map             { shouldInsert = 0; return MAP; }
-package         { shouldInsert = 0; return PACKAGE; }
+package         { shouldInsert = 0; return kPACKAGE; }
 range           { shouldInsert = 0; return RANGE; }
 return          { shouldInsert = 1; return RETURN; }
 select          { shouldInsert = 0; return SELECT; }
 struct          { shouldInsert = 0; return STRUCT; }
 switch          { shouldInsert = 0; return SWITCH; }
-type            { shouldInsert = 0; return TYPE; }
+type            { shouldInsert = 0; return kTYPE; }
 var             { shouldInsert = 0; return VAR; }
 
 int             { shouldInsert = 1; return INT; }
@@ -165,7 +165,7 @@ false           { shouldInsert = 1; yylval.boolconst = 0; return BOOLCONST; }
 void lexBlockComment() {
 	char c, c1;
 	while(1) {
-		while ((c = input()) != '*' && c != 0) {}
+		while ((c = input()) != '*' && c > 0) {}
 
 		if (c == '*') {
 			if ((c1 = input()) == '/') {
@@ -174,7 +174,7 @@ void lexBlockComment() {
 			} else {
 				unput(c1);
 			}
-		} else if (c == 0) {
+		} else if (c <= 0) {
 			printError("unclosed block comment", yylloc);
 			return;
 		}
