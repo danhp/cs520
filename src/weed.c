@@ -43,37 +43,35 @@ void  weedVARdecl(ID *id, EXP *exp, YYLTYPE loc) {
 void weedTOPfunc(FUNC_DECL *func)
 {
   /* weedFUNC_SIGN(func->signature); */
-  printf("in top func %s", func->name);
-  weedSTMT(func->body);
+  if (func->body)
+    weedSTMT(func->body);
 }
 
 void weedSTMT(STMT *stmt) {
-    printf("%u", stmt->kind);
-    if (stmt->next) {
-      printf("has next");
-      weedSTMT(stmt->next);
-    }
+    if (stmt->next) weedSTMT(stmt->next);
+
   switch(stmt->kind) {
     case switchK:
       weedSTMTswitch(stmt->val.switchS.body);
       break;
     default:
-      printf("Default");
       break;
   }
 }
 
 /* only 1 default case */
 void weedSTMTswitch(CASE_DECL *body) {
-  printf("weeding");
+  YYLTYPE loc;
+
+  if (!body) return;
+
   /* count number of default cases */
   int numDefault = 0;
   while (body) {
-    if ((body)->kind == defaultK)
-      numDefault += 1;
+    if (body->kind == defaultK) numDefault += 1;
+    loc = body->loc;
     body = body->next;
   }
 
-  if (numDefault > 1)
-    printError("Too many default cases", body->loc);
+  if (numDefault > 1) printError("Too many default cases", loc);
 }
