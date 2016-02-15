@@ -189,7 +189,7 @@ struct_decl
 
 /* 2.6 Function declarations */
 func_decl
-	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4); printf("%u", $4->kind);}
+	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4); }
 ;
 
 func_signature
@@ -401,7 +401,7 @@ mul_op
 /* 2.9.6 Function Calls */
 /* Allowed for nested parens for ID but now we need to weed */
 func_call
-	: exp '(' exp_list ')'                { $$ = makeEXPfunccall($1, $3); }
+	: operand '(' exp_list ')'             { $$ = makeEXPfunccall($1, $3); }
 ;
 
 /* 2.9.7 Append */
