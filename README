@@ -1,1 +1,7 @@
 # GoLite Compiler
+
+Reference: https://golang.org/ref/spec
+
+Code viewed:
+  - ANSI C grammar, Lex specification: http://www.lysator.liu.se/c/ANSI-C-grammar-l.html
+  - ANSI C grammar, Yacc grammar: http://www.lysator.liu.se/c/ANSI-C-grammar-y.html
