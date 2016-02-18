@@ -406,7 +406,7 @@ EXP *makeEXPop(EXP *left, char op, EXP *right) {
 			e->kind = bitorK;
 			break;
 		case '^':
-			e->kind = andnotK;
+			e->kind = bitxork;
 			break;
 		case 'b':
 			e->kind = andnotK;

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -std=c99 -pedantic
 
-FILES = error memory weed tree
+FILES = error memory weed tree pretty
 O_FILES = $(addsuffix .o, $(FILES))
 H_FILES = $(addsuffix .h, $(FILES))
 
