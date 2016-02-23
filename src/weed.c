@@ -41,7 +41,6 @@ void  weedVARdecl(ID *id, EXP *exp, YYLTYPE loc) {
 		printError("Number of ids doesn't match number of expressions", loc);
 }
 
-// Do nothing
 void weedTOPtype(TYPE_DECL *decl) { }
 
 void weedTOPfunc(FUNC_DECL *func) {
@@ -49,7 +48,6 @@ void weedTOPfunc(FUNC_DECL *func) {
 	weedSTMT(func->body);
 }
 
-// Do nothing
 void weedFUNC_SIGN(FUNC_SIGN *signature){ }
 
 void weedSTMT(STMT *stmt) {
@@ -57,10 +55,11 @@ void weedSTMT(STMT *stmt) {
 
 	switch(stmt->kind) {
 		case emptyK:
-			printf("a\n");
 			break;
 		case varK:
 			weedVARdecl(stmt->val.varS->id, stmt->val.varS->exp, stmt->val.varS->loc);
+			break;
+		case typeK:
 			break;
 		case switchK:
 			weedSTMTswitch(stmt->val.switchS.body);
@@ -103,7 +102,6 @@ void weedEXP(EXP *exp) {
 		// Weed division by zero
 		case divK:
 			weedEXPdivzero(exp->val.binaryE.right);
-			break;
 
 		// Binary operators
 		case plusK:
