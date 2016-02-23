@@ -12,7 +12,6 @@ extern PROGRAM *program;
 %union {
 	unsigned int intconst;
 	float floatconst;
-	int boolconst;
 	char runeconst;
 	char *stringconst;
 	char *id;
@@ -51,7 +50,6 @@ extern PROGRAM *program;
 
 %token <intconst> INTCONST
 %token <floatconst> FLOATCONST
-%token <boolconst> BOOLCONST
 %token <runeconst> RUNECONST
 %token <stringconst> STRINGCONST RAWSTRINGCONST IDENTIFIER
 
@@ -360,8 +358,7 @@ operand
 literal
 	: INTCONST                   { $$ = makeEXPintconst($1); }
 	| FLOATCONST                 { $$ = makeEXPfloatconst($1); }
-	| BOOLCONST                  { $$ = makeEXPboolconst($1); }
-	| RUNECONST                  { /*$$ = makeEXPruneconst($1); */}
+	| RUNECONST                  { $$ = makeEXPruneconst($1); }
 	| string_lit                 { $$ = $1; }
 ;
 

@@ -142,7 +142,7 @@ typedef struct EXP {
 	YYLTYPE loc;
 	struct TYPE *type;
 	enum {
-		idK, intconstK, floatconstK, boolconstK, stringconstK, rawstringconstK,  /* literals */
+		idK, intconstK, floatconstK, runeconstK, stringconstK, rawstringconstK,  /* literals */
 		plusK, minusK, timesK, divK, modK,      /* arithmetic operators */
 		bitandK, andnotK, bitorK, bitxork,      /* arithmetic operators */
 		leftshiftK, rightshiftK,                /* arithmetic operators */
@@ -156,7 +156,7 @@ typedef struct EXP {
 		struct { SYMBOL *sym; } idE;
 		int intconstE;
 		float floatconstE;
-		int boolconstE;
+		char runeconstE;
 		char *stringconstE;
 		char *rawstringconstE;
 		struct {struct EXP *left; struct EXP *right;} binaryE;
@@ -222,7 +222,7 @@ EXP *makeEXPid(char *name);
 EXP *makeEXPop(EXP *left, char op, EXP *right);
 EXP *makeEXPintconst(int intconst);
 EXP *makeEXPfloatconst(float floatconst);
-EXP *makeEXPboolconst(int boolconst);
+EXP *makeEXPruneconst(char runeconst);
 EXP *makeEXPstringconst(char *stringconst);
 EXP *makeEXPrawstringconst(char *rawstringconst);
 EXP *makeEXPselector(EXP *exp, char *name);

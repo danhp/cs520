@@ -67,6 +67,22 @@ void weedSTMT(STMT *stmt) {
 		case expK:
 			weedEXP(stmt->val.expS);
 			break;
+		case shortvarK:
+			break;
+		case assignK:
+			break;
+		case printK:
+		case printlnK:
+		case returnK:
+			break;
+		case ifK:
+		case ifelseK:
+			break;
+		case forK:
+			break;
+		case breakK:
+		case continueK:
+			break;
 	}
 }
 
@@ -132,6 +148,13 @@ void weedEXP(EXP *exp) {
 		case unotK:
 		case ubitnotK:
 			weedEXP(exp->val.unaryE);
+
+		case selectorK:
+		case indexK:
+		case funccallK:
+		case appendK:
+		case castK:
+			break;
 	}
 }
 

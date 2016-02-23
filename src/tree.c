@@ -480,21 +480,21 @@ EXP *makeEXPintconst(int intconst) {
 	return e;
 }
 
-EXP *makeEXPboolconst(int boolconst) {
-	EXP *e;
-	e = NEW(EXP);
-	e->loc = yylloc;
-	e->kind = boolconstK;
-	e->val.boolconstE = boolconst;
-	return e;
-}
-
 EXP *makeEXPfloatconst(float floatconst) {
 	EXP *e;
 	e = NEW(EXP);
 	e->loc = yylloc;
 	e->kind = floatconstK;
 	e->val.floatconstE = floatconst;
+	return e;
+}
+
+EXP *makeEXPruneconst(char runeconst) {
+	EXP *e;
+	e = NEW(EXP);
+	e->loc = yylloc;
+	e->kind = runeconstK;
+	e->val.runeconstE = runeconst;
 	return e;
 }
 

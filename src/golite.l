@@ -116,9 +116,6 @@ append          { shouldInsert = 0; return APPEND; }
 "."             { shouldInsert = 0; return '.'; }
 ":"             { shouldInsert = 0; return ':'; }
 
-true            { shouldInsert = 1; yylval.boolconst = 1; return BOOLCONST; }
-false           { shouldInsert = 1; yylval.boolconst = 0; return BOOLCONST; }
-
 0[xX]{H}+       { shouldInsert = 1; sscanf(yytext, "%x", &yylval.intconst); return INTCONST; }
 0{O}+           { shouldInsert = 1; sscanf(yytext, "%o", &yylval.intconst); return INTCONST; }
 {D}+            { shouldInsert = 1; yylval.intconst = atoi(yytext); return INTCONST; }
