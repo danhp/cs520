@@ -201,8 +201,12 @@ STMT *makeSTMTvar(VAR_DECL *varDecl) {
 	STMT *s;
 	s = NEW(STMT);
 	s->loc = yylloc;
-	s->kind = varK;
-	s->val.varS = varDecl;
+	if (varDecl) {
+		s->kind = varK;
+		s->val.varS = varDecl;
+	} else {
+		s->kind = emptyK;
+	}
 	return s;
 }
 
@@ -210,8 +214,12 @@ STMT *makeSTMTtype(TYPE_DECL *typeDecl) {
 	STMT *s;
 	s = NEW(STMT);
 	s->loc = yylloc;
-	s->kind = typeK;
-	s->val.typeS = typeDecl;
+	if (typeDecl) {
+		s->kind = typeK;
+		s->val.typeS = typeDecl;
+	} else {
+		s->kind = emptyK;
+	}
 	return s;
 }
 

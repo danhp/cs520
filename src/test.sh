@@ -3,12 +3,11 @@
 echo Running valids:
 for file in ../programs/valids/*
 do
-	./golite < $file > /dev/null 2>&1;
+	./golite < $file 1> /dev/null;
 	if [ "$?" -eq 0 ]; then
 		printf ".";
 	else
 		echo Failed: $file;
-		./golite < $file;
 	fi
 done
 

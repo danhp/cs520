@@ -16,7 +16,7 @@ extern PROGRAM *program;
 	char runeconst;
 	char *stringconst;
 	char *id;
-  char charconst;
+	char charconst;
 
 	/* AST NODES */
 	struct PROGRAM *program;
@@ -229,7 +229,7 @@ stmt: simple_stmt                      { $$ = $1; }
 	| for_stmt                         { $$ = $1; }
 	| BREAK                            { $$ = makeSTMTbreak(); }
 	| CONTINUE                         { $$ = makeSTMTcontinue(); }
-	| /* empty */                      { $$ = makeSTMTempty();}
+	| /* empty */                      { $$ = makeSTMTempty(); }
 ;
 
 simple_stmt
