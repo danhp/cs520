@@ -172,8 +172,8 @@ slice_type
 ;
 
 struct_type
-	: STRUCT '{'  struct_decl_list opt_semi '}'    { $$ = makeTYPEstruct($3); }
-	| STRUCT '{' '}'                               { $$ = makeTYPEstruct(NULL); }
+	: STRUCT '{' struct_decl_list opt_semi '}'    { $$ = makeTYPEstruct($3); }
+	| STRUCT '{' '}'                              { $$ = makeTYPEstruct(NULL); }
 ;
 
 struct_decl_list
@@ -193,12 +193,13 @@ func_decl
 func_signature
 	: '(' arg_list ')' type                        { $$ = makeFUNCsign($2, $4); }
 	| '(' arg_list ')'                             { $$ = makeFUNCsign($2, NULL); }
+	| '(' ')' type                                 { $$ = makeFUNCsign(NULL, $3); }
+	| '(' ')'                                      { $$ = makeFUNCsign(NULL, NULL); }
 ;
 
 arg_list
 	: arg_list ',' arg                             { $$ = $3; $3->next = $1; }
 	| arg                                          { $$ = $1; }
-	| /* empty */                                  { $$ = NULL; }
 ;
 
 arg
@@ -352,7 +353,7 @@ prim_exp
 operand
 	: literal                    { $$ = $1; }
 	| IDENTIFIER                 { $$ = makeEXPid($1); }
-	| '(' exp ')'                { $$ = $2; }
+	| '(' exp ')'                { $$ = makeEXPparen($2); }
 ;
 
 literal
@@ -399,6 +400,7 @@ mul_op
 /* Allowed for nested parens for ID but now we need to weed */
 func_call
 	: operand '(' exp_list ')'             { $$ = makeEXPfunccall($1, $3); }
+	| operand '(' ')'                      { $$ = makeEXPfunccall($1, NULL); }
 ;
 
 /* 2.9.7 Append */
@@ -410,6 +412,7 @@ append_exp
 /* cast to base types supported here, aliases will look like function calls until typing */
 type_cast_exp
 	: cast_type '(' exp ')'               { $$ = makeEXPcast($1, $3); }
+	| cast_type '(' ')'                   { printError("missing argument to conversion", yylloc); }
 ;
 
 cast_type

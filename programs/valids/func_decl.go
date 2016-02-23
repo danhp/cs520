@@ -1,7 +1,9 @@
 // all function declarations
 package func_decl
 
-func f () { }
+func f () int {
+    return 1;
+}
 
 func f1 (a int, b float) { }
 

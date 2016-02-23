@@ -31,7 +31,7 @@ void append_yytext(char c);
 
 %%
 [ \t]+          /* ignore */
-\r              { shouldInsert = 0; yycolumn = 1; }
+\r              /* ingore */
 \n              { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
 \/\/[^\n]*\n    { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
 \/\*            { lexBlockComment(); }
@@ -118,6 +118,7 @@ append          { shouldInsert = 0; return APPEND; }
 
 0[xX]{H}+       { shouldInsert = 1; sscanf(yytext, "%x", &yylval.intconst); return INTCONST; }
 0{O}+           { shouldInsert = 1; sscanf(yytext, "%o", &yylval.intconst); return INTCONST; }
+0{D}+           { printError("malformed octal or integer", yylloc); }
 {D}+            { shouldInsert = 1; yylval.intconst = atoi(yytext); return INTCONST; }
 
 {D}*"."{D}+     { shouldInsert = 1; yylval.floatconst = atof(yytext); return FLOATCONST; }

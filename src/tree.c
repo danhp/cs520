@@ -561,3 +561,12 @@ EXP *makeEXPcast(TYPE *type, EXP *exp) {
 	e->val.castE.exp = exp;
 	return e;
 }
+
+EXP *makeEXPparen(EXP *exp) {
+	EXP *e;
+	e = NEW(EXP);
+	e->loc = yylloc;
+	e->kind = parenK;
+	e->val.parenE = exp;
+	return e;
+}

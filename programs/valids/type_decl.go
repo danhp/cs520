@@ -9,6 +9,8 @@ type point struct {
     x, y float64
 }
 
+type emptyStruct struct {}
+
 type ()
 
 type (

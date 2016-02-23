@@ -10,13 +10,10 @@ func main() {
 
 	case otherCondition:
 	default:
-    break;
+		break;
 
 	}
 
 	// single line
-	switch a {
-	case condition:
-	}
-
+	switch a { case condition: }
 }

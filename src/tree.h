@@ -106,7 +106,6 @@ typedef struct STMT {
 	union {
 		struct VAR_DECL *varS;
 		struct TYPE_DECL *typeS;
-		struct STMT *blockS;
 		struct EXP *printS;
 		struct EXP *printlnS;
 		struct EXP *returnS;
@@ -150,7 +149,8 @@ typedef struct EXP {
 		orK, andK,                              /* logical operators */
 		uplusK, uminusK, unotK, ubitnotK,       /* unary operators */
 		selectorK, indexK,
-		funccallK, appendK, castK
+		funccallK, appendK, castK,
+		parenK
 	} kind;
 	union {
 		struct { SYMBOL *sym; } idE;
@@ -166,6 +166,7 @@ typedef struct EXP {
 		struct {struct EXP *exp; struct EXP *args;} funccallE;
 		struct {char *name; struct EXP *exp;} appendE;
 		struct {struct TYPE *type; struct EXP *exp;} castE;
+		struct EXP *parenE;
 	} val;
 	struct EXP *next;
 } EXP;
@@ -230,5 +231,6 @@ EXP *makeEXPindex(EXP *exp, int index);
 EXP *makeEXPfunccall(EXP *exp, EXP *args);
 EXP *makeEXPappend(char *name, EXP *exp);
 EXP *makeEXPcast(TYPE *type, EXP *exp);
+EXP *makeEXPparen(EXP *exp);
 
 #endif

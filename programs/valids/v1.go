@@ -1,6 +1,13 @@
-/* greedy /* comment */
 package main
 
-func main () {
-    1 /0;
+func main() {
+	(a).test
+	switch os := runtime.GOOS; os {
+	case 1:
+		break;
+	case "linux":
+	default:
+		// freebsd, openbsd,
+		// plan9, windows...
+	}
 }

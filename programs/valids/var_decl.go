@@ -10,7 +10,7 @@ var u7, j3 bool = true, false
 var(
     x1, x2 int
     y1, y2 = 42, 53
-    z1, z2 float = 65, 76
+    z1, _, z2 float = 65, 76, 10
     a bool
 )
 
