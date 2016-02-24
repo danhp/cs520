@@ -363,7 +363,7 @@ void weedEXPlvalue(EXP *exp) {
 	while (exp->kind == parenK) exp = exp->val.parenE;
 
 	if (exp->kind != idK && exp->kind != selectorK && exp->kind != indexK)
-		printErrorMsg("expression is not assignable");
+		printError("expression is not assignable", exp->loc);
 }
 
 void weedIDblank(ID *id) {
