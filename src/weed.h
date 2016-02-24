@@ -8,7 +8,9 @@
 #include "tree.h"
 #include "error.h"
 
-void weedPROGRAM(PROGRAM *);
+void weedPROGRAM(PROGRAM *p);
+
+void weedPACKAGE(PACKAGE *p);
 
 void weedTOP_DECL(TOP_DECL *decl);
 
@@ -34,7 +36,9 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause);
 
 void weedEXP(EXP *exp);
 void weedEXPdivzero(EXP *exp);
-void weedEXPfunccall(EXP *exp, EXP *args);
+void weedEXPcallId(EXP *exp);
 void weedEXPlvalue(EXP *exp);
+
+void weedIDblank(ID *id);
 
 #endif

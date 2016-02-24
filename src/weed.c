@@ -1,11 +1,16 @@
 #include "weed.h"
 
 void weedPROGRAM(PROGRAM *program) {
-	if (program->top_decl != NULL)
-		weedTOP_DECL(program->top_decl);
+	weedPACKAGE(program->package);
+	weedTOP_DECL(program->top_decl);
+}
+
+void weedPACKAGE(PACKAGE *p) {
+	weedIDblank(p->id);
 }
 
 void weedTOP_DECL(TOP_DECL *decl) {
+	if (!decl) return;
 	if (decl->next) weedTOP_DECL(decl->next);
 
 	switch(decl->kind) {
@@ -22,10 +27,10 @@ void weedTOP_DECL(TOP_DECL *decl) {
 }
 
 void  weedTOPvar(VAR_DECL *decl) {
-	if (decl) {
-		if (decl->next) weedTOPvar(decl->next);
-		if (decl->exp) weedVARdecl(decl->id, decl->exp, decl->loc);
-	}
+	if (!decl) return;
+	if (decl->next) weedTOPvar(decl->next);
+
+	weedVARdecl(decl->id, decl->exp, decl->loc);
 }
 
 /* #id = #exp */
@@ -41,9 +46,17 @@ void  weedVARdecl(ID *id, EXP *exp, YYLTYPE loc) {
 		printError("Number of ids doesn't match number of expressions", loc);
 }
 
-void weedTOPtype(TYPE_DECL *decl) { }
+void weedTOPtype(TYPE_DECL *decl) {
+	if (!decl) return;
+	if (decl->next) weedTOPtype(decl->next);
+
+}
 
 void weedTOPfunc(FUNC_DECL *func) {
+	if (!func) return;
+
+	weedIDblank(func->id);
+
 	if (!weedSTMTfuncreturn(func->body, weedFUNC_SIGN(func->signature))) {
 		printError("missing return at end of function", func->loc);
 	}
@@ -51,6 +64,8 @@ void weedTOPfunc(FUNC_DECL *func) {
 }
 
 int weedFUNC_SIGN(FUNC_SIGN *signature){
+	if (!signature) return false;
+
 	if (signature->type) {
 		return true;
 	} else {
@@ -108,7 +123,7 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			if (!isInsideLoop && !isInsideSwitch) printError("break is not in a switch/loop", stmt->loc);
 			break;
 		case continueK:
-			if (!isInsideLoop) printErrorMsg("continue is not in a loop");
+			if (!isInsideLoop) printError("continue is not in a loop", stmt->loc);
 			break;
 	}
 }
@@ -119,7 +134,9 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause) {
 	weedEXP(clause->condition);
 
 	if (clause->post_stmt) {
-		if (clause->post_stmt->kind == shortvarK) printErrorMsg("cannot declare in the for-increment");
+		if (clause->post_stmt->kind == shortvarK) {
+			printError("cannot declare in the for-increment", clause->post_stmt->loc);
+		}
 		weedSTMT(clause->post_stmt, false, false);
 	}
 }
@@ -132,9 +149,9 @@ int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
 	switch(stmt->kind){
 		case returnK:
 			if(!isValuedReturn && stmt->val.returnS) {
-				printErrorMsg("too many return values");
+				printError("too many return values", stmt->loc);
 			} else if (isValuedReturn && !stmt->val.returnS) {
-				printErrorMsg("not enough arguments to return");
+				printError("not enough arguments to return", stmt->loc);
 			} else {
 				return true;
 			}
@@ -218,7 +235,7 @@ void weedSTMTswitch(CASE_DECL *body, int isInsideLoop) {
 
 void weedSTMTshorvar(EXP *left, EXP *right) {
 	/* only allow id on left side of := */
-	if (left->kind != idK) printErrorMsg("non-name on left side of :=");
+	if (left->kind != idK) printError("non-name on left side of :=", left->loc);
 
 	weedSTMTassign(left, right);
 }
@@ -249,6 +266,8 @@ void weedEXP(EXP *exp) {
 	switch (exp->kind) {
 		// Constants
 		case idK:
+			weedIDblank(exp->val.idE.id);
+			break;
 		case intconstK:
 		case floatconstK:
 		case runeconstK:
@@ -292,19 +311,26 @@ void weedEXP(EXP *exp) {
 			break;
 
 		case selectorK:
+			weedEXP(exp->val.selectorE.exp);
 			weedEXPlvalue(exp->val.selectorE.exp);
 			break;
 		case indexK:
+			weedEXP(exp->val.indexE.exp);
 			weedEXPlvalue(exp->val.indexE.exp);
 			break;
 		case funccallK:
-			weedEXPfunccall(exp->val.funccallE.exp, exp->val.funccallE.args);
+			weedEXPcallId(exp->val.funccallE.exp);
+			weedEXP(exp->val.funccallE.args);
+			break;
 		case parenK:
 			weedEXP(exp->val.parenE);
 			break;
 		case appendK:
+			weedIDblank(exp->val.appendE.id);
+			weedEXP(exp->val.appendE.exp);
+			break;
 		case castK:
-			/* Do nothing */
+			weedEXP(exp->val.castE.exp);
 			break;
 	}
 }
@@ -322,11 +348,13 @@ void weedEXPdivzero(EXP *exp) {
 	}
 }
 
-void weedEXPfunccall(EXP *exp, EXP *args) {
+void weedEXPcallId(EXP *exp) {
 	while (exp->kind == parenK) exp = exp->val.parenE;
 
 	if (exp->kind != idK) {
 		printErrorMsg("functions call expects and IDENTIFIER");
+	} else {
+		weedIDblank(exp->val.idE.id);
 	}
 }
 
@@ -338,5 +366,8 @@ void weedEXPlvalue(EXP *exp) {
 		printErrorMsg("expression is not assignable");
 }
 
-void weedEXPid(EXP *exp) {
+void weedIDblank(ID *id) {
+	if (strcmp(id->name, "_") == 0) {
+		printError("cannot _ use as value", id->loc);
+	}
 }

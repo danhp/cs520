@@ -1,5 +1,5 @@
 package break_outside
 
-package main() {
+func main() {
     break
 }

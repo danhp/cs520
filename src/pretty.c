@@ -85,6 +85,7 @@ void prettyPROGRAM(PROGRAM *obj, int indentation) {
 void prettyPACKAGE(PACKAGE *obj, int indentation) {
 	print("package ");
 	prettyID(obj->id);
+	print("\n");
 }
 
 void prettyTOP_DECL(TOP_DECL *obj, int indentation) {
@@ -99,9 +100,7 @@ void prettyTOP_DECL(TOP_DECL *obj, int indentation) {
 			prettyVAR_DECL(obj->val.varT, indentation);
 			break;
 		case top_typeK:
-			if(obj->val.typeT) {
-				prettyTYPE_DECL(obj->val.typeT, indentation);
-			}
+			prettyTYPE_DECL(obj->val.typeT, indentation);
 			break;
 		case top_funcK:
 			prettyFUNC_DECL(obj->val.funcT, indentation);
@@ -127,12 +126,11 @@ void prettyVAR_DECL(VAR_DECL *obj, int indentation) {
 }
 
 void prettyTYPE_DECL(TYPE_DECL *obj, int indentation) {
+	if(!obj) return;
 	if(obj->next) prettyTYPE_DECL(obj->next, indentation);
 
-	printIndentation(indentation);
 	print("type ");
 	prettyID(obj->id);
-	print(" ");
 
 	prettyTYPE(obj->type);
 }
@@ -163,13 +161,13 @@ void prettyTYPE(TYPE *obj) {
 		case type_arrayK:
 			print("[");
 			printInteger(obj->val.arrayT.size);
-			print("] ");
+			print("]");
 			if(obj->val.arrayT.type) {
 				prettyTYPE(obj->val.arrayT.type);
 			}
 			break;
 		case type_sliceK:
-			print("[] ");
+			print("[]");
 			if(obj->val.sliceT.type) {
 				prettyTYPE(obj->val.sliceT.type);
 			}
@@ -203,7 +201,7 @@ void prettyFUNC_DECL(FUNC_DECL *obj, int indentation) {
 	prettyFUNC_SIGN(obj->signature);
 	print(" {");
 	prettySTMT(obj->body, indentation+1);
-	print("\n}");
+	print("}");
 }
 
 void prettyFUNC_SIGN(FUNC_SIGN *obj) {
@@ -286,7 +284,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			prettySTMT(obj->val.ifS.body, indentation + 1);
 
 			printIndentation(indentation);
-			print("}");
+			print("}\n");
 			break;
 		case ifelseK:
 			if (indentation) printIndentation(indentation);
@@ -306,7 +304,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			prettySTMT(obj->val.ifelseS.elsepart, indentation+1);
 
 			printIndentation(indentation);
-			print("}");
+			print("}\n");
 			break;
 		case switchK:
 			if (indentation) printIndentation(indentation);
@@ -324,7 +322,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			prettyCASE_DECL(obj->val.switchS.body, indentation+1);
 
 			printIndentation(indentation);
-			print("}");
+			print("}\n");
 			break;
 		case forK:
 			if (indentation) printIndentation(indentation);
@@ -335,7 +333,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			prettySTMT(obj->val.forS.body, indentation+1);
 
 			printIndentation(indentation);
-			print("}");
+			print("}\n");
 			break;
 		case breakK:
 			if (indentation) printIndentation(indentation);
