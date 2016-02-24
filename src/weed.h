@@ -26,6 +26,7 @@ int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn);
 void weedSTMTswitch(CASE_DECL *body, int isInsideLoop);
 void weedSTMTshorvar(EXP *left, EXP *right);
 void weedSTMTassign(EXP *left, EXP *right);
+void weedSTMTexp(EXP *exp);
 
 void weedFOR_CLAUSE(FOR_CLAUSE *clause);
 

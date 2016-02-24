@@ -216,9 +216,9 @@ void prettyEXP(EXP *obj) {
 			print("\"");
 			break;
 		case rawstringconstK:
-			print("`");
+			print("\"");
 			print(obj->val.rawstringconstE);
-			print("`");
+			print("\"");
 			break;
 		case plusK:
 			print("(");

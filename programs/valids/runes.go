@@ -1,13 +1,13 @@
 package runeconst
 
 func main() {
-    '\a'
-    '\b'
-    '\f'
-    '\n'
-    '\r'
-    '\t'
-    '\v'
-    '\\'
-    '\''
+	a := '\a'
+	a = '\b'
+	a = '\f'
+	a = '\n'
+	a = '\r'
+	a = '\t'
+	a = '\v'
+	a = '\\'
+	a = '\''
 }

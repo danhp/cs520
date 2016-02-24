@@ -1,5 +1,5 @@
 package blank_funcselector
 
 func main() {
-    _.test
+    a := _.test
 }

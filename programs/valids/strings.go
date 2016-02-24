@@ -1,8 +1,8 @@
 package strings
 
 func main() {
-    ";alksdj\nfar\"asdlkfasldkfjads;"
-    `;alskdfja
+    s := ";alksdj\nfar\"asdlkfasldkfjads;"
+    t := `;alskdfja
     a;sld\nkfa\wlk \e\qner;
 
 

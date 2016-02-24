@@ -1,7 +1,7 @@
 package main
 
 func main() {
-	(a).test
+	a := (a).test
 	switch os := runtime.GOOS; os {
 	case 1:
 		break;
@@ -10,5 +10,5 @@ func main() {
 		// freebsd, openbsd,
 		// plan9, windows...
 	}
-	(a).test.test.test
+	b := (a).test.test.test
 }

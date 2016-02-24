@@ -3,7 +3,6 @@ program=$(<$1);
 file=$(basename $1);
 pref=${file%.*};
 
-
 if [ "$#" -eq 0 ]; then
 	make -C src/
 else

@@ -187,7 +187,7 @@ int lexQuotedString() {
 	/* 	Remove the first quote mark */
 	memset(yytext, '\0', sizeof(yytext));
 	while(1) {
-		while ((c = input()) != '\\' && c != '"' && c != 0 && c != '\n') {
+		while ((c = input()) != '\\' && c != '"' && c > 0 && c != '\n') {
 			append_yytext(c);
 		}
 
@@ -195,33 +195,17 @@ int lexQuotedString() {
 			c1 = input();
 			switch (c1) {
 				case 'a':
-					append_yytext('\a');
-					break;
 				case 'b':
-					append_yytext('\b');
-					break;
 				case 'f':
-					append_yytext('\f');
-					break;
 				case 'n':
-					append_yytext('\n');
-					break;
 				case 'r':
-					append_yytext('\r');
 				case 't':
-					append_yytext('\t');
-					break;
 				case 'v':
-					append_yytext('\v');
-					break;
 				case '\\':
-					append_yytext('\\');
-					break;
 				case '\'':
-					append_yytext('\'');
-					break;
 				case '"':
-					append_yytext('"');
+					append_yytext(c);
+					append_yytext(c1);
 					break;
 				default:
 					printError("unkown escaped char", yylloc);
@@ -229,7 +213,7 @@ int lexQuotedString() {
 		} else if (c == '\n') {
 			printError("newline in string", yylloc);
 			return 1;
-		} else if (c == 0) {
+		} else if (c <= 0) {
 			printError("unclosed quoted string", yylloc);
 			return 1;
 		} else if (c == '"'){
@@ -245,16 +229,57 @@ int lexRawString() {
 	/* 	Remove the first quote mark */
 	memset(yytext, '\0', sizeof(yytext));
 	while(1) {
-		while ((c = input()) != '`' && c != 0) {
+		while ((c = input()) != '`' && c > 0 &&
+					 c != '\a' && c != '\b' && c != '\f' &&
+					 c != '\n' && c != '\r' && c != '\t' &&
+					 c != '\v' && c != '\\' && c != '\'') {
 			append_yytext(c);
 		}
 
-		if (c == 0) {
+		switch (c) {
+			case '\a':
+				append_yytext('\\');
+				append_yytext('a');
+				break;
+			case '\b':
+				append_yytext('\\');
+				append_yytext('b');
+				break;
+			case '\f':
+				append_yytext('\\');
+				append_yytext('f');
+				break;
+			case '\n':
+				append_yytext('\\');
+				append_yytext('n');
+				break;
+			case '\r':
+				append_yytext('\\');
+				append_yytext('r');
+				break;
+			case '\t':
+				append_yytext('\\');
+				append_yytext('t');
+				break;
+			case '\v':
+				append_yytext('\\');
+				append_yytext('v');
+				break;
+			case '\\':
+				append_yytext('\\');
+				append_yytext('\\');
+				break;
+			case '\'':
+				append_yytext('\\');
+				append_yytext('\'');
+				break;
+			case '`':
+				return 0;
+		}
+
+		if (c <= 0) {
 			printError("unclosed raw string", yylloc);
 			return 1;
-		} else if (c == '`'){
-			/* Succesfully closed string */
-			return 0;
 		}
 	}
 }

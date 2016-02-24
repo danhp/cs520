@@ -1,5 +1,5 @@
 package blank_funcindex
 
 func main() {
-    _[0]
+    a := _[0]
 }

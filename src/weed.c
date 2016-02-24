@@ -75,6 +75,7 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			/* nothing to check */
 			break;
 		case expK:
+			weedSTMTexp(stmt->val.expS);
 			weedEXP(stmt->val.expS);
 			break;
 		case shortvarK:
@@ -207,6 +208,14 @@ void weedSTMTassign(EXP *left, EXP *right) {
 
 	if (!(left == NULL && right == NULL))
 		printErrorMsg("Number of ids doesn't match number of expressions");
+}
+
+void weedSTMTexp(EXP *exp) {
+	while (exp->kind == parenK) exp = exp->val.parenE;
+
+	if (exp->kind != funccallK) {
+		printError("expression is not a call", exp->loc);
+	}
 }
 
 void weedEXP(EXP *exp) {

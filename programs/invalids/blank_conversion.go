@@ -1,5 +1,5 @@
 package blank_conversion
 
 func main() {
-    int(_)
+    a := int(_)
 }

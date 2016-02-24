@@ -1,5 +1,5 @@
 package blank_funcexp
 
 func main() {
-    1 + _
+    a := 1 + _
 }
