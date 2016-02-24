@@ -153,6 +153,7 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			weedSTMT(stmt->val.ifS.pre_stmt, false, false);
 			weedEXP(stmt->val.ifS.condition);
 			weedSTMT(stmt->val.ifS.body, isInsideLoop, isInsideSwitch);
+			break;
 		case ifelseK:
 			weedSTMT(stmt->val.ifelseS.pre_stmt, false, false);
 			weedEXP(stmt->val.ifelseS.condition);
@@ -191,6 +192,7 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause) {
 }
 
 int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
+	if (!stmt) return !isValuedReturn;
 	if (stmt->next) {
 		if (weedSTMTfuncreturn(stmt->next, isValuedReturn)) return true;
 	}
@@ -232,23 +234,58 @@ int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
 }
 
 int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
-	/* if (!stmt->val.forS.for_clause->condition) { */
-	/* 	return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn); */
-	/* } else { */
-	/* 	return false; */
-	/* } */
-	return false;
+	if (!stmt->val.forS.for_clause->condition) {
+		if (findSTMTbreak(stmt->val.forS.body)) return false;
+
+		return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn);
+	} else {
+		return false;
+	}
 }
 
 int weedSTMTfuncreturnswitch(CASE_DECL *c, int isValuedReturn) {
-	/* if (!c) return false; */
+	if (!c) return isValuedReturn;
 
-	/* if (c->kind == defaultK && !c->next) { */
-	/* 	return weedSTMTfuncreturn(c->val.defaultC, isValuedReturn); */
-	/* } else { */
-	/* 	return false; */
-	/* } */
-	return false;
+	int foundDefaultCase = false;
+
+	for ( ; c; c = c->next) {
+		switch (c->kind) {
+			case caseK:
+				if (findSTMTbreak(c->val.caseC.stmt)) return false;
+				if (!weedSTMTfuncreturn(c->val.caseC.stmt, isValuedReturn)) return false;
+				break;
+			case defaultK:
+				foundDefaultCase = true;
+				if (findSTMTbreak(c->val.defaultC)) return false;
+				if (!weedSTMTfuncreturn(c->val.defaultC, isValuedReturn)) return false;
+				break;
+		}
+	}
+
+	return foundDefaultCase;
+}
+
+int findSTMTbreak(STMT *stmt) {
+	if (!stmt) return false;
+	if (stmt->next) {
+		if (findSTMTbreak(stmt->next)) return true;
+	}
+
+	switch(stmt->kind) {
+		default:
+			return false;
+			break;
+		case ifK:
+			return findSTMTbreak(stmt->val.ifS.body);
+			break;
+		case ifelseK:
+			return findSTMTbreak(stmt->val.ifelseS.thenpart) ||
+					findSTMTbreak(stmt->val.ifelseS.elsepart);
+			break;
+		case breakK:
+			return true;
+			break;
+	}
 }
 
 /* only 1 default case */

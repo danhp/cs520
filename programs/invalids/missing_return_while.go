@@ -6,7 +6,11 @@ func main() {
 
 func plus(a, b int) int {
     for {
-        break
+        if true {
+            // do nothing
+        } else {
+            break
+        }
         return 1
     }
 }

@@ -26,14 +26,16 @@ int weedFUNC_SIGN(FUNC_SIGN *signature);
 void weedFUNC_ARG(FUNC_ARG *arg);
 
 void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch);
-int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn);
-int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn);
-int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn);
-int weedSTMTfuncreturnswitch(CASE_DECL *body, int isValuedReturn);
 void weedSTMTswitch(CASE_DECL *body, int isInsideLoop);
 void weedSTMTshorvar(EXP *left, EXP *right);
 void weedSTMTassign(EXP *left, EXP *right);
 void weedSTMTexp(EXP *exp);
+
+int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn);
+int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn);
+int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn);
+int weedSTMTfuncreturnswitch(CASE_DECL *body, int isValuedReturn);
+int findSTMTbreak(STMT *stmt);
 
 void weedFOR_CLAUSE(FOR_CLAUSE *clause);
 
