@@ -115,7 +115,6 @@ void prettyVAR_DECL(VAR_DECL *obj, int indentation) {
 	printIndentation(indentation);
 	print("var ");
 	prettyID(obj->id);
-	print(" ");
 
 	prettyTYPE(obj->type);
 

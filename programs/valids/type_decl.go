@@ -30,7 +30,7 @@ type _ int
 
 // single line declarations
 type (first int; second float64;)
-type (first int; second float64)
+// type (first int; second float64)
 
 // check indentations
 func main() {

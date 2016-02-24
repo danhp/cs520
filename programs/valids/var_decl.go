@@ -16,8 +16,8 @@ var(
 
 var ()
 
-var (x = 2)
+var (x = 2;)
 
 //single line var declarations
 var(x3, y4 int; y3 , u7 = 31, 59;)
-var(x3, y4 int; y3 , u7 = 31, 59)
+// var(x3, y4 int; y3 , u7 = 31, 59)

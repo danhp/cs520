@@ -423,6 +423,6 @@ cast_type
 
 opt_semi
 	: ';'
-	| /* empty */
+	/* | /1* empty *1/ */
 ;
 %%
