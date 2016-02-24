@@ -165,7 +165,7 @@ append          { shouldInsert = 0; return APPEND; }
 void lexBlockComment() {
 	char c, c1;
 	while(1) {
-		while ((c = input()) != '*' && c > 0) {}
+		while ((c = input()) != '*' && c > 0 && c != '\n') {}
 
 		if (c == '*') {
 			if ((c1 = input()) == '/') {
@@ -177,6 +177,8 @@ void lexBlockComment() {
 		} else if (c <= 0) {
 			printError("unclosed block comment", yylloc);
 			return;
+		} else if (c == '\n') {
+			lineno = lineno + 1;
 		}
 	}
 }
@@ -252,6 +254,7 @@ int lexRawString() {
 			case '\n':
 				append_yytext('\\');
 				append_yytext('n');
+				lineno = lineno + 1;
 				break;
 			case '\r':
 				append_yytext('\\');

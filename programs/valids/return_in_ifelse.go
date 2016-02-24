@@ -6,7 +6,11 @@ func main() {
 
 func plus(a, b int) int {
     if true {
-        return 1
+        if false {
+            return 1
+        } else {
+            return 1
+        }
     } else {
         return 0
     }

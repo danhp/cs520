@@ -45,7 +45,7 @@ void weedTOPtype(TYPE_DECL *decl) { }
 
 void weedTOPfunc(FUNC_DECL *func) {
 	if (!weedSTMTfuncreturn(func->body, weedFUNC_SIGN(func->signature))) {
-		printErrorMsg("missing return at end of function");
+		printError("missing return at end of function", func->loc);
 	}
 	weedSTMT(func->body, false, false);
 }
@@ -115,36 +115,42 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 
 void weedFOR_CLAUSE(FOR_CLAUSE *clause) {
 	weedSTMT(clause->init_stmt, false, false);
+
 	weedEXP(clause->condition);
 
-	if (clause->post_stmt->kind == shortvarK) printErrorMsg("cannot declare in the for-increment");
+	if (clause->post_stmt) {
+		if (clause->post_stmt->kind == shortvarK) printErrorMsg("cannot declare in the for-increment");
+	}
 	weedSTMT(clause->post_stmt, false, false);
 }
 
 int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
-	while (stmt){
-		switch(stmt->kind){
-			case returnK:
-				if(!isValuedReturn && stmt->val.returnS) {
-					printErrorMsg("too many return values");
-				} else if (isValuedReturn && !stmt->val.returnS) {
-					printErrorMsg("not enough arguments to return");
-				} else {
-					return true;
-				}
-			case ifelseK:
-				if (weedSTMTfuncreturnifelse(stmt, isValuedReturn)) return true;
-				break;
-			case forK:
-				break;
-			case switchK:
-				break;
-			default:
-				break;
-		}
-
-		stmt = stmt->next;
+	if (stmt->next) {
+		if (weedSTMTfuncreturn(stmt->next, isValuedReturn)) return true;
 	}
+
+	switch(stmt->kind){
+		case returnK:
+			if(!isValuedReturn && stmt->val.returnS) {
+				printErrorMsg("too many return values");
+			} else if (isValuedReturn && !stmt->val.returnS) {
+				printErrorMsg("not enough arguments to return");
+			} else {
+				return true;
+			}
+		case ifelseK:
+			if (weedSTMTfuncreturnifelse(stmt, isValuedReturn)) return true;
+			break;
+		case forK:
+			if (weedSTMTfuncreturnfor(stmt, isValuedReturn)) return true;
+			break;
+		case switchK:
+			if (weedSTMTfuncreturnswitch(stmt->val.switchS.body, isValuedReturn)) return true;
+			break;
+		default:
+			break;
+	}
+
 
 	if (isValuedReturn) {
 		return false;
@@ -156,10 +162,28 @@ int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
 int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
 	if (!stmt) return false;
 
-	int count = 0;
-
-	if (count) {
+	if (weedSTMTfuncreturn(stmt->val.ifelseS.thenpart, isValuedReturn) &&
+				weedSTMTfuncreturn(stmt->val.ifelseS.elsepart, isValuedReturn)) {
 		return true;
+	} else {
+		return false;
+	}
+}
+
+int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
+	if (!stmt->val.forS.for_clause->condition) {
+		return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn);
+	} else {
+		return false;
+	}
+}
+
+int weedSTMTfuncreturnswitch(CASE_DECL *c, int isValuedReturn) {
+	if (!c) return false;
+	if (c->next) return weedSTMTfuncreturnswitch(c->next, isValuedReturn);
+
+	if (c->kind == defaultK) {
+		return weedSTMTfuncreturn(c->val.defaultC, isValuedReturn);
 	} else {
 		return false;
 	}

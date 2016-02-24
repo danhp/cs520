@@ -3,6 +3,5 @@ package for_loops
 
 func main() {
     for ; ; i++ {
-
     }
 }

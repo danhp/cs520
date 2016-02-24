@@ -6,17 +6,14 @@
 extern FILE *prettyFile;
 
 void print(char *text) {
-	/* fprintf(prettyFile, "%s", text); */
 	printf("%s", text);
 }
 
 void printInteger(int number) {
-	/* fprintf(prettyFile, "%d", number); */
 	printf("%d", number);
 }
 
 void printFloat(float number) {
-	/* fprintf(prettyFile, "%f", number); */
 	printf("%f",number);
 }
 
@@ -24,13 +21,13 @@ void printRune(char c) {
 	print("'");
 	switch (c) {
 		case '\a':
-			printf("\\a");
+			printf("\\007");
 			break;
 		case '\b':
 			printf("\\b");
 			break;
 		case '\f':
-			printf("\\f");
+			printf("\\012");
 			break;
 		case '\n':
 			printf("\\n");
@@ -42,7 +39,7 @@ void printRune(char c) {
 			printf("\\t");
 			break;
 		case '\v':
-			printf("\\v");
+			printf("\\011");
 			break;
 		case '\\':
 			printf("\\\\");

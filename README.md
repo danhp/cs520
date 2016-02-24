@@ -51,4 +51,4 @@ Pretty print a file with
 
 Errors will be emmitted to stderr
 
-All output file will be store in outputs/ under the name file.pretty.go
+Output file will be stored in outputs/ under the name file.pretty.go

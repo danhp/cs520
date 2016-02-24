@@ -11,7 +11,6 @@ func main() {
 	case otherCondition:
 	default:
 		break;
-
 	}
 
 	// single line
