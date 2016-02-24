@@ -4,11 +4,12 @@ func main() {
     plus(1, 2)
 }
 
-func plus(a, b int) int{
+func plus(a, b int) int {
     switch a {
     case 1:
-        return 0
+        return 1
+        break
     default:
-        return 0
+        return 1
     }
 }

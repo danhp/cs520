@@ -30,10 +30,10 @@ make test
 ### Usage
 ```
 // Run parser
-./golite parse
+./golite parse file
 
 // Run pretty printer
-./golite pretty
+./golite pretty file
 ```
 
 ## For Vince

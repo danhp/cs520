@@ -1,5 +1,7 @@
 package blank_funcexp
 
 func main() {
-    a := 1 + _
+    var (
+        i _
+    )
 }

@@ -1,5 +1,7 @@
 package break_outside
 
 func main() {
-    break
+    if true {
+        break;
+    }
 }

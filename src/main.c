@@ -13,11 +13,12 @@ FILE *prettyTree;
 PROGRAM *program;
 
 int main(int argc, char *argv[]) {
-	if(argc != 2) {
-		printf("golite requires 1 argument. \n");
+	if(argc != 3) {
+		printf("Usage: golite (parse | pretty) file\n");
 		return 1;
 	}
 
+	freopen(argv[2],"r",stdin);
 
 	if (!yyparse()) {
 		weedPROGRAM(program);

@@ -128,6 +128,7 @@ void prettyTYPE_DECL(TYPE_DECL *obj, int indentation) {
 	print("type ");
 	prettyID(obj->id);
 
+	print(" ");
 	prettyTYPE(obj->type);
 	print("\n");
 }
@@ -209,6 +210,7 @@ void prettyFUNC_SIGN(FUNC_SIGN *obj) {
 
 	print(")");
 	if(obj->type) {
+		print(" ");
 		prettyTYPE(obj->type);
 	}
 }

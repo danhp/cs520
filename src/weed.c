@@ -30,6 +30,7 @@ void  weedTOPvar(VAR_DECL *decl) {
 	if (!decl) return;
 	if (decl->next) weedTOPvar(decl->next);
 
+	weedTYPE(decl->type);
 	weedVARdecl(decl->id, decl->exp, decl->loc);
 }
 
@@ -50,27 +51,67 @@ void weedTOPtype(TYPE_DECL *decl) {
 	if (!decl) return;
 	if (decl->next) weedTOPtype(decl->next);
 
+	weedTYPE(decl->type);
+}
+
+void weedTYPE(TYPE *type) {
+	if (!type) return;
+
+	switch (type->kind) {
+		case type_refK:
+			weedIDblank(type->val.refT.id);
+			break;
+		case type_structK:
+			weedSTRUCTdecl(type->val.structT.struct_decl);
+			break;
+		case type_arrayK:
+			weedTYPE(type->val.arrayT.type);
+			break;
+		case type_sliceK:
+			weedTYPE(type->val.sliceT.type);
+			break;
+		default:
+			return;
+	}
+}
+
+void weedSTRUCTdecl(STRUCT_DECL *decl) {
+	if (!decl) return;
+	if (decl->next) weedSTRUCTdecl(decl->next);
+
+	weedTYPE(decl->type);
 }
 
 void weedTOPfunc(FUNC_DECL *func) {
 	if (!func) return;
 
-	weedIDblank(func->id);
+	/* weedIDblank(func->id); */
 
 	if (!weedSTMTfuncreturn(func->body, weedFUNC_SIGN(func->signature))) {
 		printError("missing return at end of function", func->loc);
 	}
+
 	weedSTMT(func->body, false, false);
 }
 
-int weedFUNC_SIGN(FUNC_SIGN *signature){
+int weedFUNC_SIGN(FUNC_SIGN *signature) {
 	if (!signature) return false;
 
+	weedFUNC_ARG(signature->arg);
+
 	if (signature->type) {
+		weedTYPE(signature->type);
 		return true;
 	} else {
 		return false;
 	}
+}
+
+void weedFUNC_ARG(FUNC_ARG *arg) {
+	if (!arg) return;
+	if (arg->next) weedFUNC_ARG(arg->next);
+
+	weedTYPE(arg->type);
 }
 
 void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
@@ -79,15 +120,21 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 
 	switch(stmt->kind) {
 		case emptyK:
+			break;
 		case printK:
+			weedEXP(stmt->val.printS);
+			break;
 		case printlnK:
+			weedEXP(stmt->val.printlnS);
+			break;
 		case returnK:
+			weedEXP(stmt->val.returnS);
 			break;
 		case varK:
-			weedVARdecl(stmt->val.varS->id, stmt->val.varS->exp, stmt->val.varS->loc);
+			weedTOPvar(stmt->val.varS);
 			break;
 		case typeK:
-			/* nothing to check */
+			weedTOPtype(stmt->val.typeS);
 			break;
 		case expK:
 			weedSTMTexp(stmt->val.expS);
@@ -117,6 +164,8 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			weedSTMT(stmt->val.forS.body, true, isInsideSwitch);
 			break;
 		case switchK:
+			weedSTMT(stmt->val.switchS.pre_stmt, false, false);
+			weedEXP(stmt->val.switchS.condition);
 			weedSTMTswitch(stmt->val.switchS.body, isInsideLoop);
 			break;
 		case breakK:
@@ -168,12 +217,7 @@ int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
 			break;
 	}
 
-
-	if (isValuedReturn) {
-		return false;
-	} else {
-		return true;
-	}
+	return !isValuedReturn;
 }
 
 int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
@@ -188,22 +232,23 @@ int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
 }
 
 int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
-	if (!stmt->val.forS.for_clause->condition) {
-		return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn);
-	} else {
-		return false;
-	}
+	/* if (!stmt->val.forS.for_clause->condition) { */
+	/* 	return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn); */
+	/* } else { */
+	/* 	return false; */
+	/* } */
+	return false;
 }
 
 int weedSTMTfuncreturnswitch(CASE_DECL *c, int isValuedReturn) {
-	if (!c) return false;
-	if (c->next) return weedSTMTfuncreturnswitch(c->next, isValuedReturn);
+	/* if (!c) return false; */
 
-	if (c->kind == defaultK) {
-		return weedSTMTfuncreturn(c->val.defaultC, isValuedReturn);
-	} else {
-		return false;
-	}
+	/* if (c->kind == defaultK && !c->next) { */
+	/* 	return weedSTMTfuncreturn(c->val.defaultC, isValuedReturn); */
+	/* } else { */
+	/* 	return false; */
+	/* } */
+	return false;
 }
 
 /* only 1 default case */
@@ -277,13 +322,13 @@ void weedEXP(EXP *exp) {
 
 		// Weed division by zero
 		case divK:
+		case modK:
 			weedEXPdivzero(exp->val.binaryE.right);
 
 		// Binary operators
 		case plusK:
 		case minusK:
 		case timesK:
-		case modK:
 		case bitandK:
 		case andnotK:
 		case bitorK:
@@ -313,6 +358,7 @@ void weedEXP(EXP *exp) {
 		case selectorK:
 			weedEXP(exp->val.selectorE.exp);
 			weedEXPlvalue(exp->val.selectorE.exp);
+			weedIDblank(exp->val.selectorE.id);
 			break;
 		case indexK:
 			weedEXP(exp->val.indexE.exp);

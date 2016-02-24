@@ -19,8 +19,11 @@ void weedTOPtype(TYPE_DECL *decl);
 void weedTOPfunc(FUNC_DECL *func);
 
 void weedVARdecl(ID *id, EXP *exp, YYLTYPE loc);  /* #id = #exp */
+void weedTYPE(TYPE *type);
+void weedSTRUCTdecl(STRUCT_DECL *decl);
 
 int weedFUNC_SIGN(FUNC_SIGN *signature);
+void weedFUNC_ARG(FUNC_ARG *arg);
 
 void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch);
 int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn);

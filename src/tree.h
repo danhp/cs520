@@ -55,9 +55,9 @@ typedef struct TOP_DECL {
 
 typedef struct VAR_DECL {
 	YYLTYPE loc;
-	struct TYPE *type;
 	struct ID *id;
 	struct EXP *exp;
+	struct TYPE *type;
 	struct VAR_DECL *next;
 } VAR_DECL;
 
