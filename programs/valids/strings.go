@@ -1,9 +1,10 @@
 package strings
 
 func main() {
-    ";alksdj fa\n\t\r"
+    ";alksdj\nfar\"asdlkfasldkfjads;"
     `;alskdfja
-    a;sldkfa\wlk \e\qner;laksdf
+    a;sld\nkfa\wlk \e\qner;
 
-    4123049jq;lakfjd\adf`
+
+laksdf`
 }

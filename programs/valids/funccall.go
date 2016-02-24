@@ -1,6 +1,7 @@
 package funcall
 
 func main() {
-    a(_)
+    a()
     ((((v))))()
+    f(1,3,4)
 }

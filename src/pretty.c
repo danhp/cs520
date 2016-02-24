@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pretty.h"
-#include "tree.h"
 
 extern FILE *prettyFile;
 
@@ -19,6 +18,43 @@ void printInteger(int number) {
 void printFloat(float number) {
 	/* fprintf(prettyFile, "%f", number); */
 	printf("%f",number);
+}
+
+void printRune(char c) {
+	print("'");
+	switch (c) {
+		case '\a':
+			printf("\\a");
+			break;
+		case '\b':
+			printf("\\b");
+			break;
+		case '\f':
+			printf("\\f");
+			break;
+		case '\n':
+			printf("\\n");
+			break;
+		case '\r':
+			printf("\\r");
+			break;
+		case '\t':
+			printf("\\t");
+			break;
+		case '\v':
+			printf("\\v");
+			break;
+		case '\\':
+			printf("\\\\");
+			break;
+		case '\'':
+			printf("\\'");
+			break;
+		default:
+			printf("%c", c);
+			break;
+	}
+	print("'");
 }
 
 void printIndentation(int i) {
@@ -101,14 +137,12 @@ void prettyID(ID *obj) {
 }
 
 void prettyFUNC_DECL(FUNC_DECL *obj, int indentation) {
-	printIndentation(indentation);
-
-	print("func ");
+	print("\nfunc ");
 	print(obj->name);
 	prettyFUNC_SIGN(obj->signature);
 	print("{");
 	prettySTMT(obj->body, indentation+1);
-	print("}");
+	print("\n}");
 }
 
 void prettyTYPE(TYPE *obj) {
@@ -173,82 +207,159 @@ void prettyEXP(EXP *obj) {
 		case floatconstK:
 			printFloat(obj->val.floatconstE);
 			break;
+		case runeconstK:
+			printRune(obj->val.runeconstE);
+			break;
 		case stringconstK:
+			print("\"");
 			print(obj->val.stringconstE);
+			print("\"");
 			break;
 		case rawstringconstK:
+			print("`");
 			print(obj->val.rawstringconstE);
+			print("`");
 			break;
 		case plusK:
+			print("(");
 			prettyEXP(obj->val.binaryE.left);
 			print(" + ");
 			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case minusK:
+			print("(");
 			prettyEXP(obj->val.binaryE.left);
 			print(" - ");
 			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case timesK:
+			print("(");
 			prettyEXP(obj->val.binaryE.left);
 			print(" * ");
 			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case divK:
+			print("(");
 			prettyEXP(obj->val.binaryE.left);
 			print(" / ");
 			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case modK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" % ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case bitandK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" & ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case andnotK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" &^ ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case bitorK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print("|");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case bitxork:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" ^ ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case leftshiftK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" << ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case rightshiftK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" >> ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case eqK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" == ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case neqK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" != ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case leK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" < ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case leqK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" <= ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case geK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" > ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case geqK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" >= ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case orK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" || ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case andK:
+			print("(");
+			prettyEXP(obj->val.binaryE.left);
 			print(" && ");
+			prettyEXP(obj->val.binaryE.right);
+			print(")");
 			break;
 		case unotK:
 			print("!");
+			prettyEXP(obj->val.unaryE);
 			break;
 		case uplusK:
 			print("+");
+			prettyEXP(obj->val.unaryE);
 			break;
 		case uminusK:
 			print("-");
@@ -256,6 +367,41 @@ void prettyEXP(EXP *obj) {
 			break;
 		case ubitnotK:
 			print("^");
+			prettyEXP(obj->val.unaryE);
+			break;
+
+		case indexK:
+			prettyEXP(obj->val.indexE.exp);
+			print("[");
+			printInteger(obj->val.indexE.index);
+			print("]");
+			break;
+		case selectorK:
+			prettyEXP(obj->val.selectorE.exp);
+			print(".");
+			print(obj->val.selectorE.name);
+			break;
+		case funccallK:
+			prettyEXP(obj->val.funccallE.exp);
+			print("(");
+			if (obj->val.funccallE.args) prettyEXP(obj->val.funccallE.args);
+			print(")");
+			break;
+		case appendK:
+			print("append(");
+			print(obj->val.appendE.name);
+			print(", ");
+			prettyEXP(obj->val.appendE.exp);
+			print(")");
+			break;
+		case castK:
+			prettyTYPE(obj->val.castE.type);
+			print("(");
+			prettyEXP(obj->val.castE.exp);
+			print(")");
+			break;
+		case parenK:
+			prettyEXP(obj->val.parenE);
 			break;
 	}
 }
@@ -289,12 +435,15 @@ void prettyFUNC_SIGN(FUNC_SIGN *obj) {
 void prettySTMT(STMT *obj, int indentation) {
 	if(obj->next) {
 		prettySTMT(obj->next, indentation);
-		print("\n");
 	}
 
 
 	switch(obj->kind) {
 		case emptyK:
+			break;
+		case varK:
+			if (indentation) printIndentation(indentation);
+			prettyVAR_DECL(obj->val.varS, indentation);
 			break;
 		case typeK:
 			if (indentation) printIndentation(indentation);
@@ -323,7 +472,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			prettyEXP(obj->val.returnS);
 			break;
 		case ifK:
-			if (indentation) printIndentation(indentation);
+			printIndentation(indentation);
 			print("if ");
 			if(obj->val.ifS.pre_stmt) {
 				prettySTMT(obj->val.ifS.pre_stmt, 0);
@@ -379,6 +528,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			break;
 		case forK:
 			if (indentation) printIndentation(indentation);
+			print("for ");
 			prettyFOR_CLAUSE(obj->val.forS.for_clause);
 			print("{\n");
 
@@ -388,10 +538,12 @@ void prettySTMT(STMT *obj, int indentation) {
 			print("}");
 			break;
 		case breakK:
-			print("break;\n");
+			if (indentation) printIndentation(indentation);
+			print("break;");
 			break;
 		case continueK:
-			print("continue\n");
+			if (indentation) printIndentation(indentation);
+			print("continue");
 			break;
 		case assignK:
 			if (indentation) printIndentation(indentation);
@@ -416,6 +568,7 @@ void prettySYMBOL(SYMBOL *obj) {
 }
 
 void prettyFUNC_ARG(FUNC_ARG *obj) {
+	if (!obj) return;
 	if(obj->next) {
 		prettyFUNC_ARG(obj->next);
 		print(", ");
@@ -438,18 +591,17 @@ void prettyCASE_DECL(CASE_DECL *obj, int indentation) {
 		case caseK:
 			print("case ");
 			prettyEXP(obj->val.caseC.condition);
-			print(":\n");
+			print(":");
 			prettySTMT(obj->val.caseC.stmt, indentation+1);
 			break;
 		case defaultK:
-			print("default:\n");
+			print("default:");
 			prettySTMT(obj->val.defaultC, indentation+1);
 			break;
 	}
 }
 
 void prettyFOR_CLAUSE(FOR_CLAUSE *obj) {
-	print("for ");
 	if(obj->init_stmt) {
 		prettySTMT(obj->init_stmt, 0);
 	}

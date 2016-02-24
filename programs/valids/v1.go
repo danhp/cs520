@@ -10,4 +10,5 @@ func main() {
 		// freebsd, openbsd,
 		// plan9, windows...
 	}
+	(a).test.test.test
 }

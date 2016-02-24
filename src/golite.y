@@ -6,6 +6,7 @@
 #include "tree.h"
 #include "error.h"
 
+int yylex();
 extern PROGRAM *program;
 %}
 
@@ -365,7 +366,7 @@ literal
 
 string_lit
 	: STRINGCONST                { $$ = makeEXPstringconst($1); }
-	| RAWSTRINGCONST             { $$ = makeEXPstringconst($1); }
+	| RAWSTRINGCONST             { $$ = makeEXPrawstringconst($1); }
 ;
 
 /* OPERATORS */

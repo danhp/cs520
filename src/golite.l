@@ -25,6 +25,7 @@ static void update_loc() {
 
 void lexBlockComment();
 int lexQuotedString();
+int lexRawString();
 void append_yytext(char c);
 %}
 %array
@@ -132,10 +133,12 @@ append          { shouldInsert = 0; return APPEND; }
                   }
                 }
 
-`[^`]*`         { shouldInsert = 1;
-                  yylval.stringconst = (char *) malloc (strlen (yytext) + 1);
-                  sprintf (yylval.stringconst, "%s", yytext);
-                  return RAWSTRINGCONST;
+`               { if (lexRawString() == 0) {
+                      shouldInsert = 1;
+                      yylval.stringconst = (char *) malloc (strlen (yytext) + 1);
+                      sprintf (yylval.stringconst, "%s", yytext);
+                      return RAWSTRINGCONST;
+                  }
                 }
 
 {L}({L}|{D})*   { shouldInsert = 1;
@@ -156,7 +159,6 @@ append          { shouldInsert = 0; return APPEND; }
 '\\\''          { shouldInsert = 1; yylval.runeconst = '\''; return RUNECONST; }
 '.'             { shouldInsert = 1; yylval.runeconst = yytext[1]; return RUNECONST; }
 
-`[^`]*$         { printError("unclosed raw string", yylloc); }
 .               { printError("unknown character", yylloc); }
 %%
 
@@ -182,20 +184,47 @@ void lexBlockComment() {
 int lexQuotedString() {
 	char c, c1;
 
+	/* 	Remove the first quote mark */
+	memset(yytext, '\0', sizeof(yytext));
 	while(1) {
 		while ((c = input()) != '\\' && c != '"' && c != 0 && c != '\n') {
 			append_yytext(c);
 		}
 
-		append_yytext(c);
 		if (c == '\\') {
 			c1 = input();
-			append_yytext(c1);
-			if (c1 != 'a' && c1 != 'b' &&
-						c1 != 'f' && c1 != 'n' && c1 != 'r' && c1 != 't' &&
-						c1 != 'v' && c1 != '\\' && c1 != '"') {
-				printError("unkown escaped char", yylloc);
-				return 1;
+			switch (c1) {
+				case 'a':
+					append_yytext('\a');
+					break;
+				case 'b':
+					append_yytext('\b');
+					break;
+				case 'f':
+					append_yytext('\f');
+					break;
+				case 'n':
+					append_yytext('\n');
+					break;
+				case 'r':
+					append_yytext('\r');
+				case 't':
+					append_yytext('\t');
+					break;
+				case 'v':
+					append_yytext('\v');
+					break;
+				case '\\':
+					append_yytext('\\');
+					break;
+				case '\'':
+					append_yytext('\'');
+					break;
+				case '"':
+					append_yytext('"');
+					break;
+				default:
+					printError("unkown escaped char", yylloc);
 			}
 		} else if (c == '\n') {
 			printError("newline in string", yylloc);
@@ -204,7 +233,27 @@ int lexQuotedString() {
 			printError("unclosed quoted string", yylloc);
 			return 1;
 		} else if (c == '"'){
-			/* Succesfully closed comment */
+			/* Succesfully closed string */
+			return 0;
+		}
+	}
+}
+
+int lexRawString() {
+	char c;
+
+	/* 	Remove the first quote mark */
+	memset(yytext, '\0', sizeof(yytext));
+	while(1) {
+		while ((c = input()) != '`' && c != 0) {
+			append_yytext(c);
+		}
+
+		if (c == 0) {
+			printError("unclosed raw string", yylloc);
+			return 1;
+		} else if (c == '`'){
+			/* Succesfully closed string */
 			return 0;
 		}
 	}
