@@ -105,7 +105,7 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			weedSTMTswitch(stmt->val.switchS.body, isInsideLoop);
 			break;
 		case breakK:
-			if (!isInsideLoop && !isInsideSwitch) printErrorMsg("break is not in a switch/loop");
+			if (!isInsideLoop && !isInsideSwitch) printError("break is not in a switch/loop", stmt->loc);
 			break;
 		case continueK:
 			if (!isInsideLoop) printErrorMsg("continue is not in a loop");
@@ -120,8 +120,8 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause) {
 
 	if (clause->post_stmt) {
 		if (clause->post_stmt->kind == shortvarK) printErrorMsg("cannot declare in the for-increment");
+		weedSTMT(clause->post_stmt, false, false);
 	}
-	weedSTMT(clause->post_stmt, false, false);
 }
 
 int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {

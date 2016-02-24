@@ -18,7 +18,7 @@ PACKAGE *makePACKAGE(char *name) {
 	PACKAGE *p;
 	p = NEW(PACKAGE);
 	p->loc = yylloc;
-	p->name = name;
+	p->id = makeID(name);
 	return p;
 }
 
@@ -71,7 +71,7 @@ TYPE_DECL *makeTYPEdecl(char *name, TYPE *type) {
 	TYPE_DECL *t;
 	t = NEW(TYPE_DECL);
 	t->loc = yylloc;
-	t->name = name;
+	t->id = makeID(name);
 	t->type = type;
 	return t;
 }
@@ -117,10 +117,11 @@ TYPE *makeTYPEstring() {
 
 TYPE *makeTYPEref(char *name) {
 	TYPE *t;
+
 	t = NEW(TYPE);
 	t->loc = yylloc;
 	t->kind = type_refK;
-	t->name = name;
+	t->val.refT.id = makeID(name);
 	return t;
 }
 
@@ -165,7 +166,7 @@ FUNC_DECL *makeFUNCdecl(char *name, FUNC_SIGN *signature, STMT *body) {
 	FUNC_DECL *f;
 	f = NEW(FUNC_DECL);
 	f->loc = yylloc;
-	f->name = name;
+	f->id = makeID(name);
 	f->signature = signature;
 	f->body = body;
 	return f;
@@ -370,15 +371,16 @@ CASE_DECL *makeCASE_DECLdefault(STMT *stmt) {
 
 EXP *makeEXPid(char *name) {
 	EXP *e;
-	SYMBOL *s;
+	/* SYMBOL *s; */
 
 	e = NEW(EXP);
 	e->kind = idK;
 	e->loc = yylloc;
 
-	s = NEW(SYMBOL);
-	s->id= name;
-	e->val.idE.sym = s;
+	/* s = NEW(SYMBOL); */
+	/* s->id= name; */
+	/* e->val.idE.sym = s; */
+	e->val.idE.id = makeID(name);
 	return e;
 }
 
@@ -522,7 +524,7 @@ EXP *makeEXPselector(EXP *exp, char *name) {
 	e->loc = yylloc;
 	e->kind = selectorK;
 	e->val.selectorE.exp = exp;
-	e->val.selectorE.name = name;
+	e->val.selectorE.id = makeID(name);
 	return e;
 }
 EXP *makeEXPindex(EXP *exp, int index) {
@@ -548,7 +550,7 @@ EXP *makeEXPappend(char *name, EXP *exp) {
 	e = NEW(EXP);
 	e->loc = yylloc;
 	e->kind = appendK;
-	e->val.appendE.name = name;
+	e->val.appendE.id = makeID(name);
 	e->val.appendE.exp = exp;
 	return e;
 }

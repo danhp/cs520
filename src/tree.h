@@ -12,13 +12,12 @@ typedef struct SYMBOL {
 
 typedef struct TYPE {
 	YYLTYPE loc;
-	char *name;
 	enum {
 		type_refK, type_intK, type_floatK, type_boolK, type_runeK, type_stringK,
 		type_arrayK, type_sliceK, type_structK
 	} kind;
 	union {
-		struct{char *name;} refT;
+		struct{struct ID *id; struct SYMBOL *symbol;} refT;
 		struct{int size; struct TYPE *type;} arrayT;
 		struct{struct TYPE *type;} sliceT;
 		struct{struct STRUCT_DECL *struct_decl;} structT;
@@ -40,7 +39,7 @@ typedef struct PROGRAM {
 
 typedef struct PACKAGE {
 	YYLTYPE loc;
-	char *name;
+	struct ID *id;
 } PACKAGE;
 
 typedef struct TOP_DECL {
@@ -64,14 +63,14 @@ typedef struct VAR_DECL {
 
 typedef struct TYPE_DECL {
 	YYLTYPE loc;
-	char *name;
+	struct ID *id;
 	struct TYPE *type;
 	struct TYPE_DECL *next;
 } TYPE_DECL;
 
 typedef struct FUNC_DECL {
 	YYLTYPE loc;
-	char *name;
+	struct ID *id;
 	struct FUNC_SIGN *signature;
 	struct STMT *body;
 } FUNC_DECL;
@@ -153,7 +152,7 @@ typedef struct EXP {
 		parenK
 	} kind;
 	union {
-		struct { SYMBOL *sym; } idE;
+		struct {struct ID *id; SYMBOL *sym;} idE;
 		int intconstE;
 		float floatconstE;
 		char runeconstE;
@@ -161,10 +160,10 @@ typedef struct EXP {
 		char *rawstringconstE;
 		struct {struct EXP *left; struct EXP *right;} binaryE;
 		struct EXP *unaryE;
-		struct {struct EXP *exp; char *name;} selectorE;
+		struct {struct EXP *exp; struct ID *id;} selectorE;
 		struct {struct EXP *exp; int index;} indexE;
 		struct {struct EXP *exp; struct EXP *args;} funccallE;
-		struct {char *name; struct EXP *exp;} appendE;
+		struct {struct ID *id; struct EXP *exp;} appendE;
 		struct {struct TYPE *type; struct EXP *exp;} castE;
 		struct EXP *parenE;
 	} val;

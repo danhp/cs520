@@ -54,6 +54,19 @@ void printRune(char c) {
 	print("'");
 }
 
+void prettySYMBOL(SYMBOL *obj) {
+	print(obj->id);
+}
+
+void prettyID(ID *obj) {
+	if(obj->next) {
+		prettyID(obj->next);
+		print(", ");
+	}
+
+	print(obj->name);
+}
+
 void printIndentation(int i) {
 	int j = 0;
 
@@ -71,7 +84,7 @@ void prettyPROGRAM(PROGRAM *obj, int indentation) {
 
 void prettyPACKAGE(PACKAGE *obj, int indentation) {
 	print("package ");
-	print(obj->name);
+	prettyID(obj->id);
 }
 
 void prettyTOP_DECL(TOP_DECL *obj, int indentation) {
@@ -118,36 +131,19 @@ void prettyTYPE_DECL(TYPE_DECL *obj, int indentation) {
 
 	printIndentation(indentation);
 	print("type ");
-	print(obj->name);
+	prettyID(obj->id);
 	print(" ");
 
 	prettyTYPE(obj->type);
 }
 
-void prettyID(ID *obj) {
-	if(obj->next) {
-		prettyID(obj->next);
-		print(", ");
-	}
-
-	print(obj->name);
-}
-
-void prettyFUNC_DECL(FUNC_DECL *obj, int indentation) {
-	print("\nfunc ");
-	print(obj->name);
-	prettyFUNC_SIGN(obj->signature);
-	print("{");
-	prettySTMT(obj->body, indentation+1);
-	print("\n}");
-}
-
 void prettyTYPE(TYPE *obj) {
 	if(!obj) return;
 
+	print(" ");
 	switch(obj->kind) {
 		case type_refK:
-			print(obj->name);
+			prettyID(obj->val.refT.id);
 			return;
 		case type_intK:
 			print("int");
@@ -188,6 +184,218 @@ void prettyTYPE(TYPE *obj) {
 	}
 }
 
+void prettySTRUCT_DECL(STRUCT_DECL *obj) {
+	if(obj->next) {
+		prettySTRUCT_DECL(obj->next);
+		print("; ");
+	}
+
+	prettyID(obj->id);
+	if(obj->type) {
+		print(" ");
+		prettyTYPE(obj->type);
+	}
+}
+
+void prettyFUNC_DECL(FUNC_DECL *obj, int indentation) {
+	print("\nfunc ");
+	prettyID(obj->id);
+	prettyFUNC_SIGN(obj->signature);
+	print(" {");
+	prettySTMT(obj->body, indentation+1);
+	print("\n}");
+}
+
+void prettyFUNC_SIGN(FUNC_SIGN *obj) {
+	print("(");
+
+	if(obj->arg) {
+		prettyFUNC_ARG(obj->arg);
+	}
+
+	print(")");
+	if(obj->type) {
+		prettyTYPE(obj->type);
+	}
+}
+
+void prettyFUNC_ARG(FUNC_ARG *obj) {
+	if (!obj) return;
+	if(obj->next) {
+		prettyFUNC_ARG(obj->next);
+		print(", ");
+	}
+
+	if(obj->id) {
+		prettyID(obj->id);
+	}
+
+	print(" ");
+	prettyTYPE(obj->type);
+}
+
+void prettySTMT(STMT *obj, int indentation) {
+	if(obj->next) {
+		prettySTMT(obj->next, indentation);
+	}
+
+
+	switch(obj->kind) {
+		case emptyK:
+			break;
+		case varK:
+			if (indentation) printIndentation(indentation);
+			prettyVAR_DECL(obj->val.varS, indentation);
+			break;
+		case typeK:
+			if (indentation) printIndentation(indentation);
+			prettyTYPE_DECL(obj->val.typeS, indentation);
+			break;
+		case printK:
+			if (indentation) printIndentation(indentation);
+			print("print(");
+			prettyEXP(obj->val.printS);
+			print(")");
+			break;
+		case printlnK:
+			if (indentation) printIndentation(indentation);
+			print("println(");
+			prettyEXP(obj->val.printlnS);
+			break;
+		case shortvarK:
+			if (indentation) printIndentation(indentation);
+			prettyEXP(obj->val.shortvarS.left);
+			print(" := ");
+			prettyEXP(obj->val.shortvarS.right);
+			break;
+		case returnK:
+			if (indentation) printIndentation(indentation);
+			print("return ");
+			prettyEXP(obj->val.returnS);
+			break;
+		case ifK:
+			printIndentation(indentation);
+			print("if ");
+			if(obj->val.ifS.pre_stmt) {
+				prettySTMT(obj->val.ifS.pre_stmt, 0);
+				print("; ");
+			}
+			prettyEXP(obj->val.ifS.condition);
+			print(" {");
+
+			prettySTMT(obj->val.ifS.body, indentation + 1);
+
+			printIndentation(indentation);
+			print("}");
+			break;
+		case ifelseK:
+			if (indentation) printIndentation(indentation);
+			print("if ");
+			if(obj->val.ifelseS.pre_stmt) {
+				prettySTMT(obj->val.ifelseS.pre_stmt, 0);
+				print("; ");
+			}
+			prettyEXP(obj->val.ifelseS.condition);
+			print(" {");
+
+			prettySTMT(obj->val.ifelseS.thenpart, indentation + 1);
+
+			printIndentation(indentation);
+			print("} else {");
+
+			prettySTMT(obj->val.ifelseS.elsepart, indentation+1);
+
+			printIndentation(indentation);
+			print("}");
+			break;
+		case switchK:
+			if (indentation) printIndentation(indentation);
+			print("switch ");
+			if(obj->val.switchS.pre_stmt) {
+				prettySTMT(obj->val.switchS.pre_stmt, 0);
+				print("; ");
+			}
+
+			if(obj->val.switchS.condition) {
+				prettyEXP(obj->val.switchS.condition);
+			}
+			print(" {");
+
+			prettyCASE_DECL(obj->val.switchS.body, indentation+1);
+
+			printIndentation(indentation);
+			print("}");
+			break;
+		case forK:
+			if (indentation) printIndentation(indentation);
+			print("for ");
+			prettyFOR_CLAUSE(obj->val.forS.for_clause);
+			print("{\n");
+
+			prettySTMT(obj->val.forS.body, indentation+1);
+
+			printIndentation(indentation);
+			print("}");
+			break;
+		case breakK:
+			if (indentation) printIndentation(indentation);
+			print("break;");
+			break;
+		case continueK:
+			if (indentation) printIndentation(indentation);
+			print("continue");
+			break;
+		case assignK:
+			if (indentation) printIndentation(indentation);
+			prettyEXP(obj->val.assignS.left);
+			print(" = ");
+			prettyEXP(obj->val.assignS.right);
+			break;
+		case expK:
+			if (indentation) printIndentation(indentation);
+			prettyEXP(obj->val.expS);
+			break;
+	}
+}
+
+void prettyCASE_DECL(CASE_DECL *obj, int indentation) {
+	if (!obj) return;
+	if(obj->next) prettyCASE_DECL(obj->next, indentation);
+
+	printIndentation(indentation);
+
+	switch(obj->kind) {
+		case caseK:
+			print("case ");
+			prettyEXP(obj->val.caseC.condition);
+			print(":");
+			prettySTMT(obj->val.caseC.stmt, indentation+1);
+			break;
+		case defaultK:
+			print("default:");
+			prettySTMT(obj->val.defaultC, indentation+1);
+			break;
+	}
+}
+
+void prettyFOR_CLAUSE(FOR_CLAUSE *obj) {
+	if(obj->init_stmt) {
+		prettySTMT(obj->init_stmt, 0);
+	}
+	print("; ");
+
+	if(obj->condition) {
+		prettyEXP(obj->condition);
+	}
+	print("; ");
+
+	if(obj->post_stmt) {
+		prettySTMT(obj->post_stmt, 0);
+	}
+
+	print(" ");
+}
+
 void prettyEXP(EXP *obj) {
 	if(obj->next) {
 		prettyEXP(obj->next);
@@ -196,7 +404,7 @@ void prettyEXP(EXP *obj) {
 
 	switch(obj->kind) {
 		case idK:
-			prettySYMBOL(obj->val.idE.sym);
+			prettyID(obj->val.idE.id);
 			break;
 		case intconstK:
 			printInteger(obj->val.intconstE);
@@ -376,7 +584,7 @@ void prettyEXP(EXP *obj) {
 		case selectorK:
 			prettyEXP(obj->val.selectorE.exp);
 			print(".");
-			print(obj->val.selectorE.name);
+			prettyID(obj->val.selectorE.id);
 			break;
 		case funccallK:
 			prettyEXP(obj->val.funccallE.exp);
@@ -386,7 +594,7 @@ void prettyEXP(EXP *obj) {
 			break;
 		case appendK:
 			print("append(");
-			print(obj->val.appendE.name);
+			prettyID(obj->val.appendE.id);
 			print(", ");
 			prettyEXP(obj->val.appendE.exp);
 			print(")");
@@ -401,218 +609,5 @@ void prettyEXP(EXP *obj) {
 			prettyEXP(obj->val.parenE);
 			break;
 	}
-}
-
-void prettySTRUCT_DECL(STRUCT_DECL *obj) {
-	if(obj->next) {
-		prettySTRUCT_DECL(obj->next);
-		print(", ");
-	}
-
-	prettyID(obj->id);
-	if(obj->type) {
-		print(" ");
-		prettyTYPE(obj->type);
-	}
-}
-
-void prettyFUNC_SIGN(FUNC_SIGN *obj) {
-	print("(");
-
-	if(obj->arg) {
-		prettyFUNC_ARG(obj->arg);
-	}
-
-	print(") ");
-	if(obj->type) {
-		prettyTYPE(obj->type);
-	}
-}
-
-void prettySTMT(STMT *obj, int indentation) {
-	if(obj->next) {
-		prettySTMT(obj->next, indentation);
-	}
-
-
-	switch(obj->kind) {
-		case emptyK:
-			break;
-		case varK:
-			if (indentation) printIndentation(indentation);
-			prettyVAR_DECL(obj->val.varS, indentation);
-			break;
-		case typeK:
-			if (indentation) printIndentation(indentation);
-			prettyTYPE_DECL(obj->val.typeS, indentation);
-			break;
-		case printK:
-			if (indentation) printIndentation(indentation);
-			print("print(");
-			prettyEXP(obj->val.printS);
-			print(")");
-			break;
-		case printlnK:
-			if (indentation) printIndentation(indentation);
-			print("println(");
-			prettyEXP(obj->val.printlnS);
-			break;
-		case shortvarK:
-			if (indentation) printIndentation(indentation);
-			prettyEXP(obj->val.shortvarS.left);
-			print(" := ");
-			prettyEXP(obj->val.shortvarS.right);
-			break;
-		case returnK:
-			if (indentation) printIndentation(indentation);
-			print("return ");
-			prettyEXP(obj->val.returnS);
-			break;
-		case ifK:
-			printIndentation(indentation);
-			print("if ");
-			if(obj->val.ifS.pre_stmt) {
-				prettySTMT(obj->val.ifS.pre_stmt, 0);
-				print("; ");
-			}
-			prettyEXP(obj->val.ifS.condition);
-			print(" {");
-
-			prettySTMT(obj->val.ifS.body, indentation + 1);
-
-			printIndentation(indentation);
-			print("}");
-			break;
-		case ifelseK:
-			if (indentation) printIndentation(indentation);
-			print("if ");
-			if(obj->val.ifelseS.pre_stmt) {
-				prettySTMT(obj->val.ifelseS.pre_stmt, 0);
-				print("; ");
-			}
-			prettyEXP(obj->val.ifelseS.condition);
-			print(" {");
-
-			prettySTMT(obj->val.ifelseS.thenpart, indentation + 1);
-
-			printIndentation(indentation);
-			print("} else {");
-
-			prettySTMT(obj->val.ifelseS.elsepart, indentation+1);
-
-			printIndentation(indentation);
-			print("}");
-			break;
-		case switchK:
-			if (indentation) printIndentation(indentation);
-			print("switch ");
-			if(obj->val.switchS.pre_stmt) {
-				prettySTMT(obj->val.switchS.pre_stmt, 0);
-				print("; ");
-			}
-
-			if(obj->val.switchS.condition) {
-				prettyEXP(obj->val.switchS.condition);
-			}
-			print(" {");
-
-			if(obj->val.switchS.body) {
-				prettyCASE_DECL(obj->val.switchS.body, indentation+1);
-			}
-
-			printIndentation(indentation);
-			print("}");
-			break;
-		case forK:
-			if (indentation) printIndentation(indentation);
-			print("for ");
-			prettyFOR_CLAUSE(obj->val.forS.for_clause);
-			print("{\n");
-
-			prettySTMT(obj->val.forS.body, indentation+1);
-
-			printIndentation(indentation);
-			print("}");
-			break;
-		case breakK:
-			if (indentation) printIndentation(indentation);
-			print("break;");
-			break;
-		case continueK:
-			if (indentation) printIndentation(indentation);
-			print("continue");
-			break;
-		case assignK:
-			if (indentation) printIndentation(indentation);
-			prettyEXP(obj->val.assignS.left);
-			print(" = ");
-			prettyEXP(obj->val.assignS.right);
-			break;
-		case expK:
-			if (indentation) printIndentation(indentation);
-			prettyEXP(obj->val.expS);
-			break;
-	}
-}
-
-void prettySYMBOL(SYMBOL *obj) {
-	print(obj->id);
-
-	if(obj->next) {
-		print(", ");
-		prettySYMBOL(obj->next);
-	}
-}
-
-void prettyFUNC_ARG(FUNC_ARG *obj) {
-	if (!obj) return;
-	if(obj->next) {
-		prettyFUNC_ARG(obj->next);
-		print(", ");
-	}
-
-	if(obj->id) {
-		prettyID(obj->id);
-	}
-
-	print(" ");
-	prettyTYPE(obj->type);
-}
-
-void prettyCASE_DECL(CASE_DECL *obj, int indentation) {
-	if(obj->next) prettyCASE_DECL(obj->next, indentation);
-
-	printIndentation(indentation);
-
-	switch(obj->kind) {
-		case caseK:
-			print("case ");
-			prettyEXP(obj->val.caseC.condition);
-			print(":");
-			prettySTMT(obj->val.caseC.stmt, indentation+1);
-			break;
-		case defaultK:
-			print("default:");
-			prettySTMT(obj->val.defaultC, indentation+1);
-			break;
-	}
-}
-
-void prettyFOR_CLAUSE(FOR_CLAUSE *obj) {
-	if(obj->init_stmt) {
-		prettySTMT(obj->init_stmt, 0);
-	}
-	print("; ");
-
-	if(obj->condition) {
-		prettyEXP(obj->condition);
-	}
-	print("; ");
-
-	if(obj->post_stmt) {
-		prettySTMT(obj->post_stmt, 0);
-	}
-
-	print(" ");
 }
 

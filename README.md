@@ -37,7 +37,7 @@ make test
 ```
 
 ## For Vince
-All can be done from the top directory
+Everything can be done from the top directory
 
 Compile with:
 ```
