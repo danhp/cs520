@@ -7,8 +7,10 @@ func main() {
 func plus(a, b int) int {
     switch a {
     case 1:
+        {
+            break
+        }
         return 1
-        break
     default:
         return 1
     }

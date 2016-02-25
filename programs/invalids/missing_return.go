@@ -5,5 +5,6 @@ func main() {
 }
 
 func plus(a, b int) int {
+    return 1
     a + b
 }

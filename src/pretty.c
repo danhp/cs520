@@ -190,7 +190,7 @@ void prettySTRUCT_DECL(STRUCT_DECL *obj) {
 }
 
 void prettyFUNC_DECL(FUNC_DECL *obj, int indentation) {
-	print("\nfunc ");
+	print("func ");
 	prettyID(obj->id);
 	prettyFUNC_SIGN(obj->signature);
 	print(" {\n");

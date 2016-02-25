@@ -196,8 +196,12 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause) {
 
 int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
 	if (!stmt) return !isValuedReturn;
-	if (stmt->next) {
-		if (weedSTMTfuncreturn(stmt->next, isValuedReturn)) return true;
+	while (stmt->kind == emptyK) {
+		if (stmt->next) {
+			stmt = stmt->next;
+		} else {
+			break;
+		}
 	}
 
 	switch(stmt->kind){
@@ -238,9 +242,13 @@ int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
 
 int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
 	if (!stmt->val.forS.for_clause->condition) {
-		if (findSTMTbreak(stmt->val.forS.body)) return false;
 
-		return weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn);
+		if (weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn)) {
+			return !findSTMTbreak(stmt->val.forS.body);
+		} else {
+			return isValuedReturn;
+		}
+
 	} else {
 		return false;
 	}
@@ -278,6 +286,9 @@ int findSTMTbreak(STMT *stmt) {
 	switch(stmt->kind) {
 		default:
 			return false;
+			break;
+		case blockK:
+			return findSTMTbreak(stmt->val.blockS);
 			break;
 		case ifK:
 			return findSTMTbreak(stmt->val.ifS.body);

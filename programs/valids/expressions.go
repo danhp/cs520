@@ -3,4 +3,5 @@ package expressions
 
 func main() {
     a := 1 + 3
+    _ = bool(int(((1))))
 }
