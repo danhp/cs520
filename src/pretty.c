@@ -18,13 +18,13 @@ void printRune(char c) {
 	print("'");
 	switch (c) {
 		case '\a':
-			printf("\\007");
+			printf("\\a");
 			break;
 		case '\b':
 			printf("\\b");
 			break;
 		case '\f':
-			printf("\\012");
+			printf("\\f");
 			break;
 		case '\n':
 			printf("\\n");
@@ -36,7 +36,7 @@ void printRune(char c) {
 			printf("\\t");
 			break;
 		case '\v':
-			printf("\\011");
+			printf("\\v");
 			break;
 		case '\\':
 			printf("\\\\");
