@@ -540,7 +540,7 @@ EXP *makeEXPselector(EXP *exp, char *name) {
 	e->val.selectorE.id = makeID(name);
 	return e;
 }
-EXP *makeEXPindex(EXP *exp, int index) {
+EXP *makeEXPindex(EXP *exp, EXP *index) {
 	EXP *e;
 	e = NEW(EXP);
 	e->loc = yylloc;

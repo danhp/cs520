@@ -596,7 +596,7 @@ void prettyEXP(EXP *obj) {
 		case indexK:
 			prettyEXP(obj->val.indexE.exp);
 			print("[");
-			printInteger(obj->val.indexE.index);
+			prettyEXP(obj->val.indexE.index);
 			print("]");
 			break;
 		case selectorK:

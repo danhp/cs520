@@ -348,7 +348,7 @@ unary_exp
 prim_exp
 	: operand                    { $$ = $1; }
 	| prim_exp '.' IDENTIFIER    { $$ = makeEXPselector($1, $3); }
-	| prim_exp '[' INTCONST ']'  { $$ = makeEXPindex($1, $3); }
+	| prim_exp '[' exp ']'       { $$ = makeEXPindex($1, $3); }
 	| func_call                  { $$ = $1; }
 	| append_exp                 { $$ = $1; }
 	| type_cast_exp              { $$ = $1; }

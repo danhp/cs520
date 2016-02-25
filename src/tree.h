@@ -162,7 +162,7 @@ typedef struct EXP {
 		struct {struct EXP *left; struct EXP *right;} binaryE;
 		struct EXP *unaryE;
 		struct {struct EXP *exp; struct ID *id;} selectorE;
-		struct {struct EXP *exp; int index;} indexE;
+		struct {struct EXP *exp; struct EXP *index;} indexE;
 		struct {struct EXP *exp; struct EXP *args;} funccallE;
 		struct {struct ID *id; struct EXP *exp;} appendE;
 		struct {struct TYPE *type; struct EXP *exp;} castE;
@@ -228,7 +228,7 @@ EXP *makeEXPruneconst(char runeconst);
 EXP *makeEXPstringconst(char *stringconst);
 EXP *makeEXPrawstringconst(char *rawstringconst);
 EXP *makeEXPselector(EXP *exp, char *name);
-EXP *makeEXPindex(EXP *exp, int index);
+EXP *makeEXPindex(EXP *exp, EXP *index);
 EXP *makeEXPfunccall(EXP *exp, EXP *args);
 EXP *makeEXPappend(char *name, EXP *exp);
 EXP *makeEXPcast(TYPE *type, EXP *exp);
