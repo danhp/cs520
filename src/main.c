@@ -7,9 +7,6 @@
 #include "pretty.h"
 int yyparse();
 
-FILE *prettyFile;
-FILE *prettyTree;
-
 PROGRAM *program;
 
 int main(int argc, char *argv[]) {

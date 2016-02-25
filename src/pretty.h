@@ -1,6 +1,10 @@
 #ifndef PRETTY_H
 #define PRETTY_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "tree.h"
 
 void prettyPROGRAM(PROGRAM *obj, int indentation);

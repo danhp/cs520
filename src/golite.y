@@ -188,7 +188,9 @@ struct_decl
 
 /* 2.6 Function declarations */
 func_decl
-	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4); }
+	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4);
+	                                                 if (!$4) printError("empty function declaration", yylloc);
+	                                               }
 ;
 
 func_signature
@@ -209,7 +211,8 @@ arg
 ;
 
 block
-	: '{' stmt_list '}'                            { $$ = $2; }
+	: '{' stmt_list ';' '}'                        { $$ = $2; }
+	| '{' '}'                                      { $$ = NULL; }
 
 /* 2.8 Statements */
 stmt_list

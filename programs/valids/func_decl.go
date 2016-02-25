@@ -5,18 +5,22 @@ func f () int {
     return 1;
 }
 
-func f1 (a int, b float) { }
+func f1 (a int, b float) {
+    return
+}
 
-func f2 (a, g, e int, aasdfa, aserae float) { }
+func f2 (a, g, e int, aasdfa, aserae float) {
+    _ = 1
+}
 
 // Single line block
 func f3 () {var();;}
 
 // Allowed in Go
 func _ () {
-
+;
 }
 
 func _ (_ int, _ float64) {
-
+;
 }

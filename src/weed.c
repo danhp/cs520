@@ -244,9 +244,10 @@ int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
 }
 
 int weedSTMTfuncreturnswitch(CASE_DECL *c, int isValuedReturn) {
+	int foundDefaultCase;
 	if (!c) return isValuedReturn;
 
-	int foundDefaultCase = false;
+	foundDefaultCase = false;
 
 	for ( ; c; c = c->next) {
 		switch (c->kind) {
@@ -291,11 +292,12 @@ int findSTMTbreak(STMT *stmt) {
 /* only 1 default case */
 void weedSTMTswitch(CASE_DECL *body, int isInsideLoop) {
 	YYLTYPE loc;
+	int numDefault;
 
 	if (!body) return;
 
 	/* count number of default cases and traverse */
-	int numDefault = 0;
+	numDefault = 0;
 	while (body) {
 		switch (body->kind) {
 			case caseK:
@@ -346,7 +348,7 @@ void weedEXP(EXP *exp) {
 	if (exp->next) weedEXP(exp->next);
 
 	switch (exp->kind) {
-		// Constants
+		/* Constants */
 		case idK:
 			weedIDblank(exp->val.idE.id);
 			break;
@@ -357,12 +359,12 @@ void weedEXP(EXP *exp) {
 		case rawstringconstK:
 			break;
 
-		// Weed division by zero
+		/* Weed division by zero */
 		case divK:
 		case modK:
 			weedEXPdivzero(exp->val.binaryE.right);
 
-		// Binary operators
+		/* Binary operators */
 		case plusK:
 		case minusK:
 		case timesK:
@@ -384,7 +386,7 @@ void weedEXP(EXP *exp) {
 			weedEXP(exp->val.binaryE.right);
 			break;
 
-		// Unary operators
+		 /* Unary operators */
 		case uplusK:
 		case uminusK:
 		case unotK:

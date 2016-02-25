@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "pretty.h"
 
 extern FILE *prettyFile;
@@ -59,7 +56,7 @@ void prettySYMBOL(SYMBOL *obj) {
 }
 
 void prettyID(ID *obj) {
-	if(obj->next) {
+	if (obj->next != NULL) {
 		prettyID(obj->next);
 		print(", ");
 	}
@@ -231,6 +228,7 @@ void prettyFUNC_ARG(FUNC_ARG *obj) {
 }
 
 void prettySTMT(STMT *obj, int indentation) {
+	if (!obj) return;
 	if(obj->next) {
 		prettySTMT(obj->next, indentation);
 	}
@@ -409,6 +407,7 @@ void prettyFOR_CLAUSE(FOR_CLAUSE *obj) {
 }
 
 void prettyEXP(EXP *obj) {
+	if (!obj) return;
 	if(obj->next) {
 		prettyEXP(obj->next);
 		print(", ");
