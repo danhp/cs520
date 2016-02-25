@@ -97,12 +97,13 @@ typedef struct ID {
 typedef struct STMT {
 	YYLTYPE loc;
 	enum {
-		emptyK,
+		emptyK, blockK,
 		varK, typeK, printK, printlnK, shortvarK,
 		returnK, ifK, ifelseK, switchK, forK, breakK, continueK,
 		assignK, expK
 	} kind;
 	union {
+		struct STMT *blockS;
 		struct VAR_DECL *varS;
 		struct TYPE_DECL *typeS;
 		struct EXP *printS;
@@ -199,6 +200,7 @@ FUNC_SIGN *makeFUNCsign(FUNC_ARG *arg, TYPE *type);
 FUNC_ARG *makeFUNCarg(ID *id, TYPE *type);
 
 STMT *makeSTMTempty();
+STMT *makeSTMTblock(STMT *stmt);
 STMT *makeSTMTvar(VAR_DECL *varDecl);
 STMT *makeSTMTtype(TYPE_DECL *typeDecl);
 STMT *makeSTMTprint(EXP *exp);

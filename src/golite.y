@@ -188,8 +188,8 @@ struct_decl
 
 /* 2.6 Function declarations */
 func_decl
-	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4);
-	                                                 if (!$4) printError("empty function declaration", yylloc);
+	: FUNC IDENTIFIER func_signature block         { if (!$4) printError("empty function declaration", yylloc);
+	                                                 $$ = makeFUNCdecl($2, $3, $4);
 	                                               }
 ;
 
@@ -223,7 +223,7 @@ stmt_list
 stmt: simple_stmt                      { $$ = $1; }
 	| var_decl                         { $$ = makeSTMTvar($1); }
 	| type_decl                        { $$ = makeSTMTtype($1); }
-	| block                            { $$ = $1; }
+	| block                            { $$ = makeSTMTblock($1); }
 	| print_stmt                       { $$ = $1; }
 	| println_stmt                     { $$ = $1; }
 	| return_stmt                      { $$ = $1; }

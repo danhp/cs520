@@ -1,7 +1,7 @@
 // all function declarations
 package func_decl
 
-func f () int {
+func f () (int) {
     return 1;
 }
 

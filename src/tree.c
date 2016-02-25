@@ -198,6 +198,19 @@ STMT *makeSTMTempty() {
 	return s;
 }
 
+STMT *makeSTMTblock(STMT *stmt) {
+	STMT *s;
+	s = NEW(STMT);
+	s->loc = yylloc;
+	if (stmt) {
+		s->kind = blockK;
+		s->val.blockS = stmt;
+	} else {
+		s->kind = emptyK;
+	}
+	return s;
+}
+
 STMT *makeSTMTvar(VAR_DECL *varDecl) {
 	STMT *s;
 	s = NEW(STMT);

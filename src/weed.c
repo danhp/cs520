@@ -121,6 +121,9 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 	switch(stmt->kind) {
 		case emptyK:
 			break;
+		case blockK:
+			weedSTMT(stmt->val.blockS, isInsideLoop, isInsideSwitch);
+			break;
 		case printK:
 			weedEXP(stmt->val.printS);
 			break;
@@ -325,14 +328,16 @@ void weedSTMTshorvar(EXP *left, EXP *right) {
 }
 
 void weedSTMTassign(EXP *left, EXP *right) {
+	YYLTYPE loc = right->loc;
+
 	/* count mismatch */
 	while (left && right) {
 		left = left->next;
 		right = right->next;
 	}
 
-	if (!(left == NULL && right == NULL))
-		printErrorMsg("Number of ids doesn't match number of expressions");
+	if (left || right)
+		printError("Number of ids doesn't match number of expressions", loc);
 }
 
 void weedSTMTexp(EXP *exp) {

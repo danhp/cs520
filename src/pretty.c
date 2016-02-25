@@ -237,6 +237,13 @@ void prettySTMT(STMT *obj, int indentation) {
 	switch(obj->kind) {
 		case emptyK:
 			return;
+		case blockK:
+			printIndentation(indentation);
+			print("{\n");
+			prettySTMT(obj->val.blockS, indentation + 1);
+			printIndentation(indentation);
+			print("}\n");
+			break;
 		case varK:
 			printIndentation(indentation);
 			prettyVAR_DECL(obj->val.varS, indentation);
