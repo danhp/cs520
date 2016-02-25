@@ -15,7 +15,7 @@ echo
 echo Running invalids:
 for file in ../programs/invalids/*
 do
-	./golite parse  $file > /dev/null 2>&1;
+	./golite parse $file > /dev/null 2>&1;
 	if [ "$?" -eq 1 ]; then
 		printf ".";
 	else

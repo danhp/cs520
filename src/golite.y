@@ -188,7 +188,7 @@ struct_decl
 
 /* 2.6 Function declarations */
 func_decl
-	: FUNC IDENTIFIER func_signature block         { if (!$4) printError("empty function declaration", yylloc);
+	: FUNC IDENTIFIER func_signature block         { if (!$4) printErrorWithString("empty function declaration", yylloc);
 	                                                 $$ = makeFUNCdecl($2, $3, $4);
 	                                               }
 ;
@@ -416,7 +416,7 @@ append_exp
 /* cast to base types supported here, aliases will look like function calls until typing */
 type_cast_exp
 	: cast_type '(' exp ')'               { $$ = makeEXPcast($1, $3); }
-	| cast_type '(' ')'                   { printError("missing argument to conversion", yylloc); }
+	| cast_type '(' ')'                   { printErrorWithString("missing argument to conversion", yylloc); }
 ;
 
 cast_type

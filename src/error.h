@@ -6,4 +6,5 @@
 
 void yyerror(const char *msg);
 void printError(char *msg, YYLTYPE loc);
+void printErrorWithString(char *msg, YYLTYPE loc);
 void printErrorMsg(char *msg);

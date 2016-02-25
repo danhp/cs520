@@ -26,7 +26,7 @@ void weedTOP_DECL(TOP_DECL *decl) {
 	}
 }
 
-void  weedTOPvar(VAR_DECL *decl) {
+void weedTOPvar(VAR_DECL *decl) {
 	if (!decl) return;
 	if (decl->next) weedTOPvar(decl->next);
 
@@ -35,7 +35,7 @@ void  weedTOPvar(VAR_DECL *decl) {
 }
 
 /* #id = #exp */
-void  weedVARdecl(ID *id, EXP *exp, YYLTYPE loc) {
+void weedVARdecl(ID *id, EXP *exp, YYLTYPE loc) {
 	if (!exp) return;
 
 	while (id && exp) {
@@ -421,7 +421,7 @@ void weedEXP(EXP *exp) {
 			weedEXPlvalue(exp->val.indexE.exp);
 			break;
 		case funccallK:
-			weedEXPcallId(exp->val.funccallE.exp);
+			weedEXP(exp->val.funccallE.exp);
 			weedEXP(exp->val.funccallE.args);
 			break;
 		case parenK:
@@ -447,16 +447,6 @@ void weedEXPdivzero(EXP *exp) {
 			break;
 		default:
 			return;
-	}
-}
-
-void weedEXPcallId(EXP *exp) {
-	while (exp->kind == parenK) exp = exp->val.parenE;
-
-	if (exp->kind != idK) {
-		printErrorMsg("functions call expects and IDENTIFIER");
-	} else {
-		weedIDblank(exp->val.idE.id);
 	}
 }
 

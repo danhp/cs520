@@ -4,9 +4,9 @@
 #define true 1
 #define false 0
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include "tree.h"
 #include "error.h"

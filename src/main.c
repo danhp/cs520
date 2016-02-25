@@ -8,12 +8,16 @@
 int yyparse();
 
 PROGRAM *program;
+char *filename;
 
 int main(int argc, char *argv[]) {
 	if(argc != 3) {
 		printf("Usage: golite (parse | pretty) file\n");
 		return 1;
 	}
+
+	filename = (char *) malloc (strlen (argv[2]) + 1);
+	sprintf (filename, "%s", argv[2]);
 
 	freopen(argv[2],"r",stdin);
 

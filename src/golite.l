@@ -119,7 +119,7 @@ append          { shouldInsert = 0; return APPEND; }
 
 0[xX]{H}+       { shouldInsert = 1; sscanf(yytext, "%x", &yylval.intconst); return INTCONST; }
 0{O}+           { shouldInsert = 1; sscanf(yytext, "%o", &yylval.intconst); return INTCONST; }
-0{D}+           { printError("malformed octal or integer", yylloc); }
+0{D}+           { printErrorWithString("malformed octal or integer", yylloc); }
 {D}+            { shouldInsert = 1; yylval.intconst = atoi(yytext); return INTCONST; }
 
 {D}*"."{D}+     { shouldInsert = 1; yylval.floatconst = atof(yytext); return FLOATCONST; }
@@ -147,7 +147,7 @@ append          { shouldInsert = 0; return APPEND; }
                   return IDENTIFIER;
                 }
 
-(''')|('\\')    { printError("unkown rune", yylloc); }
+(''')|('\\')    { printErrorWithString("unkown rune", yylloc); }
 '\\a'           { shouldInsert = 1; yylval.runeconst = '\a'; return RUNECONST; }
 '\\b'           { shouldInsert = 1; yylval.runeconst = '\b'; return RUNECONST; }
 '\\f'           { shouldInsert = 1; yylval.runeconst = '\f'; return RUNECONST; }
@@ -159,7 +159,7 @@ append          { shouldInsert = 0; return APPEND; }
 '\\\''          { shouldInsert = 1; yylval.runeconst = '\''; return RUNECONST; }
 '.'             { shouldInsert = 1; yylval.runeconst = yytext[1]; return RUNECONST; }
 
-.               { printError("unknown character", yylloc); }
+.               { printErrorWithString("unknown character", yylloc); }
 %%
 
 void lexBlockComment() {
@@ -175,7 +175,7 @@ void lexBlockComment() {
 				unput(c1);
 			}
 		} else if (c <= 0) {
-			printError("unclosed block comment", yylloc);
+			printErrorWithString("unclosed block comment", yylloc);
 			return;
 		} else if (c == '\n') {
 			lineno = lineno + 1;
@@ -210,13 +210,13 @@ int lexQuotedString() {
 					append_yytext(c1);
 					break;
 				default:
-					printError("unkown escaped char", yylloc);
+					printErrorWithString("unkown escaped char", yylloc);
 			}
 		} else if (c == '\n') {
-			printError("newline in string", yylloc);
+			printErrorWithString("newline in string", yylloc);
 			return 1;
 		} else if (c <= 0) {
-			printError("unclosed quoted string", yylloc);
+			printErrorWithString("unclosed quoted string", yylloc);
 			return 1;
 		} else if (c == '"'){
 			/* Succesfully closed string */
@@ -281,7 +281,7 @@ int lexRawString() {
 		}
 
 		if (c <= 0) {
-			printError("unclosed raw string", yylloc);
+			printErrorWithString("unclosed raw string", yylloc);
 			return 1;
 		}
 	}
