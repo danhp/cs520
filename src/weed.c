@@ -375,15 +375,12 @@ void weedEXP(EXP *exp) {
 		case rawstringconstK:
 			break;
 
-		/* Weed division by zero */
-		case divK:
-		case modK:
-			weedEXPdivzero(exp->val.binaryE.right);
-
 		/* Binary operators */
 		case plusK:
 		case minusK:
 		case timesK:
+		case divK:
+		case modK:
 		case bitandK:
 		case andnotK:
 		case bitorK:
