@@ -213,6 +213,9 @@ int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn) {
 			} else {
 				return true;
 			}
+		case blockK:
+			if (weedSTMTfuncreturn(stmt->val.blockS, isValuedReturn)) return true;
+			break;
 		case ifelseK:
 			if (weedSTMTfuncreturnifelse(stmt, isValuedReturn)) return true;
 			break;
@@ -414,6 +417,7 @@ void weedEXP(EXP *exp) {
 			break;
 		case indexK:
 			weedEXP(exp->val.indexE.exp);
+			weedEXP(exp->val.indexE.index);
 			weedEXPlvalue(exp->val.indexE.exp);
 			break;
 		case funccallK:
