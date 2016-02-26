@@ -263,6 +263,7 @@ void prettySTMT(STMT *obj, int indentation) {
 			printIndentation(indentation);
 			print("println(");
 			prettyEXP(obj->val.printlnS);
+			print(")");
 			if (indentation) print("\n");
 			break;
 		case shortvarK:

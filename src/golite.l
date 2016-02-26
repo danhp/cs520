@@ -101,7 +101,7 @@ append          { shouldInsert = 0; return APPEND; }
 
 "&&"            { shouldInsert = 0; return AND; }
 "||"            { shouldInsert = 0; return OR; }
-"!"             { shouldInsert = 0; return NOT; }
+"!"             { shouldInsert = 0; return '!'; }
 
 "<-"            { shouldInsert = 0; return CHANDIRECTION; }
 
