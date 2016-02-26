@@ -46,6 +46,7 @@ void weedEXP(EXP *exp);
 void weedEXPdivzero(EXP *exp);
 void weedEXPcallId(EXP *exp);
 void weedEXPlvalue(EXP *exp);
+void weedEXPid(EXP *exp);
 
 void weedIDblank(ID *id);
 

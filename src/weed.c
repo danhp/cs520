@@ -335,10 +335,10 @@ void weedSTMTswitch(CASE_DECL *body, int isInsideLoop) {
 }
 
 void weedSTMTshorvar(EXP *left, EXP *right) {
-	/* only allow id on left side of := */
-	if (left->kind != idK) printError("non-name on left side of :=", left->loc);
-
 	weedSTMTassign(left, right);
+
+	/* only allow id on left side of := */
+	weedEXPid(left);
 }
 
 void weedSTMTassign(EXP *left, EXP *right) {
@@ -402,7 +402,7 @@ void weedEXP(EXP *exp) {
 			weedEXP(exp->val.binaryE.right);
 			break;
 
-		 /* Unary operators */
+		/* Unary operators */
 		case uplusK:
 		case uminusK:
 		case unotK:
@@ -456,6 +456,13 @@ void weedEXPlvalue(EXP *exp) {
 
 	if (exp->kind != idK && exp->kind != selectorK && exp->kind != indexK)
 		printError("expression is not assignable", exp->loc);
+}
+
+void weedEXPid(EXP *exp) {
+	if (!exp) return;
+	if (exp->next) weedEXPid(exp->next);
+
+	if (exp->kind != idK) printError("non-name on left side of :=", exp->loc);
 }
 
 void weedIDblank(ID *id) {

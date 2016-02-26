@@ -1,5 +1,5 @@
 package nonname
 
 func main() {
-	(a) := 1
+	(a), b := 1, 2
 }
