@@ -61,6 +61,13 @@ Output file will be stored in outputs/ under the name file.pretty.go
 ## Submited Files
 
 programs/valids/sorting.go
+
 programs/valids/calc.go
+
 programs/valids/set2square.go
 
+## Notes
+
+The complier tends to segfault randomly on POSIX machines (OS X)
+
+Tested to run fine on the Trotier machines.
