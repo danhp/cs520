@@ -1,5 +1,9 @@
 # GoLite Compiler
 
+Justin Domingue – 260588454
+Daniel Pham – 260526252
+Seguei Nevarko – 260583807
+
 Reference: https://golang.org/ref/spec
 
 Code viewed:
@@ -53,3 +57,10 @@ Pretty print a file with
 Errors will be emmitted to stderr
 
 Output file will be stored in outputs/ under the name file.pretty.go
+
+## Submited Files
+
+programs/valids/sorting.go
+programs/valids/calc.go
+programs/valids/set2square.go
+
