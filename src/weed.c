@@ -80,12 +80,16 @@ void weedSTRUCTdecl(STRUCT_DECL *decl) {
 	if (decl->next) weedSTRUCTdecl(decl->next);
 
 	weedTYPE(decl->type);
+
+	/* As we don't support struct literals */
+	weedIDblank(decl->id);
 }
 
 void weedTOPfunc(FUNC_DECL *func) {
 	if (!func) return;
 
-	/* weedIDblank(func->id); */
+	/* As we don't support function literals */
+	weedIDblank(func->id);
 
 	if (!weedSTMTfuncreturn(func->body, weedFUNC_SIGN(func->signature))) {
 		printError("missing return at end of function", func->loc);
@@ -110,6 +114,9 @@ int weedFUNC_SIGN(FUNC_SIGN *signature) {
 void weedFUNC_ARG(FUNC_ARG *arg) {
 	if (!arg) return;
 	if (arg->next) weedFUNC_ARG(arg->next);
+
+	/* As we don't support function literals */
+	weedIDblank(arg->id);
 
 	weedTYPE(arg->type);
 }
@@ -466,6 +473,9 @@ void weedEXPid(EXP *exp) {
 }
 
 void weedIDblank(ID *id) {
+	if (!id) return;
+	if (id->next) weedIDblank(id->next);
+
 	if (strcmp(id->name, "_") == 0) {
 		printError("cannot _ use as value", id->loc);
 	}

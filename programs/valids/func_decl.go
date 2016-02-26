@@ -15,12 +15,3 @@ func f2 (a, g, e int, aasdfa, aserae float) {
 
 // Single line block
 func f3 () {var();;}
-
-// Allowed in Go
-func _ () {
-;
-}
-
-func _ (_ int, _ float64) {
-;
-}
