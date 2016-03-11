@@ -1,0 +1,47 @@
+                               ━━━━━━━━━
+                                TEAM 09
+                               ━━━━━━━━━
+
+
+Members
+═══════
+
+  • Justin Domingue - 260588454
+  • Daniel Pham - 260526252
+  • Seguei Nevarko - 260583807
+
+
+Q1
+══
+
+  • Total: 9/10
+    • All three programs are syntactically valid
+    • Use the package name "main" to allow the Go compiler to run your
+      programs (go run foo.go)
+    • set2square.go: you want "float64", not "float"
+
+
+Q2
+══
+
+  • Total: 26.9/30
+    • Valid programs: 12.9/16
+      • Recognized as valid: 217/269
+      • Recognized as invalid: 46/269
+      • Segmentation faults: 6
+    • Invalid programs: 10/10
+      • Recognized as invalid: 400/403
+    • Good error messages: 4/4
+      • Errors contain position information (line + column)
+      • Information on the nature of the error
+
+
+Q3
+══
+
+  • Total: 10/10
+    • Good report.
+
+
+Comments
+════════
