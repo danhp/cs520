@@ -256,7 +256,7 @@ int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
 		if (weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn)) {
 			return !findSTMTbreak(stmt->val.forS.body);
 		} else {
-			return isValuedReturn;
+			return !isValuedReturn;
 		}
 
 	} else {
