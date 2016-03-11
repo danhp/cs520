@@ -1,0 +1,63 @@
+The first step is to include the two .h files:
+
+    #include "myRedBlackTree.h"
+    #include "SymbolTable.h"
+
+
+Then you will need to create a new object of LayerManager which will be then used thoughout the code:
+
+    LAYERMANAGER *layerManager = LAYER_newLayer(NULL);
+
+    // the function actually puts a new Layer on top of the current layers but since we dont have one
+    // we can just pass in NULL and it will make a new one from scratch.
+
+
+When inserting variables you can use one of those functions:
+
+    int LAYER_addVariable(LAYERMANAGER *layer, char *name,  VARIABLETYPE varType)
+    
+    int LAYER_addVariableWithSubType(LAYERMANAGER *layer, char *name,  VARIABLETYPE varType, char *subType)
+
+    //Those functions will return 1 if the variable was added and 0 if a variable of that name already exists.
+
+    //The VARIABLETYPE is defined in myRedBlackTree.h, you can ad more types if I forgot one.
+    //  ex: LAYER_addVariableWithSubType(layerManager, "numberOfStudents",  VariableType_int);
+
+    //The subtype is for things like structs where the type is struct but it also has a name
+    //  ex: LAYER_addVariableWithSubType(layerManager, "bestStudent",  VariableType_struct, "STUDENT");
+
+
+You can then get the types of those variables with:
+
+    VARIABLETYPE LAYER_varType(LAYERMANAGER *layer, char *name);
+    //gives you the variable type of the object, if the object doesnt exist it returns the type VariableType_DNE
+
+    REDBLACKNODE *LAYER_getNode(LAYERMANAGER *layer, char *name);
+    //return the entire REDBLACKNODE pointer. This is if you want to access the type and subtype of the object.
+    //return NULL if the object doesnt exist
+
+    int LAYER_contains(LAYERMANAGER *layer, char *name);
+    //return 1 or 0 depending on if the variable exists or not
+
+
+Now if you enter a function or another structure and you want to have a new set of variables use:
+
+    LAYERMANAGER *LAYER_newLayer(LAYERMANAGER *current);
+    // ex: layerManager = LAYER_newLayer(layerManager);
+
+    //This will create new layer on top and all the previous functions that search for variables will go through
+    //layers one by one starting from the last one added.
+
+
+If you leave the structure and you need to remove the top layer just call
+
+    LAYERMANAGER *LAYER_removeLayer(LAYERMANAGER *current);
+    // ex: layerManager = LAYER_removeLayer(layerManager);
+
+
+If you want to know the structure of the red-black tree for debugging purposes just call
+
+    void LAYER_printAllTrees(LAYERMANAGER *layer);
+    //this prints with "printf" all the trees in the layers in order of last to first (prints variable names and structure only)
+    
+
