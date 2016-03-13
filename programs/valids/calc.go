@@ -1,4 +1,4 @@
-package coolmath
+package main
 
 /* A simple calculator program */
 /* To use, just call /*
@@ -42,7 +42,7 @@ func compute(op int, a float64, b float64) float64 {
 }
 
 func power(a float64, b float64) float64 {
-  var ret int = 1
+  var ret float64 = 1
   var power = exponent(b)
 
   for power > 0 {

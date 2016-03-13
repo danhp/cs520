@@ -1,8 +1,8 @@
 // various allowed expressions
-package expressions
+package main
 
 func main() {
     a := 1 + 3
-    _ = 1 / 0
-    _ = bool(int(((1))))
+    _ = 1 / 1
+    _ = int(((a)))
 }

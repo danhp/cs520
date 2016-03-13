@@ -1,4 +1,4 @@
-package strings
+package main
 
 func main() {
     s := ";alksdj\nfar\"asdlkfasldkfjads;"
@@ -7,4 +7,5 @@ func main() {
 
 
 laksdf`
+    print(s, t);
 }

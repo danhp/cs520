@@ -1,5 +1,6 @@
-package append_exps
+package main
 
 func main() {
-    _ := append(an_id, 3 + 3);
+    var an_id []int
+    _ = append(an_id, 3 + 3);
 }

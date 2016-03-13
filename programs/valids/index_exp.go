@@ -1,6 +1,8 @@
-package index_exp
+package main
 
 func main() {
-    a := b[0]
+    var a, b [2]int
+    x := 0
+    a[1] = b[0]
     a[x] = 3
 }

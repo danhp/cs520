@@ -1,4 +1,4 @@
-package return_ifelse
+package main
 
 func main() {
     plus(1,2)

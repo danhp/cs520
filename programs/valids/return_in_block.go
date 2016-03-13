@@ -1,4 +1,4 @@
-package return_block
+package main
 
 func main() {
     plus(1,2)
