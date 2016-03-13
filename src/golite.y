@@ -357,7 +357,13 @@ prim_exp
 operand
 	: literal                    { $$ = $1; }
 	| IDENTIFIER                 { $$ = makeEXPid($1); }
-	| '(' exp ')'                { $$ = makeEXPparen($2); }
+	| '(' exp ')'                { $$ = $2;
+	                               /* save memory and time */
+	                               /* Only need to know of parens on lhs of := */
+	                               if ($$->kind == idK) {
+	                                   $$ = makeEXPparen($2);
+	                               }
+	                             }
 ;
 
 literal
