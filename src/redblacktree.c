@@ -1,43 +1,51 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "myRedBlackTree.h"
+#include "y.tab.h"
+#include "tree.h"
+#include "redblacktree.h"
 
-REDBLACKNODE *makeRedBlackNode(char *name, VARIABLETYPE varType)
+SYMBOL *makeSYMBOL(char *id, SymbolKind kind)
 {
-  REDBLACKNODE *node = malloc(sizeof(REDBLACKNODE));
+  SYMBOL *node = malloc(sizeof(SYMBOL));
   node->blackColor = 1;
   node->isLeftChild = 1;
-  node->subType = "";
-  node->varType = varType;
-  node->name = name;
+  node->kind = kind;
+  node->id = id;
 
   return node;
 }
 
-REDBLACKNODE *makeRedBlackNodeWithSubType(char *name, VARIABLETYPE varType, char *subType)
+SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id,  SymbolKind kind, YYLTYPE loc)
 {
-  REDBLACKNODE *node = malloc(sizeof(REDBLACKNODE));
-  node->blackColor = 1;
-  node->isLeftChild = 1;
-  node->subType = subType;
-  node->varType = varType;
-  node->name = name;
-
-  return node;
+  SYMBOL *s = makeSYMBOL(id, kind);
+  int err = TREE_addSYMBOL(tree, s);
+  if(err == 0)
+  {
+    printError("That Symbol id was already defined in this context.", loc);
+    return NULL;
+  }
+  else
+  {
+    return s;
+  }
 }
 
-int TREE_addVariable(REDBLACKTREE *tree, char *name,  VARIABLETYPE varType)
+SYMBOL *TREE_addVariableDebug(REDBLACKTREE *tree, char *id,  SymbolKind kind)
 {
-  return TREE_addRedBlackNode(tree, makeRedBlackNode(name, varType));
+  SYMBOL *s = makeSYMBOL(id, kind);
+  int err = TREE_addSYMBOL(tree, s);
+  if(err == 0)
+  {
+    return NULL;
+  }
+  else
+  {
+    return s;
+  }
 }
 
-int TREE_addVariableWithSubType(REDBLACKTREE *tree, char *name,  VARIABLETYPE varType, char *subType)
-{
-  return TREE_addRedBlackNode(tree, makeRedBlackNodeWithSubType(name, varType, subType));
-}
-
-int TREE_addRedBlackNode( REDBLACKTREE *tree, REDBLACKNODE *node)
+int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node)
 {
   if(tree->root == NULL)
   {
@@ -55,9 +63,9 @@ int TREE_addRedBlackNode( REDBLACKTREE *tree, REDBLACKNODE *node)
   }
 }
 
-REDBLACKNODE *NODE_findNode(REDBLACKNODE *node, char *name)
+SYMBOL *NODE_findNode(SYMBOL *node, char *id)
 {
-  int compare = strcmp(name,node->name);
+  int compare = strcmp(id,node->id);
 
   if(compare < 0)
   {
@@ -67,7 +75,7 @@ REDBLACKNODE *NODE_findNode(REDBLACKNODE *node, char *name)
     }
     else
     {
-      return NODE_findNode(node->leftChild, name);
+      return NODE_findNode(node->leftChild, id);
     }
   }
   else if(compare > 0)
@@ -78,7 +86,7 @@ REDBLACKNODE *NODE_findNode(REDBLACKNODE *node, char *name)
     }
     else
     {
-      return NODE_findNode(node->rightChild, name);
+      return NODE_findNode(node->rightChild, id);
     }
   }
   else
@@ -87,7 +95,7 @@ REDBLACKNODE *NODE_findNode(REDBLACKNODE *node, char *name)
   }
 }
 
-REDBLACKNODE *TREE_findNode(REDBLACKTREE *tree, char *name)
+SYMBOL *TREE_findNode(REDBLACKTREE *tree, char *id)
 {
   if( tree->root == NULL)
   {
@@ -95,13 +103,13 @@ REDBLACKNODE *TREE_findNode(REDBLACKTREE *tree, char *name)
   }
   else
   {
-    return NODE_findNode(tree->root, name);
+    return NODE_findNode(tree->root, id);
   }
 }
 
-int NODE_addNodeIfDoesNotExist(REDBLACKNODE *node, REDBLACKNODE *newNode)
+int NODE_addNodeIfDoesNotExist(SYMBOL *node, SYMBOL *newNode)
 {
-  int compare = strcmp(newNode->name, node->name);
+  int compare = strcmp(newNode->id, node->id);
 
   if(compare < 0)
   {
@@ -139,7 +147,7 @@ int NODE_addNodeIfDoesNotExist(REDBLACKNODE *node, REDBLACKNODE *newNode)
   }
 }
 
-int isRed(REDBLACKNODE *node)
+int isRed(SYMBOL *node)
 {
   if(node->blackColor)
   {
@@ -148,7 +156,7 @@ int isRed(REDBLACKNODE *node)
   return 1;
 }
 
-int isBlack(REDBLACKNODE *node)
+int isBlack(SYMBOL *node)
 {
   if(node->blackColor)
   {
@@ -157,20 +165,20 @@ int isBlack(REDBLACKNODE *node)
   return 0;
 }
 
-void setBlack(REDBLACKNODE *node)
+void setBlack(SYMBOL *node)
 {
   node->blackColor = 1;
 }
 
-void setRed(REDBLACKNODE *node)
+void setRed(SYMBOL *node)
 {
   node->blackColor = 0;
 }
 
-void treeRotation(REDBLACKNODE *node)
+void treeRotation(SYMBOL *node)
 {
-  REDBLACKNODE *current = node;
-  REDBLACKNODE *temp = NULL;
+  SYMBOL *current = node;
+  SYMBOL *temp = NULL;
 
   if(node->parent == NULL)
   {
@@ -315,10 +323,10 @@ void TREE_printTree(REDBLACKTREE *tree)
   printf("}\n");
 }
 
-void NODE_printNode(REDBLACKNODE *node, int indentation)
+void NODE_printNode(SYMBOL *node, int indentation)
 {
   NODE_printIndentation(indentation);
-  printf("name: %s\n",node->name);
+  printf("id: %s\n",node->id);
   NODE_printIndentation(indentation);
   printf("LeftChild");
   if(node->leftChild == NULL)

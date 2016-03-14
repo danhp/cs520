@@ -5,6 +5,8 @@
 #include "tree.h"
 #include "weed.h"
 #include "pretty.h"
+#include "symbol.h"
+
 int yyparse();
 
 PROGRAM *program;
@@ -24,6 +26,7 @@ int main(int argc, char *argv[]) {
 	if (!yyparse()) {
 		weedPROGRAM(program);
 		if (strcmp(argv[1], "parse") == 0) {
+      symPROGRAM(program);
 			return 0;
 		}
 
@@ -31,6 +34,7 @@ int main(int argc, char *argv[]) {
 			prettyPROGRAM(program, 0);
 			return 0;
 		}
+
 		return 0;
 	}
 }
