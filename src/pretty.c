@@ -625,7 +625,9 @@ void prettyEXP(EXP *obj) {
 			print(")");
 			break;
 		case parenK:
+			print("(");
 			prettyEXP(obj->val.parenE);
+			print(")");
 			break;
 	}
 }

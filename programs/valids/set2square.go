@@ -1,4 +1,4 @@
-package random
+package main
 
 var tableData [][3][3]string
 
@@ -22,7 +22,7 @@ func square(set []string) ([3][3]string) {
     var data [3][3]string
 
     for count < size {
-        set := append(set, "empty");
+        set = append(set, "empty");
         size--
     }
 
@@ -33,22 +33,25 @@ func square(set []string) ([3][3]string) {
 
         data = clear(data)
 
-        tableData = append(tableData, entry)
+        tableData = append(tableData, data)
     }
 
-    println(data)
-    return string(data)
+    println(data[0][0], data[0][1], data[0][2])
+    println(data[1][0], data[1][1], data[1][2])
+    println(data[2][0], data[2][1], data[2][2])
+    return data
 }
 
 func len(set []string) int {
-    var c float = 50.
-    for result, i := 0, 0; set[i] != nil; result++ {
+    var c float64 = 50.
+    result, _ := 0, 1
+    for i := 0; result < 8; result++ {
         // Essentially do noting so be goofy
         var x struct {
             a, b int
         }
         (((((((((x))))))))).a = 3
-        (((c))) -= 1. * (3. + float(x.a))
+        (((c))) -= 1. * (3. + float64(x.a + i))
     }
     {
         if ((bool))((!!true)) {

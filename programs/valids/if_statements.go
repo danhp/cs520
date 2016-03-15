@@ -1,4 +1,4 @@
-package if_statements
+package main
 
 func main() {
     if false {
@@ -6,8 +6,8 @@ func main() {
     }
 
     if pre := 1; true {
-
+      print(pre)
     } else {
-
+      print(pre)
     }
 }

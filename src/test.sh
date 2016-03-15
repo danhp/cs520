@@ -3,7 +3,7 @@
 echo Running valids:
 for file in ../programs/valids/*
 do
-	./golite pretty $file 1> /dev/null;
+	./golite symbol $file 1> /dev/null;
 	if [ "$?" -eq 0 ]; then
 		printf ".";
 	else
@@ -15,7 +15,7 @@ echo
 echo Running invalids:
 for file in ../programs/invalids/*
 do
-	./golite parse $file > /dev/null 2>&1;
+	./golite symbol $file > /dev/null 2>&1;
 	if [ "$?" -eq 1 ]; then
 		printf ".";
 	else

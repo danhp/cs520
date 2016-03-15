@@ -1,7 +1,8 @@
 // Various allowed for loops
-package for_loops
+package main
 
 func main() {
-    for ; ; i++ {
+    for i := 0; ; i++ {
+      return
     }
 }

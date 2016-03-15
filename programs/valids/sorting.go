@@ -1,5 +1,5 @@
 //we sort numbers using a heap
-package heapsort
+package main
 
 var index int
 var size int = 10
@@ -19,15 +19,16 @@ func main(){
   numbers[8] = 66
   numbers[9] = 53
 
-  var heap [1000]int
+  // var heap [1000]int
   heapSort(10, numbers)
 
   var sorted []int
   sorted = getSortedList()
+  println(sorted)
   // sorted now contains a sorted list of our numbers
 }
 
-func heapSort(size int, numbers []int) {
+func heapSort(size int, numbers [10]int) {
   var lastIndex int = 1
   var current = 1;
   var newIndex int
@@ -37,14 +38,13 @@ func heapSort(size int, numbers []int) {
 
   myHeap[1] = numbers[0]
 
-  var i int
   for i:= 1; i < size; i++ {
     lastIndex++
     myHeap[lastIndex] = numbers[i]
 
     keepLooping = true
     current = lastIndex
-    
+
     for keepLooping {
       newIndex = current/2
       if newIndex > 0  && myHeap[newIndex] < myHeap[current] {

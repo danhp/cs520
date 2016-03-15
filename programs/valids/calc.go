@@ -1,11 +1,12 @@
-package coolmath
+package main
 
 /* A simple calculator program */
 /* To use, just call /*
     compute(op, a, b)
 */
 
-type exponent int
+type dummyInt int
+type exponent dummyInt
 
 func main() {
   println(",------------,")
@@ -42,7 +43,7 @@ func compute(op int, a float64, b float64) float64 {
 }
 
 func power(a float64, b float64) float64 {
-  var ret int = 1
+  var ret float64 = 1
   var power = exponent(b)
 
   for power > 0 {

@@ -2,12 +2,31 @@
 #define TREE_H
 #include "y.tab.h"
 
-typedef enum{intSym, floatSym, boolSym, runeSym, stringSym} SymbolKind;
+typedef enum{
+	intSym, floatSym, boolSym, runeSym, stringSym,
+	arraySym, sliceSym,
+	structSym, funcSym, typeSym,
+	inferredSym, blankSym
+} SymbolKind;
+
 typedef struct SYMBOL {
 	YYLTYPE loc;
 	char *id;
 	SymbolKind kind;
+	union {
+		struct FUNC_SIGN *funcSignature;
+		struct TYPE *type;
+		struct STRUCT_DECL *structDecl;
+	}val;
 	struct SYMBOL *next;
+
+	/* for red black tree */
+	int blackColor;
+	int isLeftChild;
+	struct SYMBOL *parent;
+	struct SYMBOL *rightChild;
+	struct SYMBOL *leftChild;
+	/* end */
 } SYMBOL;
 
 typedef struct TYPE {
@@ -17,7 +36,7 @@ typedef struct TYPE {
 		type_arrayK, type_sliceK, type_structK
 	} kind;
 	union {
-		struct{struct ID *id; struct SYMBOL *symbol;} refT;
+		struct{struct ID *id;} refT;
 		struct{int size; struct TYPE *type;} arrayT;
 		struct{struct TYPE *type;} sliceT;
 		struct{struct STRUCT_DECL *struct_decl;} structT;
@@ -91,6 +110,7 @@ typedef struct FUNC_ARG {
 typedef struct ID {
 	YYLTYPE loc;
 	char *name;
+	SYMBOL *symbol;
 	struct ID *next;
 } ID;
 
@@ -153,7 +173,7 @@ typedef struct EXP {
 		parenK
 	} kind;
 	union {
-		struct {struct ID *id; SYMBOL *sym;} idE;
+		struct {struct ID *id;} idE;
 		int intconstE;
 		float floatconstE;
 		char runeconstE;

@@ -1,14 +1,10 @@
 package main
 
+var _ = 2
+var _ = 3
+
 func main() {
-	a := (a).test
-	switch os := runtime.GOOS; os {
-	case 1:
-		break;
-	case "linux":
-	default:
-		// freebsd, openbsd,
-		// plan9, windows...
-	}
-	b := (a).test.test.test
+  _ = 1
+  _ = 3
+  a, b := 0, 1
 }
