@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo Running valids:
-for file in ../programs/valids/*
+echo Running valid syntax:
+for file in ../programs/valids/syntax/*
 do
-	./golite symbol $file 1> /dev/null;
+	./golite type $file 1> /dev/null;
 	if [ "$?" -eq 0 ]; then
 		printf ".";
 	else
@@ -12,10 +12,34 @@ do
 done
 
 echo
-echo Running invalids:
-for file in ../programs/invalids/*
+echo Running valid types:
+for file in ../programs/valids/type/*
 do
-	./golite symbol $file > /dev/null 2>&1;
+	./golite type $file 1> /dev/null;
+	if [ "$?" -eq 0 ]; then
+		printf ".";
+	else
+		echo Failed: $file;
+	fi
+done
+
+echo
+echo Running invalid syntax:
+for file in ../programs/invalids/syntax/*
+do
+	./golite type $file > /dev/null 2>&1;
+	if [ "$?" -eq 1 ]; then
+		printf ".";
+	else
+		echo Failed: $file;
+	fi
+done
+
+echo
+echo Running invalid types:
+for file in ../programs/invalids/type/*
+do
+	./golite type $file > /dev/null 2>&1;
 	if [ "$?" -eq 1 ]; then
 		printf ".";
 	else

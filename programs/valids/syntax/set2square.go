@@ -1,6 +1,8 @@
 package main
 
-var tableData [][3][3]string
+type set [][3][3] string
+type setAlias set
+var tableData setAlias
 
 func len(set []string) int {
     var c float64 = 50.
@@ -9,6 +11,7 @@ func len(set []string) int {
         // Essentially do noting so be goofy
         var x struct {
             a, b int
+            c []setAlias
         }
         (((((((((x))))))))).a = 3
         (((c))) -= 1. * (3. + float64(x.a + i))

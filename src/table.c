@@ -24,11 +24,11 @@ SymbolTable *unscopeSymbolTable(SymbolTable *s, int line) {
 	return s->next;
 }
 
-SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc) {
+SYMBOL *putSymbol(SymbolTable *t, char *name, TYPE *type, YYLTYPE loc) {
 	char *b = "_";
 	if (strcmp(name, b) == 0) return blank();
 
-	return TREE_addVariable(t->tree, name, kind, loc);
+	return TREE_addVariable(t->tree, name, type, loc);
 }
 
 SYMBOL *getSymbol(SymbolTable *t, char *name, YYLTYPE loc) {
@@ -45,6 +45,17 @@ SYMBOL *getSymbol(SymbolTable *t, char *name, YYLTYPE loc) {
 	}
 
 	return node;
+}
+
+int isInTopFrame(SymbolTable *table, char *name) {
+	if (strcmp(name, "_") == 0) return 1;
+
+	SYMBOL *node = node = TREE_findNode(table->tree, name);
+	if (node){
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 SYMBOL *blank() {

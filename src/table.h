@@ -17,12 +17,14 @@ typedef struct SymbolTable
 } SymbolTable;
 
 int shouldPrint;
+SymbolTable *sym;
 
 SymbolTable *initSymbolTable();
 SymbolTable *scopeSymbolTable(SymbolTable *s);
 SymbolTable *unscopeSymbolTable(SymbolTable *s, int line);
-SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc);
+SYMBOL *putSymbol(SymbolTable *t, char *name, TYPE *type, YYLTYPE loc);
 SYMBOL *getSymbol(SymbolTable *t, char *name, YYLTYPE loc);
+int isInTopFrame(SymbolTable *table, char *name);
 SYMBOL *blank();
 
 void printSymbolTable(SymbolTable *t);

@@ -5,16 +5,16 @@ package main
     compute(op, a, b)
 */
 
-type dummyInt int
-type exponent dummyInt
+type dummyFloat float64
+type exponent dummyFloat
 
 func power(a float64, b float64) float64 {
   var ret float64 = 1
   var power = exponent(b)
 
-  for power > 0 {
+  for power > 0.0 {
     ret = ret * a
-    power = power - 1
+    power = power - 1.0
   }
 
   return ret
@@ -46,10 +46,10 @@ func main() {
   println("| CALCULATOR |")
   println("'------------'")
 
-  print(compute(0,1,1))
-  print(compute(1,5,4))
-  print(compute(2,10,22.0))
-  print(compute(3, 19.11, .1))
-  print(compute(4, 2,4))        /* 2^4 */
-  print(compute(4, -10, 0))     /* negate -10 */
+  println(compute(0,1.,1.))
+  println(compute(1,5.,4.))
+  println(compute(2,10.,22.0))
+  println(compute(3, 19.11, .1))
+  println(compute(4, 2., 4.))        /* 2^4 */
+  println(compute(4, -10., 0.))     /* negate -10 */
 }

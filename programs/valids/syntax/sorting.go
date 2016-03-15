@@ -92,6 +92,6 @@ func main(){
 
   var sorted []int
   sorted = getSortedList()
-  println(sorted)
+  // println(sorted[0])
   // sorted now contains a sorted list of our numbers
 }

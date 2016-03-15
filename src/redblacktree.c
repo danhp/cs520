@@ -1,23 +1,22 @@
 #include "redblacktree.h"
 
-SYMBOL *makeSYMBOL(char *id, SymbolKind kind, YYLTYPE loc) {
-  SYMBOL *node = malloc(sizeof(SYMBOL));
-  node->blackColor = 0;
-  node->isLeftChild = 1;
-  node->kind = kind;
-  node->loc = loc;
-  node->id = id;
+SYMBOL *makeSYMBOL(char *id, TYPE *type, YYLTYPE loc) {
+	SYMBOL *node = malloc(sizeof(SYMBOL));
+	node->blackColor = 0;
+	node->isLeftChild = 1;
+	node->val.type = type;
+	node->loc = loc;
+	node->id = id;
 
-  return node;
+	return node;
 }
 
-SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id,  SymbolKind kind, YYLTYPE loc) {
-  SYMBOL *s = makeSYMBOL(id, kind, loc);
-  int err = TREE_addSYMBOL(tree, s);
-  if(err == 0) {
-    printErrorRedeclaration(loc, id, TREE_findNode(tree, id)->loc);
-  }
-  return s;
+SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id, TYPE *type, YYLTYPE loc) {
+	SYMBOL *s = makeSYMBOL(id, type, loc);
+	if (TREE_addSYMBOL(tree, s) == 0) {
+		printErrorRedeclaration(loc, id, TREE_findNode(tree, id)->loc);
+	}
+	return s;
 }
 
 int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node) {
@@ -61,8 +60,7 @@ SYMBOL *TREE_findNode(REDBLACKTREE *tree, char *id) {
   }
 }
 
-int NODE_addNodeIfDoesNotExist(SYMBOL *node, SYMBOL *newNode)
-{
+int NODE_addNodeIfDoesNotExist(SYMBOL *node, SYMBOL *newNode) {
   int compare = strcmp(newNode->id, node->id);
 
   if(compare < 0)
@@ -308,7 +306,29 @@ void printSymbols(REDBLACKTREE *t, int line) {
 
 void printSyms(SYMBOL *s) {
 	printf("ID: %s, TYPE: ", s->id);
-	symbolTypeToString(s);
+
+	switch (s->kind) {
+		case varSym:
+			print("Variable ");
+			prettyTYPE(s->val.type);
+			break;
+		case typeSym:
+			print("Type Alias ");
+			prettyTYPE(s->val.type);
+			break;
+		case funcSym:
+			print("Function ");
+			prettyFUNC_SIGN(s->val.funcSignature);
+			break;
+		case inferredSym:
+			print("undefined");
+			break;
+		case blankSym:
+			print("BLANK");
+			break;
+	}
+
+	print("\n");
 
 	if (s->leftChild) {
 		printSyms(s->leftChild);
@@ -319,84 +339,3 @@ void printSyms(SYMBOL *s) {
 	}
 }
 
-void symbolTypeToString(SYMBOL *s) {
-	switch (s->kind) {
-		case intSym:
-			print("int");
-			break;
-		case floatSym:
-			print("float");
-			break;
-		case boolSym:
-			print("bool");
-			break;
-		case runeSym:
-			print("rune");
-			break;
-		case stringSym:
-			printf("string");
-			break;
-		case arraySym:
-			print("array");
-			break;
-		case sliceSym:
-			print("slice");
-			break;
-		case structSym:
-			print("struct { ");
-			prettySTRUCT_DECL(s->val.structDecl);
-			print("}");
-			break;
-		case funcSym:
-			printf("function ");
-			prettyFUNC_SIGN(s->val.funcSignature);
-			break;
-		case typeSym:
-			print("type alias of ");
-			typeToString(s->val.type);
-			break;
-		case inferredSym:
-			print("undefined");
-			break;
-		case blankSym:
-			print("BLANK");
-			break;
-	}
-	print("\n");
-}
-
-char *typeToString(TYPE *t) {
-	char *string = "";
-	switch (t->kind) {
-		case type_refK:
-			print(typeToString(t->val.refT->symbol->val.type));
-			break;
-		case type_intK:
-			print("int");
-			break;
-		case type_floatK:
-			print("float64");
-			break;
-		case type_boolK:
-			print("bool");
-			break;
-		case type_runeK:
-			print("rune");
-			break;
-		case type_stringK:
-			print("string");
-			break;
-		case type_arrayK:
-			print("array");
-			break;
-		case type_sliceK:
-			print("slice");
-			break;
-		case type_structK:
-			print("struct { ");
-			prettySTRUCT_DECL(t->val.structT);
-			print("}");
-			break;
-	}
-	return string;
-}

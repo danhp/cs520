@@ -1,270 +1,284 @@
 #include "symbol.h"
 
 void symPROGRAM(PROGRAM *obj, int print) {
-  shouldPrint = print;
-  SymbolTable *sym = initSymbolTable();
+	shouldPrint = print;
+	sym = initSymbolTable();
 
-  // add true/false
-  putSymbol(sym, "true", boolSym, yylloc);
-  putSymbol(sym, "false", boolSym, yylloc);
+	// add true/false
+	TYPE *boolType = NEW(TYPE);
+	boolType->kind = type_boolK;
+	putSymbol(sym, "true", boolType, yylloc);
+	putSymbol(sym, "false", boolType, yylloc);
 
-  sym = scopeSymbolTable(sym);
-  symTOP_DECL(obj->top_decl, sym);
-  sym = unscopeSymbolTable(sym, obj->loc.first_line);
+	sym = scopeSymbolTable(sym);
+	symTOP_DECL(obj->top_decl);
+	sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
-void symTOP_DECL(TOP_DECL *obj, SymbolTable *sym) {
-  if (obj->next) symTOP_DECL(obj->next, sym);
+void symTOP_DECL(TOP_DECL *obj) {
+	if (obj->next) symTOP_DECL(obj->next);
 
-  switch(obj->kind) {
-    case top_varK:
-      symVAR_DECL(obj->val.varT, sym);
-      break;
-    case top_typeK:
-      symTYPE_DECL(obj->val.typeT, sym);
-      break;
-    case top_funcK:
-      symFUNC_DECL(obj->val.funcT, sym);
-      break;
-  }
-}
-
-void symVAR_DECL(VAR_DECL *obj, SymbolTable *sym) {
-	SymbolKind kind;
-
-	if(!obj) return;
-	if(obj->next) symVAR_DECL(obj->next, sym);
-
-	if (obj->type) {
-		symTYPE(obj->type, sym);
-		kind = symKindFromTYPE(obj->type);
-	} else {
-		kind = inferredSym;
+	switch(obj->kind) {
+		case top_varK:
+			symVAR_DECL(obj->val.varT);
+			break;
+		case top_typeK:
+			symTYPE_DECL(obj->val.typeT);
+			break;
+		case top_funcK:
+			symFUNC_DECL(obj->val.funcT);
+			break;
 	}
+}
+
+void symVAR_DECL(VAR_DECL *obj) {
+	if(!obj || !obj->id) return;
+	if(obj->next) symVAR_DECL(obj->next);
 
 	ID *cur = obj->id;
 	while (cur) {
-		SYMBOL *s = putSymbol(sym, cur->name, kind, obj->loc);
-		if (kind == structSym) {
-			s->val.structDecl = obj->type->val.structT;
+		cur->symbol = putSymbol(sym, cur->name, obj->type, cur->loc);
+		if (!obj->type) {
+			cur->symbol->kind = inferredSym;
+		} else {
+			symTYPE(obj->type);
+			/* Crush type aliases */
+			while (obj->type->kind == type_refK) {
+				obj->type = obj->type->val.refT->symbol->val.type;
+			}
 		}
-		cur->symbol = s;
 		cur = cur->next;
 	}
+
+	if (obj->exp) {
+		symEXP(obj->exp);
+	}
 }
 
-void symTYPE_DECL(TYPE_DECL *obj, SymbolTable *sym)
-{ SYMBOL *s;
+void symTYPE_DECL(TYPE_DECL *obj) {
+	if(!obj) return;
+	if(obj->next) symTYPE_DECL(obj->next);
 
-  if(!obj) return; if(obj->next) symTYPE_DECL(obj->next, sym);
-
-  s = putSymbol(sym, obj->id->name, typeSym, obj->loc);
-  s->val.type = obj->type;
-
-  symTYPE(obj->type, sym);
+	symTYPE(obj->type);
+	/* Crush type aliases */
+	while (obj->type->kind == type_refK) {
+		obj->type = obj->type->val.refT->symbol->val.type;
+	}
+	obj->id->symbol = putSymbol(sym, obj->id->name, obj->type, obj->loc);
+	obj->id->symbol->kind = typeSym;
 }
 
-void symTYPE(TYPE *obj, SymbolTable *sym)
-{ if(!obj) return;
-  switch(obj->kind) {
-    case type_refK:
-      obj->val.refT->symbol = getSymbol(sym, obj->val.refT->name, obj->loc);;
-      return;
-    case type_intK:
-    case type_floatK:
-    case type_boolK:
-    case type_runeK:
-    case type_stringK:
-      break;
-    case type_arrayK:
-      if(obj->val.arrayT.type) {
-        symTYPE(obj->val.arrayT.type, sym);
-      }
-      break;
-    case type_sliceK:
-      if(obj->val.sliceT) {
-        symTYPE(obj->val.sliceT, sym);
-      }
-      break;
-    case type_structK:
-      if(obj->val.structT) {
-        sym = scopeSymbolTable(sym);
-        symSTRUCT_DECL(obj->val.structT, sym);
-        sym = unscopeSymbolTable(sym, obj->loc.first_line);
-      }
-      return;
-  }
+void symTYPE(TYPE *obj) {
+	if(!obj) return;
+
+	switch(obj->kind) {
+		case type_refK:
+			obj->val.refT->symbol = getSymbol(sym, obj->val.refT->name, obj->loc);
+			return;
+		case type_intK:
+		case type_floatK:
+		case type_boolK:
+		case type_runeK:
+		case type_stringK:
+			break;
+		case type_arrayK:
+			symTYPE(obj->val.arrayT.type);
+			/* Crush type aliases */
+			while (obj->val.arrayT.type->kind == type_refK) {
+				obj->val.arrayT.type = obj->val.arrayT.type->val.refT->symbol->val.type;
+			}
+			break;
+		case type_sliceK:
+			symTYPE(obj->val.sliceT);
+			/* Crush type aliases */
+			while (obj->val.sliceT->kind == type_refK) {
+				obj->val.sliceT = obj->val.sliceT->val.refT->symbol->val.type;
+			}
+			break;
+		case type_structK:
+			symSTRUCT_DECL(obj->val.structT);
+			return;
+	}
 }
 
-void symSTRUCT_DECL(STRUCT_DECL *obj, SymbolTable *sym) {
+void symSTRUCT_DECL(STRUCT_DECL *obj) {
 	if (!obj) return;
-	if (obj->next) { symSTRUCT_DECL(obj->next, sym); }
+	if (obj->next) symSTRUCT_DECL(obj->next);
 
+	sym = scopeSymbolTable(sym);
 	ID *id = obj->id;
 
-	symTYPE(obj->type, sym);
+	symTYPE(obj->type);
+	/* Crush type aliases */
+	while (obj->type->kind == type_refK) {
+		obj->type = obj->type->val.refT->symbol->val.type;
+	}
 	while (id) {
-		id->symbol = putSymbol(sym, id->name, symKindFromTYPE(obj->type), obj->loc);
-		if (id->symbol->kind == structSym) {
-			id->symbol->val.structDecl = obj->type->val.structT;
-		}
+		id->symbol = putSymbol(sym, id->name, obj->type, obj->loc);
 		id = id->next;
 	}
+	sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
 /* 1)Add function type to top-level symbol table
  * 2)Create local symbol table and add parameters to it
  */
-void symFUNC_DECL(FUNC_DECL *obj, SymbolTable *sym)
-{ SYMBOL *s;
+void symFUNC_DECL(FUNC_DECL *obj) {
+	if (!obj) return;
+	SYMBOL *s;
 
-  s = putSymbol(sym, obj->id->name, funcSym, obj->loc);
-  s->val.funcSignature = obj->signature;
-  obj->id->symbol = s;
+	// HACK: fixup the symbol after passing null
+	s = putSymbol(sym, obj->id->name, NULL, obj->loc);
+	s->kind = funcSym;
+	s->val.funcSignature = obj->signature;
+	obj->id->symbol = s;
 
-  sym = scopeSymbolTable(sym);
-  symFUNC_SIGN(obj->signature, sym);
-  symSTMT(obj->body, sym);
-  unscopeSymbolTable(sym, obj->loc.first_line);
+	sym = scopeSymbolTable(sym);
+	symFUNC_SIGN(obj->signature);
+	symSTMT(obj->body);
+	sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
-void symFUNC_SIGN(FUNC_SIGN *obj, SymbolTable *sym) {
+void symFUNC_SIGN(FUNC_SIGN *obj) {
 	if (obj->arg) {
-		symFUNC_ARG(obj->arg, sym);
+		symFUNC_ARG(obj->arg);
 	}
 
 	if (obj->type) {
-		symTYPE(obj->type, sym);
+		symTYPE(obj->type);
+		/* Crush type aliases */
+		while (obj->type->kind == type_refK) {
+			obj->type = obj->type->val.refT->symbol->val.type;
+		}
 	}
 }
 
-void symFUNC_ARG(FUNC_ARG *obj, SymbolTable *sym)
+void symFUNC_ARG(FUNC_ARG *obj)
 { if (!obj) return;
-  if(obj->next) { symFUNC_ARG(obj->next, sym); }
+  if(obj->next) { symFUNC_ARG(obj->next); }
 
   ID *cur = obj->id;
   while (cur) {
-    SYMBOL *s = putSymbol(sym, cur->name, symKindFromTYPE(obj->type), obj->loc);
+    SYMBOL *s = putSymbol(sym, cur->name, obj->type, obj->loc);
     cur->symbol = s;
     cur = cur->next;
   }
 }
 
-void symSTMT(STMT *obj, SymbolTable *sym) {
-
+void symSTMT(STMT *obj) {
   if (!obj) return;
-  if(obj->next) { symSTMT(obj->next, sym); }
+  if(obj->next) { symSTMT(obj->next); }
 
   switch(obj->kind) {
     case emptyK:
       return;
     case blockK:
       sym = scopeSymbolTable(sym);
-      symSTMT(obj->val.blockS, sym);
+      symSTMT(obj->val.blockS);
       sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case varK:
-      symVAR_DECL(obj->val.varS, sym);
+      symVAR_DECL(obj->val.varS);
       break;
     case typeK:
-      symTYPE_DECL(obj->val.typeS, sym);
+      symTYPE_DECL(obj->val.typeS);
       break;
     case printK:
-      symEXP(obj->val.printS, sym);
+      symEXP(obj->val.printS);
       break;
     case printlnK:
-      symEXP(obj->val.printlnS, sym);
+      symEXP(obj->val.printlnS);
       break;
     case shortvarK:
-      symSHORTVAR(obj->val.shortvarS.left, sym);// process left  //tODO
-        symEXP(obj->val.shortvarS.right, sym); // process right
+      symSHORTVAR(obj->val.shortvarS.left);// process left
+      symEXP(obj->val.shortvarS.right); // process right
       break;
     case returnK:
-      symEXP(obj->val.returnS, sym);
+      symEXP(obj->val.returnS);
       break;
     case ifK:
       sym = scopeSymbolTable(sym);
       if(obj->val.ifS.pre_stmt) {
-        symSTMT(obj->val.ifS.pre_stmt, sym);
+        symSTMT(obj->val.ifS.pre_stmt);
       }
-      symEXP(obj->val.ifS.condition, sym);
-      symSTMT(obj->val.ifS.body, sym);
+      symEXP(obj->val.ifS.condition);
+      symSTMT(obj->val.ifS.body);
       sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case ifelseK:
       sym = scopeSymbolTable(sym);
       if(obj->val.ifelseS.pre_stmt) {
-        symSTMT(obj->val.ifelseS.pre_stmt, sym);
+        symSTMT(obj->val.ifelseS.pre_stmt);
       }
-      symEXP(obj->val.ifelseS.condition, sym);
-      symSTMT(obj->val.ifelseS.thenpart, sym);
-      symSTMT(obj->val.ifelseS.elsepart, sym);
+      symEXP(obj->val.ifelseS.condition);
+      symSTMT(obj->val.ifelseS.thenpart);
+      symSTMT(obj->val.ifelseS.elsepart);
       sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case switchK:
       sym = scopeSymbolTable(sym);
       if(obj->val.switchS.pre_stmt) {
-          symSTMT(obj->val.switchS.pre_stmt, sym);
+          symSTMT(obj->val.switchS.pre_stmt);
       }
 
       if(obj->val.switchS.condition) {
-          symEXP(obj->val.switchS.condition, sym);
+          symEXP(obj->val.switchS.condition);
       }
 
-      symCASE_DECL(obj->val.switchS.body, sym);
+      symCASE_DECL(obj->val.switchS.body);
       sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case forK:
       sym = scopeSymbolTable(sym);
-      symFOR_CLAUSE(obj->val.forS.for_clause, sym);
-      symSTMT(obj->val.forS.body, sym);
+      symFOR_CLAUSE(obj->val.forS.for_clause);
+      symSTMT(obj->val.forS.body);
       sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case breakK:
     case continueK:
       break;
     case assignK:
-      symEXP(obj->val.assignS.left, sym);
-      symEXP(obj->val.assignS.right, sym);
+      symEXP(obj->val.assignS.left);
+      symEXP(obj->val.assignS.right);
       break;
     case expK:
-      symEXP(obj->val.expS, sym);
+      symEXP(obj->val.expS);
       break;
     }
 }
 
-void symCASE_DECL(CASE_DECL *obj, SymbolTable *sym) {
+void symCASE_DECL(CASE_DECL *obj) {
   if (!obj) return;
-  if(obj->next) symCASE_DECL(obj->next, sym);
+  if(obj->next) symCASE_DECL(obj->next);
 
   sym = scopeSymbolTable(sym);
   switch(obj->kind) {
     case caseK:
-      symEXP(obj->val.caseC.condition, sym);
-      symSTMT(obj->val.caseC.stmt, sym);
+      symEXP(obj->val.caseC.condition);
+      symSTMT(obj->val.caseC.stmt);
       break;
     case defaultK:
-      symSTMT(obj->val.defaultC, sym);
+      symSTMT(obj->val.defaultC);
       break;
   }
   sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
-void symFOR_CLAUSE(FOR_CLAUSE *obj, SymbolTable *sym)
-{ if(obj->init_stmt) symSTMT(obj->init_stmt, sym);
+void symFOR_CLAUSE(FOR_CLAUSE *obj)
+{ if(obj->init_stmt) symSTMT(obj->init_stmt);
 
   if(obj->condition) {
-    symEXP(obj->condition, sym);
+    symEXP(obj->condition);
   }
 
   if(obj->post_stmt) {
-    symSTMT(obj->post_stmt, sym);
+    symSTMT(obj->post_stmt);
   }
 }
 
-void symEXP(EXP *obj, SymbolTable *sym)
+void symEXP(EXP *obj)
 { if (!obj) return;
-  if(obj->next) { symEXP(obj->next, sym); }
+  if(obj->next) { symEXP(obj->next); }
 
   switch(obj->kind) {
     case idK:
@@ -295,84 +309,65 @@ void symEXP(EXP *obj, SymbolTable *sym)
     case geqK:
     case orK:
     case andK:
-      symEXP(obj->val.binaryE.left, sym);
-      symEXP(obj->val.binaryE.right, sym);
+      symEXP(obj->val.binaryE.left);
+      symEXP(obj->val.binaryE.right);
       break;
     case unotK:
     case uplusK:
     case uminusK:
     case ubitnotK:
-      symEXP(obj->val.unaryE, sym);
+      symEXP(obj->val.unaryE);
       break;
     case indexK:
-      symEXP(obj->val.indexE.exp, sym);
-      symEXP(obj->val.indexE.index, sym);
+      symEXP(obj->val.indexE.exp);
+      symEXP(obj->val.indexE.index);
       break;
     case selectorK:
-      symEXP(obj->val.selectorE.exp, sym);
-      /* Defer the field checking to later */
-      /* obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name, obj->loc); */
+      symEXP(obj->val.selectorE.exp);
       break;
     case funccallK:
-      symEXP(obj->val.funccallE.exp, sym);
-      if (obj->val.funccallE.args) symEXP(obj->val.funccallE.args, sym);
+      symEXP(obj->val.funccallE.exp);
+      if (obj->val.funccallE.args) symEXP(obj->val.funccallE.args);
       break;
     case appendK:
       obj->val.appendE.id->symbol = getSymbol(sym, obj->val.appendE.id->name, obj->loc);
-      symEXP(obj->val.appendE.exp, sym);
+      /* Crush type aliases */
+      TYPE *t = obj->val.appendE.id->symbol->val.type;
+      while (t->kind == type_refK) {
+        t = t->val.refT->symbol->val.type;
+      }
+      obj->val.appendE.id->symbol->val.type = t;
+      symEXP(obj->val.appendE.exp);
       break;
     case castK:
-      /* symTYPE(obj->val.castE.type, sym); */
-      symEXP(obj->val.castE.exp, sym);
+      symTYPE(obj->val.castE.type);
+      symEXP(obj->val.castE.exp);
       break;
     case parenK:
-      symEXP(obj->val.parenE, sym);
+      symEXP(obj->val.parenE);
       break;
   }
 }
 
 
-void symSHORTVAR(EXP *obj, SymbolTable *sym) {
-	if (!obj) return;
-	if (obj->next) symSHORTVAR(obj->next, sym);
+void symSHORTVAR(EXP *id) {
+	if (!id) return;
 
-	obj->val.idE->symbol = putSymbol(sym, obj->val.idE->name, inferredSym, obj->loc);
-}
+	YYLTYPE loc = id->loc;
+	int foundNewDeclaration = 0;
+	while (id) {
+		if (isInTopFrame(sym, id->val.idE->name)) {
+			id->val.idE->symbol = getSymbol(sym, id->val.idE->name, id->loc);
+		} else {
+			foundNewDeclaration = 1;
+			id->val.idE->symbol = putSymbol(sym, id->val.idE->name, NULL, id->loc);
+			id->val.idE->symbol->kind = inferredSym;
+		}
+		id = id->next;
+	}
 
-/* Returns the SymbolKind associated with TYPE `type` */
-SymbolKind symKindFromTYPE(TYPE *type)
-{ SymbolKind kind;
-
-  switch (type->kind) {
-    case type_refK:
-      kind = symKindFromTYPE(type->val.refT->symbol->val.type);
-      break;
-    case type_intK:
-      kind = intSym;
-      break;
-    case type_floatK:
-      kind = floatSym;
-      break;
-    case type_boolK:
-      kind = boolSym;
-      break;
-    case type_runeK:
-      kind = runeSym;
-      break;
-    case type_stringK:
-      kind = stringSym;;
-      break;
-    case type_arrayK:
-      kind = arraySym;
-      break;
-    case type_sliceK:
-      kind = sliceSym;
-      break;
-    case type_structK:
-      kind = structSym;
-      break;
-  }
-
-  return kind;
+	if (!foundNewDeclaration) {
+		printError("no new delcaration on left of :=", loc);
+	}
 }
 

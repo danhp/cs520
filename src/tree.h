@@ -3,9 +3,7 @@
 #include "y.tab.h"
 
 typedef enum{
-	intSym, floatSym, boolSym, runeSym, stringSym,
-	arraySym, sliceSym,
-	structSym, funcSym, typeSym,
+	varSym, funcSym, typeSym,
 	inferredSym, blankSym
 } SymbolKind;
 
@@ -16,7 +14,6 @@ typedef struct SYMBOL {
 	union {
 		struct FUNC_SIGN *funcSignature;
 		struct TYPE *type;
-		struct STRUCT_DECL *structDecl;
 	}val;
 	struct SYMBOL *next;
 

@@ -6,6 +6,7 @@
 #include "weed.h"
 #include "pretty.h"
 #include "symbol.h"
+#include "type.h"
 
 int yyparse();
 
@@ -36,10 +37,14 @@ int main(int argc, char *argv[]) {
 
 		if (strcmp(argv[1], "symbol") == 0) {
 			symPROGRAM(program, 1);
+			return 0;
 		} else {
 			symPROGRAM(program, 0);
 		}
 
+		if (strcmp(argv[1], "type") == 0) {
+			typePROGRAM(program);
+		}
 
 		return 0;
 	}

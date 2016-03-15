@@ -15,7 +15,7 @@ typedef struct REDBLACKTREE {
   struct SYMBOL *root;
 } REDBLACKTREE;
 
-SYMBOL *makeSYMBOL(char *id, SymbolKind kind, YYLTYPE loc);
+SYMBOL *makeSYMBOL(char *id, TYPE *type, YYLTYPE loc);
 int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node);
 SYMBOL *NODE_findNode(SYMBOL *node, char *id);
 SYMBOL *TREE_findNode(REDBLACKTREE *tree, char *id);
@@ -27,7 +27,7 @@ int isBlack(SYMBOL *node);
 void setBlack(SYMBOL *node);
 void setRed(SYMBOL *node);
 
-SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id,  SymbolKind kind, YYLTYPE loc);
+SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id, TYPE *type, YYLTYPE loc);
 void TREE_printTree(REDBLACKTREE *tree);
 void NODE_printNode(SYMBOL *node, int indentation);
 void NODE_printIndentation(int indentation);

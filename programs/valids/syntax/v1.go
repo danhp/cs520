@@ -8,3 +8,8 @@ func main() {
   _ = 3
   a, b := 0, 1
 }
+
+func plus() string {
+    var a [1] struct{a, b  int;}
+    return "a"
+}
