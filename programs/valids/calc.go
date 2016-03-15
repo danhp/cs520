@@ -8,17 +8,16 @@ package main
 type dummyInt int
 type exponent dummyInt
 
-func main() {
-  println(",------------,")
-  println("| CALCULATOR |")
-  println("'------------'")
+func power(a float64, b float64) float64 {
+  var ret float64 = 1
+  var power = exponent(b)
 
-  print(compute(0,1,1))
-  print(compute(1,5,4))
-  print(compute(2,10,22.0))
-  print(compute(3, 19.11, .1))
-  print(compute(4, 2,4))        /* 2^4 */
-  print(compute(4, -10, 0))     /* negate -10 */
+  for power > 0 {
+    ret = ret * a
+    power = power - 1
+  }
+
+  return ret
 }
 
 func compute(op int, a float64, b float64) float64 {
@@ -42,14 +41,15 @@ func compute(op int, a float64, b float64) float64 {
   return -1
 }
 
-func power(a float64, b float64) float64 {
-  var ret float64 = 1
-  var power = exponent(b)
+func main() {
+  println(",------------,")
+  println("| CALCULATOR |")
+  println("'------------'")
 
-  for power > 0 {
-    ret = ret * a
-    power = power - 1
-  }
-
-  return ret
+  print(compute(0,1,1))
+  print(compute(1,5,4))
+  print(compute(2,10,22.0))
+  print(compute(3, 19.11, .1))
+  print(compute(4, 2,4))        /* 2^4 */
+  print(compute(4, -10, 0))     /* negate -10 */
 }

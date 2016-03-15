@@ -1,9 +1,5 @@
 package main
 
-func main() {
-    plus(1,2)
-}
-
 func plus(a, b int) int {
     if true {
         if false {
@@ -14,4 +10,8 @@ func plus(a, b int) int {
     } else {
         return 0
     }
+}
+
+func main() {
+    plus(1,2)
 }

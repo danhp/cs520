@@ -29,23 +29,25 @@ void symTOP_DECL(TOP_DECL *obj, SymbolTable *sym) {
   }
 }
 
-void symVAR_DECL(VAR_DECL *obj, SymbolTable *sym)
-{ SymbolKind kind;
+void symVAR_DECL(VAR_DECL *obj, SymbolTable *sym) {
+	SymbolKind kind;
 
-  if(!obj) return; if(obj->next) symVAR_DECL(obj->next, sym);
+	if(!obj) return;
+	if(obj->next) symVAR_DECL(obj->next, sym);
 
-  if (obj->type) {  /* if type was declared, use it */
-    kind = symKindFromTYPE(obj->type);
-  } else {
-    kind = inferredSym;
-  }
+	if (obj->type) {
+		symTYPE(obj->type, sym);
+		kind = symKindFromTYPE(obj->type);
+	} else {
+		kind = inferredSym;
+	}
 
-  ID *cur = obj->id;
-  while (cur) {
-    SYMBOL *s = putSymbol(sym, cur->name, kind, obj->loc);
-    cur->symbol = s;
-    cur = cur->next;
-  }
+	ID *cur = obj->id;
+	while (cur) {
+		SYMBOL *s = putSymbol(sym, cur->name, kind, obj->loc);
+		cur->symbol = s;
+		cur = cur->next;
+	}
 }
 
 void symTYPE_DECL(TYPE_DECL *obj, SymbolTable *sym)
@@ -91,12 +93,15 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
   }
 }
 
-void symSTRUCT_DECL(STRUCT_DECL *obj, SymbolTable *sym)
-{ SYMBOL *s;
-  if(obj->next) { symSTRUCT_DECL(obj->next, sym); }
+void symSTRUCT_DECL(STRUCT_DECL *obj, SymbolTable *sym) {
+	ID *id = obj->id;
+	if(obj->next) { symSTRUCT_DECL(obj->next, sym); }
 
-  s = putSymbol(sym, obj->id->name, structSym, obj->loc);
-  s->val.structDecl = obj;
+	symTYPE(obj->type, sym);
+	while (id) {
+		id->symbol = putSymbol(sym, id->name, symKindFromTYPE(obj->type), obj->loc);
+		id = id->next;
+	}
 }
 
 /* 1)Add function type to top-level symbol table
@@ -115,10 +120,14 @@ void symFUNC_DECL(FUNC_DECL *obj, SymbolTable *sym)
   unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
-void symFUNC_SIGN(FUNC_SIGN *obj, SymbolTable *sym)
-{
-  if (obj->arg)
-    symFUNC_ARG(obj->arg, sym);
+void symFUNC_SIGN(FUNC_SIGN *obj, SymbolTable *sym) {
+	if (obj->arg) {
+		symFUNC_ARG(obj->arg, sym);
+	}
+
+	if (obj->type) {
+		symTYPE(obj->type, sym);
+	}
 }
 
 void symFUNC_ARG(FUNC_ARG *obj, SymbolTable *sym)
@@ -293,7 +302,8 @@ void symEXP(EXP *obj, SymbolTable *sym)
       break;
     case selectorK:
       symEXP(obj->val.selectorE.exp, sym);
-      obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name, obj->loc);
+      /* Defer the field checking to later */
+      /* obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name, obj->loc); */
       break;
     case funccallK:
       symEXP(obj->val.funccallE.exp, sym);
@@ -327,8 +337,7 @@ SymbolKind symKindFromTYPE(TYPE *type)
 
   switch (type->kind) {
     case type_refK:
-      /* type.val.refT.id->symbol = getSymbol(sym, type.val.refT.id->name, type->loc); */
-      kind = typeSym;
+      kind = symKindFromTYPE(type->val.refT.id->symbol->val.type);
       break;
     case type_intK:
       kind = intSym;

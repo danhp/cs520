@@ -28,6 +28,6 @@ void printErrorRedeclaration(YYLTYPE loc1, char *id, YYLTYPE loc2) {
 }
 
 void printErrorUndefined(char *id, YYLTYPE loc) {
-	fprintf(stderr, "%s: ERROR, %d:%d, undefined: %s", filename, loc.first_line, loc.first_column, id);
+	fprintf(stderr, "%s: ERROR, %d:%d, undefined: %s\n", filename, loc.first_line, loc.first_column, id);
 	exit(1);
 }

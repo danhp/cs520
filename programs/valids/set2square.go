@@ -2,17 +2,35 @@ package main
 
 var tableData [][3][3]string
 
-func main() {
-    var set []string
-    set = append(set, "1")
-    set = append(set, "1")
-    set = append(set, "1")
-    set = append(set, "z")
-    set = append(set, "y")
-    set = append(set, "x")
-
-    square(set)
+func len(set []string) int {
+    var c float64 = 50.
+    result, _ := 0, 1
+    for i := 0; result < 8; result++ {
+        // Essentially do noting so be goofy
+        var x struct {
+            a, b int
+        }
+        (((((((((x))))))))).a = 3
+        (((c))) -= 1. * (3. + float64(x.a + i))
+    }
+    {
+        if ((bool))((!!true)) {
+            return result
+        } else {
+            return result
+        }
+    }
 }
+
+// replace the first line
+func clear(s [3][3]string) [3][3]string {
+    s[0][0] = "a"
+    s[0][1] = "b"
+    s[0][2] = "c"
+
+    return s
+}
+
 
 /* Read a slice and put as much of it /*
 into a 3 by 3 array and place in the global list */
@@ -42,31 +60,14 @@ func square(set []string) ([3][3]string) {
     return data
 }
 
-func len(set []string) int {
-    var c float64 = 50.
-    result, _ := 0, 1
-    for i := 0; result < 8; result++ {
-        // Essentially do noting so be goofy
-        var x struct {
-            a, b int
-        }
-        (((((((((x))))))))).a = 3
-        (((c))) -= 1. * (3. + float64(x.a + i))
-    }
-    {
-        if ((bool))((!!true)) {
-            return result
+func plus(a, b int) int {
+    if true {
+        if false {
+            return 1
         } else {
-            return result
+            return 1
         }
+    } else {
+        return 0
     }
-}
-
-// replace the first line
-func clear(s [3][3]string) [3][3]string {
-    s[0][0] = "a"
-    s[0][1] = "b"
-    s[0][2] = "c"
-
-    return s
 }

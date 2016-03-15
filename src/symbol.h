@@ -24,4 +24,5 @@ void symCASE_DECL(CASE_DECL *obj, SymbolTable *sym);
 void symFOR_CLAUSE(FOR_CLAUSE *obj, SymbolTable *sym);
 void symEXP(EXP *obj, SymbolTable *sym);
 void symSHORTVAR(EXP *obj, SymbolTable *sym);
+
 #endif
