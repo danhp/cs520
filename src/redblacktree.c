@@ -1,108 +1,62 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "y.tab.h"
-#include "tree.h"
 #include "redblacktree.h"
 
-SYMBOL *makeSYMBOL(char *id, SymbolKind kind)
-{
+SYMBOL *makeSYMBOL(char *id, SymbolKind kind, YYLTYPE loc) {
   SYMBOL *node = malloc(sizeof(SYMBOL));
   node->blackColor = 1;
   node->isLeftChild = 1;
   node->kind = kind;
+  node->loc = loc;
   node->id = id;
 
   return node;
 }
 
-SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id,  SymbolKind kind, YYLTYPE loc)
-{
-  SYMBOL *s = makeSYMBOL(id, kind);
+SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id,  SymbolKind kind, YYLTYPE loc) {
+  SYMBOL *s = makeSYMBOL(id, kind, loc);
   int err = TREE_addSYMBOL(tree, s);
-  if(err == 0)
-  {
-    printError("That Symbol id was already defined in this context.", loc);
-    return NULL;
+  if(err == 0) {
+    printErrorRedeclaration(loc, id, TREE_findNode(tree, id)->loc);
   }
-  else
-  {
-    return s;
-  }
+  return s;
 }
 
-SYMBOL *TREE_addVariableDebug(REDBLACKTREE *tree, char *id,  SymbolKind kind)
-{
-  SYMBOL *s = makeSYMBOL(id, kind);
-  int err = TREE_addSYMBOL(tree, s);
-  if(err == 0)
-  {
-    return NULL;
-  }
-  else
-  {
-    return s;
-  }
-}
-
-int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node)
-{
-  if(tree->root == NULL)
-  {
+int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node) {
+  if(tree->root == NULL) {
     tree->root = node;
     return 1;
-  }
-  else
-  {
+  } else {
     int toReturn = NODE_addNodeIfDoesNotExist(tree->root, node);
-    if(tree->root->parent != NULL)
-    {
+    if(tree->root->parent != NULL) {
       tree->root = tree->root->parent;
     }
     return toReturn;
   }
 }
 
-SYMBOL *NODE_findNode(SYMBOL *node, char *id)
-{
+SYMBOL *NODE_findNode(SYMBOL *node, char *id) {
   int compare = strcmp(id,node->id);
 
-  if(compare < 0)
-  {
-    if(node->leftChild == NULL)
-    {
+  if(compare < 0) {
+    if(node->leftChild == NULL) {
       return NULL;
-    }
-    else
-    {
+    } else {
       return NODE_findNode(node->leftChild, id);
     }
-  }
-  else if(compare > 0)
-  {
-    if(node->rightChild == NULL)
-    {
+  } else if(compare > 0) {
+    if(node->rightChild == NULL) {
       return NULL;
-    }
-    else
-    {
+    } else {
       return NODE_findNode(node->rightChild, id);
     }
-  }
-  else
-  {
+  } else {
     return node;
   }
 }
 
-SYMBOL *TREE_findNode(REDBLACKTREE *tree, char *id)
-{
-  if( tree->root == NULL)
-  {
+SYMBOL *TREE_findNode(REDBLACKTREE *tree, char *id) {
+  if( tree->root == NULL) {
     return NULL;
-  }
-  else
-  {
+  } else {
     return NODE_findNode(tree->root, id);
   }
 }
@@ -303,50 +257,147 @@ void treeRotation(SYMBOL *node)
   }
 }
 
-void NODE_printIndentation(int indentation)
-{
+void NODE_printIndentation(int indentation) {
   int i=0;
-  for(i=0;i<indentation;i++)
-  {
-    printf("  ");
+  for(i=0;i<indentation;i++) {
+    printf("\t");
   }
 }
 
-void TREE_printTree(REDBLACKTREE *tree)
-{
+void TREE_printTree(REDBLACKTREE *tree) {
   printf("tree\n");
   printf("{\n");
-  if(tree->root != NULL)
-  {
+  if(tree->root != NULL) {
     NODE_printNode(tree->root, 1);
   }
   printf("}\n");
 }
 
-void NODE_printNode(SYMBOL *node, int indentation)
-{
+void NODE_printNode(SYMBOL *node, int indentation) {
   NODE_printIndentation(indentation);
   printf("id: %s\n",node->id);
   NODE_printIndentation(indentation);
   printf("LeftChild");
-  if(node->leftChild == NULL)
-  {
+  if(node->leftChild == NULL) {
     printf(" = NULL\n");
-  }
-  else
-  {
+  } else {
     printf(":\n");
     NODE_printNode(node->leftChild, indentation+1);
   }
+
   NODE_printIndentation(indentation);
   printf("RightChild");
-  if(node->rightChild == NULL)
-  {
+  if(node->rightChild == NULL) {
     printf(" = NULL\n");
-  }
-  else
-  {
+  } else {
     printf(":\n");
     NODE_printNode(node->rightChild, indentation+1);
   }
+}
+
+void printSymbols(REDBLACKTREE *t, int line) {
+	if (!t->root) return;
+
+	printf("Exit at line %d\n", line);
+	printf("--- FRAME ---\n");
+	if (t->root) {
+		printSyms(t->root);
+	}
+	printf("--- END ---\n\n");
+}
+
+void printSyms(SYMBOL *s) {
+	printf("ID: %s, TYPE: %s\n", s->id, symbolTypeToString(s));
+
+	if (s->leftChild) {
+		printSyms(s->leftChild);
+	}
+
+	if (s->rightChild) {
+		printSyms(s->rightChild);
+	}
+}
+
+char *symbolTypeToString(SYMBOL *s) {
+	char *string = "";
+	char *msg = "Type Alias, ALIAS: ";
+	char *temp = "";
+
+	switch (s->kind) {
+		case intSym:
+			string = "int";
+			break;
+		case floatSym:
+			string = "float64";
+			break;
+		case boolSym:
+			string = "bool";
+			break;
+		case runeSym:
+			string = "rune";
+			break;
+		case stringSym:
+			string = "string";
+			break;
+		case arraySym:
+			string = "array";
+			break;
+		case sliceSym:
+			string = "slice";
+			break;
+		case structSym:
+			string = "struct";
+			break;
+		case funcSym:
+			string = "function";
+			break;
+		case typeSym:
+			temp = (char *) malloc(strlen(typeToString(s->val.type)));
+			sprintf(temp, "%s", typeToString(s->val.type));
+			string = (char *) malloc(strlen(msg) + strlen(temp) + 1);
+			sprintf(string, "%s%s", msg, temp);
+			break;
+		case inferredSym:
+			string = "undefined";
+			break;
+		case blankSym:
+			string = "BLANK";
+			break;
+	}
+
+	return string ;
+}
+
+char *typeToString(TYPE *t) {
+	char *string = "";
+	switch (t->kind) {
+		case type_refK:
+			string = typeToString(t->val.refT.id->symbol->val.type);
+			break;
+		case type_intK:
+			string = "int";
+			break;
+		case type_floatK:
+			string = "float64";
+			break;
+		case type_boolK:
+			string = "bool";
+			break;
+		case type_runeK:
+			string = "rune";
+			break;
+		case type_stringK:
+			string = "string";
+			break;
+		case type_arrayK:
+			string = "array";
+			break;
+		case type_sliceK:
+			string = "slice";
+			break;
+		case type_structK:
+			string = "struct";
+			break;
+	}
+	return string;
 }

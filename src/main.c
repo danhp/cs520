@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
 	if (!yyparse()) {
 		weedPROGRAM(program);
 		if (strcmp(argv[1], "parse") == 0) {
-      symPROGRAM(program);
 			return 0;
 		}
 
@@ -34,6 +33,13 @@ int main(int argc, char *argv[]) {
 			prettyPROGRAM(program, 0);
 			return 0;
 		}
+
+		if (strcmp(argv[1], "symbol") == 0) {
+			symPROGRAM(program, 1);
+		} else {
+			symPROGRAM(program, 0);
+		}
+
 
 		return 0;
 	}

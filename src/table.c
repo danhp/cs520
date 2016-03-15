@@ -1,91 +1,67 @@
-#include <stdlib.h>
-#include "redblacktree.h"
 #include "table.h"
 
 SYMBOL *blankSymbol;
 
-SymbolTable *initSymbolTable()
-{
-  REDBLACKTREE *newTree = malloc(sizeof(REDBLACKTREE));
-  SymbolTable *t = malloc(sizeof(SymbolTable));
-  t->tree = newTree;
-  t->next = NULL;
-  return t;
+SymbolTable *initSymbolTable() {
+	REDBLACKTREE *newTree = NEW(REDBLACKTREE);
+	SymbolTable *t = NEW(SymbolTable);
+	t->tree = newTree;
+	t->next = NULL;
+	return t;
 }
 
-SymbolTable *scopeSymbolTable(SymbolTable *s)
-{
-  SymbolTable *t = malloc(sizeof(SymbolTable));
-  t = initSymbolTable();
-  t->next = s;
-  return t;
+SymbolTable *scopeSymbolTable(SymbolTable *s) {
+	SymbolTable *t = NEW(SymbolTable);
+	t = initSymbolTable();
+	t->next = s;
+	return t;
 }
 
-SymbolTable *unscopeSymbolTable(SymbolTable *previous)
-{
-  return previous->next;
+SymbolTable *unscopeSymbolTable(SymbolTable *s, int line) {
+	if (shouldPrint) {
+		printFrame(s, line);
+	}
+	return s->next;
 }
 
-SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc)
-{
-  return TREE_addVariable(t->tree, name, kind, loc);
+SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc) {
+	char *b = "_";
+	if (strcmp(name, b) == 0) return blank();
+
+	return TREE_addVariable(t->tree, name, kind, loc);
 }
 
-SYMBOL *putSymbolDebug(SymbolTable *t, char *name, SymbolKind kind)
-{
-  return TREE_addVariableDebug(t->tree, name, kind);
+SYMBOL *getSymbol(SymbolTable *t, char *name) {
+	if (strcmp(name, "_") == 0) return blank();
+
+	SYMBOL *node = TREE_findNode(t->tree, name);
+	if (!node) {
+		if (t->next) {
+			node = getSymbol(t->next, name);
+		}
+	}
+
+	return node;
 }
 
-SYMBOL *getSymbol(SymbolTable *t, char *name)
-{
-  SYMBOL *node = TREE_findNode(t->tree, name);
-  if(node == NULL)
-  {
-    if(t->next == NULL)
-    {
-      return NULL;
-    }
-    else
-    {
-      return getSymbol(t->next, name);
-    }
-  }
-  else
-  {
-    return node;
-  }
+SYMBOL *blank() {
+	if (!blankSymbol) {
+		blankSymbol = NEW(SYMBOL);
+		blankSymbol->id  = "_";
+		blankSymbol->kind = blankSym;
+	}
+
+	return blankSymbol;
 }
 
-int defSymbol(SymbolTable *t, char *name)
-{
-  SYMBOL *node = getSymbol(t, name);
-  if(node==NULL)
-  {
-    return 0;
-  }
-  else
-  {
-    return 1;
-  }
+/* PRINTING RELATED */
+void printSymbolTable(SymbolTable *t) {
+	TREE_printTree(t->tree);
+	if(t->next) {
+		printSymbolTable(t->next);
+	}
 }
 
-SYMBOL *blank()
-{
-  if(blankSymbol == NULL)
-  {
-    blankSymbol = malloc(sizeof(SYMBOL));
-    blankSymbol->id  = "_";
-  }
-
-  return blankSymbol;
-}
-
-void printSymbolTable(SymbolTable *t)
-{
-  TREE_printTree(t->tree);
-  if(t->next != NULL)
-  {
-    printSymbolTable(t->next);
-  }
-
+void printFrame(SymbolTable *t, int line) {
+	printSymbols(t->tree, line);
 }

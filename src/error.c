@@ -21,3 +21,8 @@ void printErrorMsg(char *msg) {
 	fprintf(stderr, "%s: ERROR %s\n", filename, msg);
 	exit(1);
 }
+
+void printErrorRedeclaration(YYLTYPE loc1, char *id, YYLTYPE loc2) {
+	fprintf(stderr, "%s: ERROR, %d:%d, %s redeclared in this block, previous declaration at %d:%d\n", filename, loc1.first_line, loc1.first_column, id, loc2.first_line, loc2.first_column);
+	exit(1);
+}

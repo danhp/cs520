@@ -5,7 +5,8 @@ package main
     compute(op, a, b)
 */
 
-type exponent int
+type dummyInt int
+type exponent dummyInt
 
 func main() {
   println(",------------,")

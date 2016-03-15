@@ -2,26 +2,31 @@
 #define TREE_H
 #include "y.tab.h"
 
-typedef enum{intSym, floatSym, boolSym, runeSym, stringSym, arraySym, sliceSym, structSym, funcSym, inferredSym, typeSym} SymbolKind;
+typedef enum{
+	intSym, floatSym, boolSym, runeSym, stringSym,
+	arraySym, sliceSym,
+	structSym, funcSym, typeSym,
+	inferredSym, blankSym
+} SymbolKind;
+
 typedef struct SYMBOL {
 	YYLTYPE loc;
 	char *id;
 	SymbolKind kind;
-  union {
-    struct FUNC_SIGN *funcSignature;
-    struct TYPE *type;
-    struct STRUCT_DECL *structDecl;
-  }val;
+	union {
+		struct FUNC_SIGN *funcSignature;
+		struct TYPE *type;
+		struct STRUCT_DECL *structDecl;
+	}val;
 	struct SYMBOL *next;
 
-  /* for red black tree */
- 	int blackColor;
- 	int isLeftChild;
- 	struct SYMBOL *parent;
- 	struct SYMBOL *rightChild;
- 	struct SYMBOL *leftChild;
-  /* end */
-
+	/* for red black tree */
+	int blackColor;
+	int isLeftChild;
+	struct SYMBOL *parent;
+	struct SYMBOL *rightChild;
+	struct SYMBOL *leftChild;
+	/* end */
 } SYMBOL;
 
 typedef struct TYPE {
@@ -105,7 +110,7 @@ typedef struct FUNC_ARG {
 typedef struct ID {
 	YYLTYPE loc;
 	char *name;
-  SYMBOL *symbol;
+	SYMBOL *symbol;
 	struct ID *next;
 } ID;
 

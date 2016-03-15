@@ -1,18 +1,20 @@
 #include "symbol.h"
 
-void symPROGRAM(PROGRAM *obj)
-{ SymbolTable *sym = initSymbolTable();
+void symPROGRAM(PROGRAM *obj, int print) {
+  shouldPrint = print;
+  SymbolTable *sym = initSymbolTable();
 
   // add true/false
   putSymbol(sym, "true", boolSym, yylloc);
   putSymbol(sym, "false", boolSym, yylloc);
 
-  SymbolTable *localsym = scopeSymbolTable(sym);
-  symTOP_DECL(obj->top_decl, localsym);
+  sym = scopeSymbolTable(sym);
+  symTOP_DECL(obj->top_decl, sym);
+  sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
-void symTOP_DECL(TOP_DECL *obj, SymbolTable *sym)
-{ if (obj->next) symTOP_DECL(obj->next, sym);
+void symTOP_DECL(TOP_DECL *obj, SymbolTable *sym) {
+  if (obj->next) symTOP_DECL(obj->next, sym);
 
   switch(obj->kind) {
     case top_varK:
@@ -81,7 +83,9 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
       break;
     case type_structK:
       if(obj->val.structT.struct_decl) {
-        symSTRUCT_DECL(obj->val.structT.struct_decl, scopeSymbolTable(sym));
+        sym = scopeSymbolTable(sym);
+        symSTRUCT_DECL(obj->val.structT.struct_decl, sym);
+        sym = unscopeSymbolTable(sym, obj->loc.first_line);
       }
       return;
   }
@@ -105,11 +109,10 @@ void symFUNC_DECL(FUNC_DECL *obj, SymbolTable *sym)
   s->val.funcSignature = obj->signature;
   obj->id->symbol = s;
 
-  SymbolTable *localsym = scopeSymbolTable(sym);
-  symFUNC_SIGN(obj->signature, localsym);
-  symSTMT(obj->body, localsym);
-
-  /* unscopeSymbolTable(localSym); */
+  sym = scopeSymbolTable(sym);
+  symFUNC_SIGN(obj->signature, sym);
+  symSTMT(obj->body, sym);
+  unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
 void symFUNC_SIGN(FUNC_SIGN *obj, SymbolTable *sym)
@@ -130,8 +133,7 @@ void symFUNC_ARG(FUNC_ARG *obj, SymbolTable *sym)
   }
 }
 
-void symSTMT(STMT *obj, SymbolTable *sym)
-{ SymbolTable *localsym;
+void symSTMT(STMT *obj, SymbolTable *sym) {
 
   if (!obj) return;
   if(obj->next) { symSTMT(obj->next, sym); }
@@ -140,8 +142,9 @@ void symSTMT(STMT *obj, SymbolTable *sym)
     case emptyK:
       return;
     case blockK:
-      localsym = scopeSymbolTable(sym);
-      symSTMT(obj->val.blockS, localsym);
+      sym = scopeSymbolTable(sym);
+      symSTMT(obj->val.blockS, sym);
+      sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case varK:
       symVAR_DECL(obj->val.varS, sym);
@@ -163,67 +166,71 @@ void symSTMT(STMT *obj, SymbolTable *sym)
       symEXP(obj->val.returnS, sym);
       break;
     case ifK:
-      localsym = scopeSymbolTable(sym);
+      sym = scopeSymbolTable(sym);
       if(obj->val.ifS.pre_stmt) {
-        symSTMT(obj->val.ifS.pre_stmt, localsym);
+        symSTMT(obj->val.ifS.pre_stmt, sym);
       }
-      symEXP(obj->val.ifS.condition, localsym);
-      symSTMT(obj->val.ifS.body, localsym);
+      symEXP(obj->val.ifS.condition, sym);
+      symSTMT(obj->val.ifS.body, sym);
+      sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case ifelseK:
-      localsym = scopeSymbolTable(sym);
+      sym = scopeSymbolTable(sym);
       if(obj->val.ifelseS.pre_stmt) {
-        symSTMT(obj->val.ifelseS.pre_stmt, localsym);
+        symSTMT(obj->val.ifelseS.pre_stmt, sym);
       }
-      symEXP(obj->val.ifelseS.condition, localsym);
-      symSTMT(obj->val.ifelseS.thenpart, localsym);
-      symSTMT(obj->val.ifelseS.elsepart, localsym);
+      symEXP(obj->val.ifelseS.condition, sym);
+      symSTMT(obj->val.ifelseS.thenpart, sym);
+      symSTMT(obj->val.ifelseS.elsepart, sym);
+      sym = unscopeSymbolTable(sym, obj->loc.first_line);
       break;
     case switchK:
-      localsym = scopeSymbolTable(sym);
+      sym = scopeSymbolTable(sym);
       if(obj->val.switchS.pre_stmt) {
-        symSTMT(obj->val.switchS.pre_stmt, localsym);
-
-        if(obj->val.switchS.condition) {
-          symEXP(obj->val.switchS.condition, localsym);
-        }
-
-        symCASE_DECL(obj->val.switchS.body, localsym);
-        break;
-        case forK:
-        localsym = scopeSymbolTable(sym);
-        symFOR_CLAUSE(obj->val.forS.for_clause, localsym);
-        symSTMT(obj->val.forS.body, localsym);
-        break;
-        case breakK:
-        case continueK:
-        break;
-        case assignK:
-        symEXP(obj->val.assignS.left, sym);
-        symEXP(obj->val.assignS.right, sym);
-        break;
-        case expK:
-        symEXP(obj->val.expS, sym);
-        break;
+          symSTMT(obj->val.switchS.pre_stmt, sym);
       }
-  }
+
+      if(obj->val.switchS.condition) {
+          symEXP(obj->val.switchS.condition, sym);
+      }
+
+      symCASE_DECL(obj->val.switchS.body, sym);
+      sym = unscopeSymbolTable(sym, obj->loc.first_line);
+      break;
+    case forK:
+      sym = scopeSymbolTable(sym);
+      symFOR_CLAUSE(obj->val.forS.for_clause, sym);
+      symSTMT(obj->val.forS.body, sym);
+      sym = unscopeSymbolTable(sym, obj->loc.first_line);
+      break;
+    case breakK:
+    case continueK:
+      break;
+    case assignK:
+      symEXP(obj->val.assignS.left, sym);
+      symEXP(obj->val.assignS.right, sym);
+      break;
+    case expK:
+      symEXP(obj->val.expS, sym);
+      break;
+    }
 }
 
-void symCASE_DECL(CASE_DECL *obj, SymbolTable *sym)
-{ SymbolTable *localsym = scopeSymbolTable(sym);
-
+void symCASE_DECL(CASE_DECL *obj, SymbolTable *sym) {
   if (!obj) return;
   if(obj->next) symCASE_DECL(obj->next, sym);
 
+  sym = scopeSymbolTable(sym);
   switch(obj->kind) {
     case caseK:
-      symEXP(obj->val.caseC.condition, localsym);
-      symSTMT(obj->val.caseC.stmt, localsym);
+      symEXP(obj->val.caseC.condition, sym);
+      symSTMT(obj->val.caseC.stmt, sym);
       break;
     case defaultK:
-      symSTMT(obj->val.defaultC, localsym);
+      symSTMT(obj->val.defaultC, sym);
       break;
   }
+  sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
 void symFOR_CLAUSE(FOR_CLAUSE *obj, SymbolTable *sym)
@@ -308,7 +315,10 @@ void symEXP(EXP *obj, SymbolTable *sym)
 
 
 void symSHORTVAR(EXP *obj, SymbolTable *sym) {
-  //dan, please indulge me
+	if (!obj) return;
+	if (obj->next) symSHORTVAR(obj->next, sym);
+
+	obj->val.idE.id->symbol = putSymbol(sym, obj->val.idE.id->name, inferredSym, obj->loc);
 }
 
 /* Returns the SymbolKind associated with TYPE `type` */

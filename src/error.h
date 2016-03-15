@@ -8,3 +8,4 @@ void yyerror(const char *msg);
 void printError(char *msg, YYLTYPE loc);
 void printErrorWithString(char *msg, YYLTYPE loc);
 void printErrorMsg(char *msg);
+void printErrorRedeclaration(YYLTYPE loc1, char *id, YYLTYPE loc2);

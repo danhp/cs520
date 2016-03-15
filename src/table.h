@@ -1,6 +1,12 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "memory.h"
+#include "y.tab.h"
 #include "redblacktree.h"
 
 typedef struct SymbolTable
@@ -9,15 +15,16 @@ typedef struct SymbolTable
   struct SymbolTable *next;
 } SymbolTable;
 
+int shouldPrint;
 
 SymbolTable *initSymbolTable();
 SymbolTable *scopeSymbolTable(SymbolTable *s);
-SymbolTable *unscopeSymbolTable(SymbolTable *previous);
+SymbolTable *unscopeSymbolTable(SymbolTable *s, int line);
 SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc);
 SYMBOL *getSymbol(SymbolTable *t, char *name);
-int defSymbol(SymbolTable *t, char *name);
 SYMBOL *blank();
-SYMBOL *putSymbolDebug(SymbolTable *t, char *name, SymbolKind kind);
+
 void printSymbolTable(SymbolTable *t);
+void printFrame(SymbolTable *t, int line);
 
 #endif

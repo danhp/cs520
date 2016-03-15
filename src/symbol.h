@@ -10,7 +10,7 @@
 /* Returns the SymbolKind associated with TYPE `type` */
 SymbolKind symKindFromTYPE(TYPE *type);
 
-void symPROGRAM(PROGRAM *obj);
+void symPROGRAM(PROGRAM *obj, int print);
 void symTOP_DECL(TOP_DECL *obj, SymbolTable *sym);
 void symVAR_DECL(VAR_DECL *obj, SymbolTable *sym);
 void symTYPE_DECL(TYPE_DECL *obj, SymbolTable *sym);
