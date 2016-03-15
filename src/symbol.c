@@ -293,7 +293,7 @@ void symEXP(EXP *obj, SymbolTable *sym)
       break;
     case selectorK:
       symEXP(obj->val.selectorE.exp, sym);
-      obj->val.idE.id->symbol = getSymbol(sym, obj->val.idE.id->name);
+      obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name);
       break;
     case funccallK:
       symEXP(obj->val.funccallE.exp, sym);
