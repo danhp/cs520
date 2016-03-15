@@ -31,14 +31,17 @@ SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc) {
 	return TREE_addVariable(t->tree, name, kind, loc);
 }
 
-SYMBOL *getSymbol(SymbolTable *t, char *name) {
+SYMBOL *getSymbol(SymbolTable *t, char *name, YYLTYPE loc) {
 	if (strcmp(name, "_") == 0) return blank();
 
 	SYMBOL *node = TREE_findNode(t->tree, name);
+	while (!node && t->next) {
+		node = TREE_findNode(t->next->tree, name);
+		t = t->next;
+	}
+
 	if (!node) {
-		if (t->next) {
-			node = getSymbol(t->next, name);
-		}
+		printErrorUndefined(name, loc);
 	}
 
 	return node;

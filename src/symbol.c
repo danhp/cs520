@@ -63,7 +63,7 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
 { if(!obj) return;
   switch(obj->kind) {
     case type_refK:
-      obj->val.refT.id->symbol = getSymbol(sym, obj->val.refT.id->name);;
+      obj->val.refT.id->symbol = getSymbol(sym, obj->val.refT.id->name, obj->loc);;
       return;
     case type_intK:
     case type_floatK:
@@ -251,7 +251,7 @@ void symEXP(EXP *obj, SymbolTable *sym)
 
   switch(obj->kind) {
     case idK:
-      obj->val.idE.id->symbol = getSymbol(sym, obj->val.idE.id->name);
+      obj->val.idE.id->symbol = getSymbol(sym, obj->val.idE.id->name, obj->loc);
       break;
     case intconstK:
     case floatconstK:
@@ -293,14 +293,14 @@ void symEXP(EXP *obj, SymbolTable *sym)
       break;
     case selectorK:
       symEXP(obj->val.selectorE.exp, sym);
-      obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name);
+      obj->val.selectorE.id->symbol = getSymbol(sym, obj->val.selectorE.id->name, obj->loc);
       break;
     case funccallK:
       symEXP(obj->val.funccallE.exp, sym);
       if (obj->val.funccallE.args) symEXP(obj->val.funccallE.args, sym);
       break;
     case appendK:
-      obj->val.appendE.id->symbol = getSymbol(sym, obj->val.appendE.id->name);
+      obj->val.appendE.id->symbol = getSymbol(sym, obj->val.appendE.id->name, obj->loc);
       symEXP(obj->val.appendE.exp, sym);
       break;
     case castK:

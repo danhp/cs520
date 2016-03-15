@@ -7,6 +7,7 @@
 
 #include "memory.h"
 #include "y.tab.h"
+#include "error.h"
 #include "redblacktree.h"
 
 typedef struct SymbolTable
@@ -21,7 +22,7 @@ SymbolTable *initSymbolTable();
 SymbolTable *scopeSymbolTable(SymbolTable *s);
 SymbolTable *unscopeSymbolTable(SymbolTable *s, int line);
 SYMBOL *putSymbol(SymbolTable *t, char *name, SymbolKind kind, YYLTYPE loc);
-SYMBOL *getSymbol(SymbolTable *t, char *name);
+SYMBOL *getSymbol(SymbolTable *t, char *name, YYLTYPE loc);
 SYMBOL *blank();
 
 void printSymbolTable(SymbolTable *t);

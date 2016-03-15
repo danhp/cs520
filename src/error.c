@@ -26,3 +26,8 @@ void printErrorRedeclaration(YYLTYPE loc1, char *id, YYLTYPE loc2) {
 	fprintf(stderr, "%s: ERROR, %d:%d, %s redeclared in this block, previous declaration at %d:%d\n", filename, loc1.first_line, loc1.first_column, id, loc2.first_line, loc2.first_column);
 	exit(1);
 }
+
+void printErrorUndefined(char *id, YYLTYPE loc) {
+	fprintf(stderr, "%s: ERROR, %d:%d, undefined: %s", filename, loc.first_line, loc.first_column, id);
+	exit(1);
+}
