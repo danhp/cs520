@@ -7,6 +7,8 @@
 
 #include "tree.h"
 
+void print(char *text);
+
 void prettyPROGRAM(PROGRAM *obj, int indentation);
 void prettyPACKAGE(PACKAGE *obj, int indentation);
 void prettyTOP_DECL(TOP_DECL *obj, int indentation);

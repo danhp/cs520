@@ -307,7 +307,8 @@ void printSymbols(REDBLACKTREE *t, int line) {
 }
 
 void printSyms(SYMBOL *s) {
-	printf("ID: %s, TYPE: %s\n", s->id, symbolTypeToString(s));
+	printf("ID: %s, TYPE: ", s->id);
+	symbolTypeToString(s);
 
 	if (s->leftChild) {
 		printSyms(s->leftChild);
@@ -318,85 +319,83 @@ void printSyms(SYMBOL *s) {
 	}
 }
 
-char *symbolTypeToString(SYMBOL *s) {
-	char *string = "";
-	char *msg = "Type Alias, ALIAS: ";
-	char *temp = "";
-
+void symbolTypeToString(SYMBOL *s) {
 	switch (s->kind) {
 		case intSym:
-			string = "int";
+			print("int");
 			break;
 		case floatSym:
-			string = "float64";
+			print("float");
 			break;
 		case boolSym:
-			string = "bool";
+			print("bool");
 			break;
 		case runeSym:
-			string = "rune";
+			print("rune");
 			break;
 		case stringSym:
-			string = "string";
+			printf("string");
 			break;
 		case arraySym:
-			string = "array";
+			print("array");
 			break;
 		case sliceSym:
-			string = "slice";
+			print("slice");
 			break;
 		case structSym:
-			string = "struct";
+			print("struct { ");
+			prettySTRUCT_DECL(s->val.structDecl);
+			print("}");
 			break;
 		case funcSym:
-			string = "function";
+			printf("function ");
+			prettyFUNC_SIGN(s->val.funcSignature);
 			break;
 		case typeSym:
-			temp = (char *) malloc(strlen(typeToString(s->val.type)));
-			sprintf(temp, "%s", typeToString(s->val.type));
-			string = (char *) malloc(strlen(msg) + strlen(temp) + 1);
-			sprintf(string, "%s%s", msg, temp);
+			print("type alias of ");
+			typeToString(s->val.type);
 			break;
 		case inferredSym:
-			string = "undefined";
+			print("undefined");
 			break;
 		case blankSym:
-			string = "BLANK";
+			print("BLANK");
 			break;
 	}
-
-	return string ;
+	print("\n");
 }
 
 char *typeToString(TYPE *t) {
 	char *string = "";
 	switch (t->kind) {
 		case type_refK:
-			string = typeToString(t->val.refT.id->symbol->val.type);
+			print(typeToString(t->val.refT->symbol->val.type));
 			break;
 		case type_intK:
-			string = "int";
+			print("int");
 			break;
 		case type_floatK:
-			string = "float64";
+			print("float64");
 			break;
 		case type_boolK:
-			string = "bool";
+			print("bool");
 			break;
 		case type_runeK:
-			string = "rune";
+			print("rune");
 			break;
 		case type_stringK:
-			string = "string";
+			print("string");
 			break;
 		case type_arrayK:
-			string = "array";
+			print("array");
 			break;
 		case type_sliceK:
-			string = "slice";
+			print("slice");
 			break;
 		case type_structK:
-			string = "struct";
+			print("struct { ");
+			prettySTRUCT_DECL(t->val.structT);
+			print("}");
 			break;
 	}
 	return string;

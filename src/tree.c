@@ -121,7 +121,7 @@ TYPE *makeTYPEref(char *name) {
 	t = NEW(TYPE);
 	t->loc = yylloc;
 	t->kind = type_refK;
-	t->val.refT.id = makeID(name);
+	t->val.refT = makeID(name);
 	return t;
 }
 
@@ -140,7 +140,7 @@ TYPE *makeTYPEslice(TYPE *type) {
 	t = NEW(TYPE);
 	t->loc = yylloc;
 	t->kind = type_sliceK;
-	t->val.sliceT.type = type;
+	t->val.sliceT = type;
 	return t;
 }
 
@@ -149,7 +149,7 @@ TYPE *makeTYPEstruct(STRUCT_DECL *structDecl) {
 	t = NEW(TYPE);
 	t->loc = yylloc;
 	t->kind = type_structK;
-	t->val.structT.struct_decl = structDecl;
+	t->val.structT = structDecl;
 	return t;
 }
 
@@ -393,7 +393,7 @@ EXP *makeEXPid(char *name) {
 	/* s = NEW(SYMBOL); */
 	/* s->id= name; */
 	/* e->val.idE.sym = s; */
-	e->val.idE.id = makeID(name);
+	e->val.idE = makeID(name);
 	return e;
 }
 

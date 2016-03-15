@@ -7,6 +7,7 @@
 
 #include "error.h"
 #include "tree.h"
+#include "pretty.h"
 #include "y.tab.h"
 
 
@@ -34,7 +35,7 @@ SYMBOL *TREE_addVariableDebug(REDBLACKTREE *tree, char *id,  SymbolKind kind);
 
 void printSymbols(REDBLACKTREE *tree, int line);
 void printSyms(SYMBOL *s);
-char *symbolTypeToString(SYMBOL *s);
+void symbolTypeToString(SYMBOL *s);
 char *typeToString(TYPE *t);
 
 #endif

@@ -59,16 +59,16 @@ void weedTYPE(TYPE *type) {
 
 	switch (type->kind) {
 		case type_refK:
-			weedIDblank(type->val.refT.id);
+			weedIDblank(type->val.refT);
 			break;
 		case type_structK:
-			weedSTRUCTdecl(type->val.structT.struct_decl);
+			weedSTRUCTdecl(type->val.structT);
 			break;
 		case type_arrayK:
 			weedTYPE(type->val.arrayT.type);
 			break;
 		case type_sliceK:
-			weedTYPE(type->val.sliceT.type);
+			weedTYPE(type->val.sliceT);
 			break;
 		default:
 			return;
@@ -376,7 +376,7 @@ void weedEXP(EXP *exp) {
 	switch (exp->kind) {
 		/* Constants */
 		case idK:
-			weedIDblank(exp->val.idE.id);
+			weedIDblank(exp->val.idE);
 			break;
 		case intconstK:
 		case floatconstK:

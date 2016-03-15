@@ -36,10 +36,10 @@ typedef struct TYPE {
 		type_arrayK, type_sliceK, type_structK
 	} kind;
 	union {
-		struct{struct ID *id;} refT;
+		struct ID *refT;
 		struct{int size; struct TYPE *type;} arrayT;
-		struct{struct TYPE *type;} sliceT;
-		struct{struct STRUCT_DECL *struct_decl;} structT;
+		struct TYPE *sliceT;
+		struct STRUCT_DECL *structT;
 	} val;
 } TYPE;
 
@@ -173,7 +173,7 @@ typedef struct EXP {
 		parenK
 	} kind;
 	union {
-		struct {struct ID *id;} idE;
+		struct ID *idE;
 		int intconstE;
 		float floatconstE;
 		char runeconstE;

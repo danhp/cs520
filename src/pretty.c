@@ -135,7 +135,7 @@ void prettyTYPE(TYPE *obj) {
 
 	switch(obj->kind) {
 		case type_refK:
-			prettyID(obj->val.refT.id);
+			prettyID(obj->val.refT);
 			return;
 		case type_intK:
 			print("int");
@@ -162,14 +162,14 @@ void prettyTYPE(TYPE *obj) {
 			break;
 		case type_sliceK:
 			print("[]");
-			if(obj->val.sliceT.type) {
-				prettyTYPE(obj->val.sliceT.type);
+			if(obj->val.sliceT) {
+				prettyTYPE(obj->val.sliceT);
 			}
 			break;
 		case type_structK:
 			print("struct {");
-			if(obj->val.structT.struct_decl) {
-				prettySTRUCT_DECL(obj->val.structT.struct_decl);
+			if(obj->val.structT) {
+				prettySTRUCT_DECL(obj->val.structT);
 			}
 			print("}");
 			return;
@@ -177,6 +177,7 @@ void prettyTYPE(TYPE *obj) {
 }
 
 void prettySTRUCT_DECL(STRUCT_DECL *obj) {
+	if (!obj) return;
 	if(obj->next) {
 		prettySTRUCT_DECL(obj->next);
 	}
@@ -423,7 +424,7 @@ void prettyEXP(EXP *obj) {
 
 	switch(obj->kind) {
 		case idK:
-			prettyID(obj->val.idE.id);
+			prettyID(obj->val.idE);
 			break;
 		case intconstK:
 			printInteger(obj->val.intconstE);

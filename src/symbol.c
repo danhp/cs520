@@ -45,6 +45,9 @@ void symVAR_DECL(VAR_DECL *obj, SymbolTable *sym) {
 	ID *cur = obj->id;
 	while (cur) {
 		SYMBOL *s = putSymbol(sym, cur->name, kind, obj->loc);
+		if (kind == structSym) {
+			s->val.structDecl = obj->type->val.structT;
+		}
 		cur->symbol = s;
 		cur = cur->next;
 	}
@@ -65,7 +68,7 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
 { if(!obj) return;
   switch(obj->kind) {
     case type_refK:
-      obj->val.refT.id->symbol = getSymbol(sym, obj->val.refT.id->name, obj->loc);;
+      obj->val.refT->symbol = getSymbol(sym, obj->val.refT->name, obj->loc);;
       return;
     case type_intK:
     case type_floatK:
@@ -79,14 +82,14 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
       }
       break;
     case type_sliceK:
-      if(obj->val.sliceT.type) {
-        symTYPE(obj->val.sliceT.type, sym);
+      if(obj->val.sliceT) {
+        symTYPE(obj->val.sliceT, sym);
       }
       break;
     case type_structK:
-      if(obj->val.structT.struct_decl) {
+      if(obj->val.structT) {
         sym = scopeSymbolTable(sym);
-        symSTRUCT_DECL(obj->val.structT.struct_decl, sym);
+        symSTRUCT_DECL(obj->val.structT, sym);
         sym = unscopeSymbolTable(sym, obj->loc.first_line);
       }
       return;
@@ -94,12 +97,17 @@ void symTYPE(TYPE *obj, SymbolTable *sym)
 }
 
 void symSTRUCT_DECL(STRUCT_DECL *obj, SymbolTable *sym) {
+	if (!obj) return;
+	if (obj->next) { symSTRUCT_DECL(obj->next, sym); }
+
 	ID *id = obj->id;
-	if(obj->next) { symSTRUCT_DECL(obj->next, sym); }
 
 	symTYPE(obj->type, sym);
 	while (id) {
 		id->symbol = putSymbol(sym, id->name, symKindFromTYPE(obj->type), obj->loc);
+		if (id->symbol->kind == structSym) {
+			id->symbol->val.structDecl = obj->type->val.structT;
+		}
 		id = id->next;
 	}
 }
@@ -260,7 +268,7 @@ void symEXP(EXP *obj, SymbolTable *sym)
 
   switch(obj->kind) {
     case idK:
-      obj->val.idE.id->symbol = getSymbol(sym, obj->val.idE.id->name, obj->loc);
+      obj->val.idE->symbol = getSymbol(sym, obj->val.idE->name, obj->loc);
       break;
     case intconstK:
     case floatconstK:
@@ -328,7 +336,7 @@ void symSHORTVAR(EXP *obj, SymbolTable *sym) {
 	if (!obj) return;
 	if (obj->next) symSHORTVAR(obj->next, sym);
 
-	obj->val.idE.id->symbol = putSymbol(sym, obj->val.idE.id->name, inferredSym, obj->loc);
+	obj->val.idE->symbol = putSymbol(sym, obj->val.idE->name, inferredSym, obj->loc);
 }
 
 /* Returns the SymbolKind associated with TYPE `type` */
@@ -337,7 +345,7 @@ SymbolKind symKindFromTYPE(TYPE *type)
 
   switch (type->kind) {
     case type_refK:
-      kind = symKindFromTYPE(type->val.refT.id->symbol->val.type);
+      kind = symKindFromTYPE(type->val.refT->symbol->val.type);
       break;
     case type_intK:
       kind = intSym;
