@@ -2,7 +2,7 @@
 
 SYMBOL *makeSYMBOL(char *id, SymbolKind kind, YYLTYPE loc) {
   SYMBOL *node = malloc(sizeof(SYMBOL));
-  node->blackColor = 1;
+  node->blackColor = 0;
   node->isLeftChild = 1;
   node->kind = kind;
   node->loc = loc;
