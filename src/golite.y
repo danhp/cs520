@@ -188,9 +188,7 @@ struct_decl
 
 /* 2.6 Function declarations */
 func_decl
-	: FUNC IDENTIFIER func_signature block         { if (!$4) printErrorWithString("empty function declaration", yylloc);
-	                                                 $$ = makeFUNCdecl($2, $3, $4);
-	                                               }
+	: FUNC IDENTIFIER func_signature block         { $$ = makeFUNCdecl($2, $3, $4); }
 ;
 
 func_signature
@@ -268,6 +266,9 @@ if_stmt
 	: IF simple_stmt ';' exp block                           { $$ = makeSMTif($2, $4, $5); }
 	| IF simple_stmt ';' exp block ELSE if_stmt              { $$ = makeSMTifelse($2, $4, $5, $7); }
 	| IF simple_stmt ';' exp block ELSE block                { $$ = makeSMTifelse($2, $4, $5, $7); }
+	| IF ';' exp block                                       { $$ = makeSMTif(NULL, $3, $4); }
+	| IF ';' exp block ELSE if_stmt                          { $$ = makeSMTifelse(NULL, $3, $4, $6); }
+	| IF ';' exp block ELSE block                            { $$ = makeSMTifelse(NULL, $3, $4, $6); }
 	| IF exp block                                           { $$ = makeSMTif(NULL, $2, $3); }
 	| IF exp block ELSE if_stmt                              { $$ = makeSMTifelse(NULL, $2, $3, $5); }
 	| IF exp block ELSE block                                { $$ = makeSMTifelse(NULL, $2, $3, $5); }
@@ -276,6 +277,8 @@ if_stmt
 switch_stmt
 	: SWITCH simple_stmt ';' exp '{' case_list '}'           { $$ = makeSTMTswitch($2, $4, $6); }
 	| SWITCH simple_stmt ';' '{' case_list '}'               { $$ = makeSTMTswitch($2, NULL, $5); }
+	| SWITCH ';' exp '{' case_list '}'                       { $$ = makeSTMTswitch(NULL, $3, $5); }
+	| SWITCH ';' '{' case_list '}'                           { $$ = makeSTMTswitch(NULL, NULL, $4); }
 	| SWITCH exp '{' case_list '}'                           { $$ = makeSTMTswitch(NULL, $2, $4); }
 	| SWITCH '{' case_list '}'                               { $$ = makeSTMTswitch(NULL, NULL, $3); }
 ;
@@ -409,8 +412,8 @@ mul_op
 /* 2.9.6 Function Calls */
 /* Allowed for nested parens for ID but now we need to weed */
 func_call
-	: operand '(' exp_list ')'             { $$ = makeEXPfunccall($1, $3); }
-	| operand '(' ')'                      { $$ = makeEXPfunccall($1, NULL); }
+	: prim_exp '(' exp_list ')'             { $$ = makeEXPfunccall($1, $3); }
+	| prim_exp '(' ')'                      { $$ = makeEXPfunccall($1, NULL); }
 ;
 
 /* 2.9.7 Append */

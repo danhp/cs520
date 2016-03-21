@@ -156,7 +156,7 @@ void weedSTMT(STMT *stmt, int isInsideLoop, int isInsideSwitch) {
 			break;
 		case assignK:
 			weedSTMTassign(stmt->val.assignS.left, stmt->val.assignS.right);
-			weedEXPlvalue(stmt->val.assignS.left);
+			weedEXPlvalue(stmt->val.assignS.left, true);
 			weedEXP(stmt->val.assignS.right);
 			break;
 		case ifK:
@@ -419,13 +419,13 @@ void weedEXP(EXP *exp) {
 
 		case selectorK:
 			weedEXP(exp->val.selectorE.exp);
-			weedEXPlvalue(exp->val.selectorE.exp);
+			weedEXPlvalue(exp->val.selectorE.exp, false);
 			weedIDblank(exp->val.selectorE.id);
 			break;
 		case indexK:
 			weedEXP(exp->val.indexE.exp);
 			weedEXP(exp->val.indexE.index);
-			weedEXPlvalue(exp->val.indexE.exp);
+			weedEXPlvalue(exp->val.indexE.exp, false);
 			break;
 		case funccallK:
 			weedEXP(exp->val.funccallE.exp);
@@ -457,12 +457,22 @@ void weedEXPdivzero(EXP *exp) {
 	}
 }
 
-void weedEXPlvalue(EXP *exp) {
-	if (exp->next) weedEXPlvalue(exp->next);
+void weedEXPlvalue(EXP *exp, int isAssign) {
+	if (exp->next) weedEXPlvalue(exp->next, isAssign);
 	while (exp->kind == parenK) exp = exp->val.parenE;
 
-	if (exp->kind != idK && exp->kind != selectorK && exp->kind != indexK)
-		printError("expression is not assignable", exp->loc);
+	switch (exp->kind) {
+		case idK:
+		case selectorK:
+		case indexK:
+			break;
+		case funccallK:
+			if (!isAssign) {
+				break;
+			}
+		default:
+			printError("expression is not assignable", exp->loc);
+	}
 }
 
 void weedEXPid(EXP *exp) {

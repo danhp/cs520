@@ -45,7 +45,7 @@ void weedFOR_CLAUSE(FOR_CLAUSE *clause);
 void weedEXP(EXP *exp);
 void weedEXPdivzero(EXP *exp);
 void weedEXPcallId(EXP *exp);
-void weedEXPlvalue(EXP *exp);
+void weedEXPlvalue(EXP *exp, int isAssign);
 void weedEXPid(EXP *exp);
 
 void weedIDblank(ID *id);

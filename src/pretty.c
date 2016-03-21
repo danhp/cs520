@@ -86,6 +86,7 @@ void prettyPACKAGE(PACKAGE *obj, int indentation) {
 }
 
 void prettyTOP_DECL(TOP_DECL *obj, int indentation) {
+	if (!obj) return;
 	if (obj->next) {
 		prettyTOP_DECL(obj->next, indentation);
 	}

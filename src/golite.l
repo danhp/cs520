@@ -12,6 +12,7 @@ H [a-fA-F0-9]
 
 int yycolumn = 1;
 int shouldInsert = 0;
+int shouldInsertAfterBlockComment = 0;
 int lineno = 1;
 
 static void update_loc() {
@@ -35,7 +36,12 @@ void append_yytext(char c);
 \r              /* ingore */
 \n              { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
 \/\/[^\n]*\n    { lineno++; yycolumn = 1; if (shouldInsert) { shouldInsert = 0; return ';'; }; }
-\/\*            { lexBlockComment(); }
+\/\*            { lexBlockComment();
+	              if (shouldInsertAfterBlockComment) {
+	                  shouldInsertAfterBlockComment = 0;
+	                  return ';';
+	              }
+	            }
 
 break           { shouldInsert = 1; return BREAK; }
 case            { shouldInsert = 0; return CASE; }
@@ -179,6 +185,10 @@ void lexBlockComment() {
 			return;
 		} else if (c == '\n') {
 			lineno = lineno + 1;
+			if (shouldInsert) {
+				shouldInsert = 0;
+				shouldInsertAfterBlockComment = 1;
+			}
 		}
 	}
 }
@@ -204,7 +214,6 @@ int lexQuotedString() {
 				case 't':
 				case 'v':
 				case '\\':
-				case '\'':
 				case '"':
 					append_yytext(c);
 					append_yytext(c1);
