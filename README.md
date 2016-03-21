@@ -1,8 +1,8 @@
 # GoLite Compiler
 
-Justin Domingue – 260588454
-Daniel Pham – 260526252
-Seguei Nevarko – 260583807
+- Justin Domingue – 260588454
+- Daniel Pham – 260526252
+- Seguei Nevarko – 260583807
 
 Reference: https://golang.org/ref/spec
 
@@ -16,47 +16,80 @@ Code viewed:
 #### Compile
 ```
 // In root directory
-./run
+$ ./run
 ```
 or
 
 ```
-cd src/
-make
+$ cd src/
+$ make
 ```
 
 #### Testing
 Run the parser on all files in programs/
 ```
-cd src
-make test
+$ cd src
+$ make test
 ```
 
 ### Usage
-```
-// Run parser
-./golite parse file
 
-// Run pretty printer
-./golite pretty file
-```
+Run parser
+
+    $ ./golite parse file
+
+Run pretty printer
+
+    $ ./golite pretty file
+
+Dump symbol table
+
+    $ ./golite symbol file
+
+Run type checker
+
+    $ ./golite type file
+
+Run type checker and pretty print with types
+
+    $ ./golite pptype file
 
 ## For Vince
+
 Everything can be done from the top directory
 
-Compile with:
-```
-./run
-```
+**Compile**
 
-Pretty print a file with
-```
-./run file.go
-```
+    $ ./run
 
-Errors will be emmitted to stderr
+**Pretty print a file**
 
-Output file will be stored in outputs/ under the name file.pretty.go
+    $ ./run file.go
+    $ ls outputs/
+    foo.pretty.go
+
+**[`-pptype`] Pretty print with expression types**
+
+    $ ./run file.go -pptype
+    $ ls outputs/
+    foo.pptype.go
+
+**[`-dumpsymtab`] Dump top-most frame of the symbol table each time a scope is exited**
+
+    $ ./run file.go -dumpsymtab
+    $ ls outputs
+    foo.symtab
+
+**``pptype`` and `dumpsymtab` can be used together**
+
+    $ ./run file.go -pptype -dumpsymtab
+    $ ls outputs/
+    foo.symtab  foo.pptype.go
+
+#### Comments
+
+- Errors will be emmitted to stderr
+- Calling `./run file.go [-pptype -dumpsymtab]` will delete everything in output before proceeding with the command
 
 ## Submited Files
 

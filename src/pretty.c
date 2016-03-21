@@ -1,6 +1,7 @@
 #include "pretty.h"
 
 extern FILE *prettyFile;
+int pptype_flag_on = 0;
 
 void print(char *text) {
 	printf("%s", text);
@@ -72,7 +73,8 @@ void printIndentation(int i) {
 	}
 }
 
-void prettyPROGRAM(PROGRAM *obj, int indentation) {
+void prettyPROGRAM(PROGRAM *obj, int indentation, int pptype_flag) {
+  pptype_flag_on = pptype_flag; // for flag --pptype
 	prettyPACKAGE(obj->package, indentation);
 	prettyTOP_DECL(obj->top_decl, indentation);
 }
@@ -421,6 +423,13 @@ void prettyEXP(EXP *obj) {
 		prettyEXP(obj->next);
 		print(", ");
 	}
+
+  // print type before the expression
+  if (pptype_flag_on) {
+    print("/*");
+    prettyTYPE(obj->type);
+    print("*/ ");
+  }
 
 	switch(obj->kind) {
 		case idK:

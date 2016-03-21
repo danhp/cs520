@@ -1,16 +1,27 @@
 #!/bin/bash
 if [ "$#" -eq 0 ]; then
-	make -C src/
+  make -C src/
 else
-	program=$(<$1);
-	file=$(basename $1);
-	pref=${file%.*};
+  # assumes the script was called like one of the following:
+  #   a) ./run file [-pptype | -dumpsymtab] ---> golite flag file
+  #   b) ./run file                         ---> golite pretty
 
-	rm outputs/$pref.* > /dev/null 2>&1;
+  file=$(basename $1);
+  pref=${file%.*};
+  cmd=$([ "$#" -ge 2 ] && echo ${2:1} || echo "pretty")
+  output_file=$([ "$cmd" = "dumpsymtab" ] && echo "symtab" || echo "$cmd".go )
 
-	./src/golite pretty $1 1> /dev/null;
-	# Only write if successful
-	if [ "$?" -eq 0 ]; then
-		./src/golite pretty $1 1> outputs/$pref.pretty.go;
-	fi
+  rm outputs/$pref.* > /dev/null 2>&1;
+
+  # # call golite with command and filename
+  ./src/golite $cmd $1  1> /dev/null;
+  # # Only write if successful
+  if [ "$?" -eq 0 ]; then
+    ./src/golite $cmd $1 1> outputs/$pref.$output_file;
+    if [ "$#" -eq 3 ]; then
+      cmd=${3:1}
+      output_file=$([ "$cmd" = "dumpsymtab" ] && echo "symtab" || echo "$cmd".go )
+      ./src/golite $cmd $1 1> outputs/$pref.$output_file;
+    fi
+  fi
 fi

@@ -9,7 +9,7 @@
 
 void print(char *text);
 
-void prettyPROGRAM(PROGRAM *obj, int indentation);
+void prettyPROGRAM(PROGRAM *obj, int indentation, int pptype_flag);
 void prettyPACKAGE(PACKAGE *obj, int indentation);
 void prettyTOP_DECL(TOP_DECL *obj, int indentation);
 void prettyVAR_DECL(VAR_DECL *obj, int indentation);

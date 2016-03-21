@@ -15,7 +15,7 @@ char *filename;
 
 int main(int argc, char *argv[]) {
 	if(argc != 3) {
-		printf("Usage: golite (parse | pretty) file\n");
+		printf("Usage: golite (parse | pretty | (symbol|dumpsymtab) | type | pptype) file\n");
 		return 1;
 	}
 
@@ -31,11 +31,11 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (strcmp(argv[1], "pretty") == 0) {
-			prettyPROGRAM(program, 0);
+			prettyPROGRAM(program, 0, 0);
 			return 0;
 		}
 
-		if (strcmp(argv[1], "symbol") == 0) {
+		if ((strcmp(argv[1], "symbol") == 0) || (strcmp(argv[1], "dumpsymtab") == 0)) {
 			symPROGRAM(program, 1);
 			return 0;
 		} else {
@@ -44,6 +44,11 @@ int main(int argc, char *argv[]) {
 
 		if (strcmp(argv[1], "type") == 0) {
 			typePROGRAM(program);
+		}
+
+		if (strcmp(argv[1], "pptype") == 0) {
+			typePROGRAM(program);
+      prettyPROGRAM(program, 0, 1);
 		}
 
 		return 0;
