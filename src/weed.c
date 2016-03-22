@@ -253,7 +253,7 @@ int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn) {
 int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn) {
 	if (!stmt->val.forS.for_clause->condition) {
 
-		if (weedSTMTfuncreturn(stmt->val.forS.body, isValuedReturn)) {
+		if (findSTMTreturn(stmt->val.forS.body, isValuedReturn)) {
 			return !findSTMTbreak(stmt->val.forS.body);
 		} else {
 			return !isValuedReturn;
@@ -285,6 +285,53 @@ int weedSTMTfuncreturnswitch(CASE_DECL *c, int isValuedReturn) {
 	}
 
 	return foundDefaultCase;
+}
+
+int findSTMTreturn(STMT *stmt, int isValuedReturn) {
+	if (!stmt) return false;
+
+	int foundReturn = false;
+	if (stmt->next) {
+		if (findSTMTreturn(stmt->next, isValuedReturn)) {
+			foundReturn = true;
+		}
+	}
+
+	int ifp = false;
+	int elsep = false;
+	switch (stmt->kind) {
+		case blockK:
+			if (findSTMTreturn(stmt->val.blockS, isValuedReturn)) {
+				foundReturn = true;
+			}
+			break;
+		case ifK:
+			if (findSTMTreturn(stmt->val.ifS.body, isValuedReturn)) {
+				foundReturn = true;
+			}
+			break;
+		case ifelseK:
+			/* Run before as OR might skip elsepart */
+			ifp = findSTMTreturn(stmt->val.ifelseS.thenpart, isValuedReturn);
+			elsep = findSTMTreturn(stmt->val.ifelseS.elsepart, isValuedReturn);
+
+			if (ifp || elsep) {
+				foundReturn = true;
+			}
+			break;
+		case returnK:
+			if(!isValuedReturn && stmt->val.returnS) {
+				printError("too many return values", stmt->loc);
+			} else if (isValuedReturn && !stmt->val.returnS) {
+				printError("not enough arguments to return", stmt->loc);
+			} else {
+				foundReturn = true;
+			}
+			break;
+		default:
+			break;
+	}
+	return foundReturn;
 }
 
 int findSTMTbreak(STMT *stmt) {

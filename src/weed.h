@@ -38,6 +38,7 @@ int weedSTMTfuncreturn(STMT *stmt, int isValuedReturn);
 int weedSTMTfuncreturnifelse(STMT *stmt, int isValuedReturn);
 int weedSTMTfuncreturnfor(STMT *stmt, int isValuedReturn);
 int weedSTMTfuncreturnswitch(CASE_DECL *body, int isValuedReturn);
+int findSTMTreturn(STMT *stmt, int isValuedReturn);
 int findSTMTbreak(STMT *stmt);
 
 void weedFOR_CLAUSE(FOR_CLAUSE *clause);

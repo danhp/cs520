@@ -1,14 +1,18 @@
 package main
 
 func plus(a, b int) int {
-    if true {
-        if false {
-            return 1
-        } else {
-            return 1
+    for {
+        return 1
+        if true {
+            if false {
+                return 1
+                _ = 0
+            } else {
+                
+            }
+            _ = 2
         }
-    } else {
-        return 0
+        _ = 0
     }
 }
 
