@@ -686,7 +686,10 @@ TYPE *typeEXPcast(TYPE *type, EXP *exp) {
 int isSameStruct(STRUCT_DECL *d1, STRUCT_DECL *d2) {
 	if (!d1 && !d2) return true;
 	if (d1->next && d2->next) {
-		isSameStruct(d1->next, d2->next);
+		if (!isSameStruct(d1->next, d2->next)) {
+			return false;
+		}
+		;
 	}
 
 	if (d1->type->kind != d2->type->kind) {
