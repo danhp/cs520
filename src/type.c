@@ -58,6 +58,12 @@ void typeVAR_DECL(VAR_DECL *decl) {
 	while (id && exp) {
 		typeEXP(exp);
 
+		if (id->symbol->kind != varSym &&
+				id->symbol->kind != inferredSym &&
+				id->symbol->kind != blankSym) {
+			printErrorAssign(id->name, id->loc);
+		}
+
 		/* Type inference */
 		if (decl->type) {
 			id->symbol->val.type = decl->type;
@@ -277,9 +283,10 @@ TYPE *typeEXP(EXP *exp) {
 		case idK:
 			exp->type = exp->val.idE->symbol->val.type;
 
-			/* HACK: possible as Golite does not support functions as variables */
-			if (exp->val.idE->symbol->kind == funcSym) {
-				printError("invalid function call", exp->loc);
+			if (exp->val.idE->symbol->kind != varSym &&
+					exp->val.idE->symbol->kind != inferredSym &&
+					exp->val.idE->symbol->kind != blankSym) {
+				printErrorAssign(exp->val.idE->name, exp->val.idE->loc);
 			}
 			break;
 		case intconstK:
@@ -362,7 +369,6 @@ TYPE *typeEXP(EXP *exp) {
 }
 
 /* Numeric or String */
-/* TODO: Better error messages */
 TYPE *typeEXPplus(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
@@ -373,7 +379,7 @@ TYPE *typeEXPplus(EXP *left, EXP *right) {
 		case type_intK:
 		case type_runeK:
 			if (left->type->kind != right->type->kind) {
-				printErrorType(left->type, right->type, left->loc);
+				printErrorOperatorMismatch("+", left->type, right->type, right->loc);
 			}
 			break;
 		default:
@@ -394,7 +400,7 @@ TYPE *typeEXPnumeric(EXP *left, EXP *right) {
 		case type_floatK:
 		case type_runeK:
 			if (left->type->kind != right->type->kind) {
-				printErrorType(left->type, right->type, left->loc);
+				printErrorOperatorMismatch("-, *, /, %", left->type, right->type, right->loc);
 			}
 			break;
 		default:

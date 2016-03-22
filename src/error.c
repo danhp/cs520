@@ -53,10 +53,24 @@ void printErrorOperator(TYPE *type, char *op, YYLTYPE loc) {
 	exit(1);
 }
 
+void printErrorOperatorMismatch(char *op, TYPE *left, TYPE *right, YYLTYPE loc) {
+	fprintf(stderr, "%s: ERROR, %d:%d, cannot use %s on ", filename, loc.first_line, loc.first_column, op);
+	pTYPE(left);
+	fprintf(stderr, "%s", " and ");
+	pTYPE(right);
+	fprintf(stderr, "\n");
+	exit(1);
+}
+
 void printErrorUnkownField(ID *id, YYLTYPE loc) {
 	fprintf(stderr, "%s: ERROR, %d:%d, struct has no field named ", filename, loc.first_line, loc.first_column);
 	pID(id);
 	fprintf(stderr, "\n");
+	exit(1);
+}
+
+void printErrorAssign(char *name, YYLTYPE loc) {
+	fprintf(stderr, "%s: ERROR, %d:%d, cannot use `%s` as value/assignement\n", filename, loc.first_line, loc.first_column, name);
 	exit(1);
 }
 

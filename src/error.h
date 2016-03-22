@@ -13,4 +13,6 @@ void printErrorRedeclaration(YYLTYPE loc1, char *id, YYLTYPE loc2);
 void printErrorUndefined(char *id, YYLTYPE loc);
 void printErrorType(TYPE *t1, TYPE *t2, YYLTYPE loc);
 void printErrorOperator(TYPE *type, char *op, YYLTYPE loc);
+void printErrorOperatorMismatch(char *op, TYPE *left, TYPE *right, YYLTYPE loc);
 void printErrorUnkownField(ID *id, YYLTYPE loc);
+void printErrorAssign(char *name, YYLTYPE loc);
