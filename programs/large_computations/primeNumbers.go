@@ -18,7 +18,7 @@ func main() {
   var temp int = 0
   var isPrime int = 1
 
-  for counter < ithPimeNumber {
+  for counter < iTHprimeNumber {
     number++
 
     if number > square {
@@ -40,7 +40,7 @@ func main() {
       }
     }
 
-    if isPrime {
+    if isPrime == 1 {
       primeNumbers = append(primeNumbers, number)
       lastPrime = number
     }

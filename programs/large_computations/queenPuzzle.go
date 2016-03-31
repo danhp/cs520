@@ -11,7 +11,7 @@ var queens []point
 var chessGridSize int
 
 //returns 1 if everything is good
-func queenRecusion(index int) int {
+func queenRecursion(index int) int {
   if index >= chessGridSize {
     return 1
   }
@@ -23,7 +23,7 @@ func queenRecusion(index int) int {
   var p2 point
   var solutionFound = 0
 
-  for i := 0; i<chessGridSize; i++ {
+  for i = 0; i<chessGridSize; i++ {
     p = queens[i]
     p.x = i
 
@@ -36,8 +36,8 @@ func queenRecusion(index int) int {
       }
     }
 
-    if allgood {
-      if queenRecursion(index+1) {
+    if allgood == 1 {
+      if queenRecursion(index+1) == 1 {
         print("(")
         print(p.x)
         print(",")
@@ -55,12 +55,12 @@ func main() {
   chessGridSize = 8
 
   var i int
-  for i := 0; i<chessGridSize; i++ {
+  for i = 0; i<chessGridSize; i++ {
     var p point
     p.x = 0
     p.y = i
     queens = append(queens, p)
   }
 
-  queenRecustion(0)
+  queenRecursion(0)
 }
