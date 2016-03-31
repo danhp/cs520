@@ -27,7 +27,7 @@ func main() {
     }
 
     isPrime = 1
-    for i := 0; i<counter; i++ {
+    for i = 0; i<counter; i++ {
       temp = primeNumbers[i]
 
       if temp > sqrt {
