@@ -1,4 +1,4 @@
-package queenPuzzle
+package main
 
 // This is the classic queens problem. Set the chess grid size (in main class) to a number and the program will
 // place that many queens on the chessboard in a way that they wont be attacking eachother.
@@ -21,16 +21,17 @@ func queenRecursion(index int) int {
   var p point
   var allgood int
   var p2 point
-  var solutionFound = 0
+  var solutionFound int = 0
+
+  p = queens[index]
 
   for i = 0; i<chessGridSize; i++ {
-    p = queens[i]
     p.x = i
 
     allgood = 1
-    for j := 0; j<index; j++ {
+    for j = 0; j<index; j++ {
       p2 = queens[j]
-      if p.y == p2.y || p2.y - p.y == p2.x - p.x || p2.y - p.y == p.x - p2.x {
+      if p.x == p2.x || p2.y - p.y == p2.x - p.x || p2.y - p.y == p.x - p2.x {
         allgood = 0
         break
       }
@@ -44,6 +45,7 @@ func queenRecursion(index int) int {
         print(p.y)
         println(")")
         solutionFound = 1
+        break
       }
     }
   }
