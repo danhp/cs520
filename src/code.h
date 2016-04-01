@@ -1,15 +1,19 @@
 #ifndef CODE_H
 #define CODE_H
 
+#define SEMICOLON print(";");
+#define SPACE     print(" ");
+#define NEWLINE   print("\n");
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "tree.h"
+#include "pretty.h"
 
-void print(char *text);
-
-void codePROGRAM(PROGRAM *obj, int indentation, int pptype_flag);
+void codePROGRAM(PROGRAM *obj, int indentation);
+void codeCPPheader();
 void codePACKAGE(PACKAGE *obj, int indentation);
 void codeTOP_DECL(TOP_DECL *obj, int indentation);
 void codeVAR_DECL(VAR_DECL *obj, int indentation);
@@ -19,7 +23,7 @@ void codeFUNC_DECL(FUNC_DECL *obj, int indentation);
 void codeTYPE(TYPE *obj);
 void codeEXP(EXP *obj);
 void codeSTRUCT_DECL(STRUCT_DECL *obj);
-void codeFUNC_SIGN(FUNC_SIGN *obj);
+void codeFUNC_SIGN(FUNC_SIGN *obj, ID *id);
 void codeSTMT(STMT *obj, int indentation);
 void codeSYMBOL(SYMBOL *obj);
 void codeFUNC_ARG(FUNC_ARG *obj);

@@ -7,6 +7,7 @@
 #include "pretty.h"
 #include "symbol.h"
 #include "type.h"
+#include "code.h"
 
 int yyparse();
 
@@ -15,7 +16,7 @@ char *filename;
 
 int main(int argc, char *argv[]) {
 	if(argc != 3) {
-		printf("Usage: golite (parse | pretty | (symbol|dumpsymtab) | type | pptype) file\n");
+		printf("Usage: golite (parse | pretty | (symbol|dumpsymtab) | type | pptype | code) file\n");
 		return 1;
 	}
 
@@ -50,6 +51,11 @@ int main(int argc, char *argv[]) {
 			typePROGRAM(program);
       prettyPROGRAM(program, 0, 1);
 		}
+
+    if (strcmp(argv[1], "code") == 0) {
+      typePROGRAM(program);
+      codePROGRAM(program, 0);
+    }
 
 		return 0;
 	}

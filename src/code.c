@@ -1,54 +1,5 @@
 #include "code.h"
 
-void print(char *text) {
-	printf("%s", text);
-}
-
-void printInteger(int number) {
-	printf("%d", number);
-}
-
-void printFloat(float number) {
-	printf("%f",number);
-}
-
-void printRune(char c) {
-	print("'");
-	switch (c) {
-		case '\a':
-			printf("\\a");
-			break;
-		case '\b':
-			printf("\\b");
-			break;
-		case '\f':
-			printf("\\f");
-			break;
-		case '\n':
-			printf("\\n");
-			break;
-		case '\r':
-			printf("\\r");
-			break;
-		case '\t':
-			printf("\\t");
-			break;
-		case '\v':
-			printf("\\v");
-			break;
-		case '\\':
-			printf("\\\\");
-			break;
-		case '\'':
-			printf("\\'");
-			break;
-		default:
-			printf("%c", c);
-			break;
-	}
-	print("'");
-}
-
 void codeSYMBOL(SYMBOL *obj) {
 	print(obj->id);
 }
@@ -62,24 +13,23 @@ void codeID(ID *obj) {
 	print(obj->name);
 }
 
-void printIndentation(int i) {
-	int j = 0;
+void codePROGRAM(PROGRAM *obj, int indentation) {
+  codeCPPheader();  // add #include and stuff like that
 
-	for( ; j < i; j++) {
-		print("\t");
-	}
-}
-
-void codePROGRAM(PROGRAM *obj, int indentation, int pptype_flag) {
-  pptype_flag_on = pptype_flag; // for flag --pptype
-	codePACKAGE(obj->package, indentation);
+	/* codePACKAGE(obj->package, indentation); */ //ignore
 	codeTOP_DECL(obj->top_decl, indentation);
 }
 
+void codeCPPheader() {
+  print("#include <iostream>");
+  NEWLINE;
+  print("using namespace std;");
+  NEWLINE; NEWLINE;
+}
+
 void codePACKAGE(PACKAGE *obj, int indentation) {
-	print("package ");
+	print("namespace ");
 	codeID(obj->id);
-	print("\n\n");
 }
 
 void codeTOP_DECL(TOP_DECL *obj, int indentation) {
@@ -101,33 +51,33 @@ void codeTOP_DECL(TOP_DECL *obj, int indentation) {
 	}
 }
 
+// type id [id = exp];;
 void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 	if(!obj) return;
 	if(obj->next) codeVAR_DECL(obj->next, indentation);
 
-	print("var ");
-	codeID(obj->id);
-
-	print(" ");
 	codeTYPE(obj->type);
+	SPACE;
+	codeID(obj->id);
 
 	if (obj->exp) {
 		print(" = ");
 		codeEXP(obj->exp);
 	}
-	print("\n");
+  SEMICOLON;
+	NEWLINE;
 }
 
 void codeTYPE_DECL(TYPE_DECL *obj, int indentation) {
 	if(!obj) return;
 	if(obj->next) codeTYPE_DECL(obj->next, indentation);
 
-	print("type ");
-	codeID(obj->id);
-
-	print(" ");
+	print("typedef ");
 	codeTYPE(obj->type);
-	print("\n");
+  SPACE;
+	codeID(obj->id);
+  SEMICOLON;
+  NEWLINE;
 }
 
 void codeTYPE(TYPE *obj) {
@@ -141,16 +91,16 @@ void codeTYPE(TYPE *obj) {
 			print("int");
 			return;
 		case type_floatK:
-			print("float64");
+			print("double");  //double is 64-bit float in C++
 			break;
 		case type_boolK:
 			print("bool");
 			break;
 		case type_runeK:
-			print("rune");
+			print("char");
 			break;
 		case type_stringK:
-			print("string");
+			print("string");  // std::string
 			return;
 		case type_arrayK:
 			print("[");
@@ -160,14 +110,14 @@ void codeTYPE(TYPE *obj) {
 				codeTYPE(obj->val.arrayT.type);
 			}
 			break;
-		case type_sliceK:
+		case type_sliceK: //TODO
 			print("[]");
 			if(obj->val.sliceT) {
 				codeTYPE(obj->val.sliceT);
 			}
 			break;
 		case type_structK:
-			print("struct {");
+			print("struct { ");
 			if(obj->val.structT) {
 				codeSTRUCT_DECL(obj->val.structT);
 			}
@@ -182,24 +132,29 @@ void codeSTRUCT_DECL(STRUCT_DECL *obj) {
 		codeSTRUCT_DECL(obj->next);
 	}
 
-	codeID(obj->id);
 	if(obj->type) {
-		print(" ");
 		codeTYPE(obj->type);
 	}
+  SPACE;
+	codeID(obj->id);
 	print("; ");
 }
 
 void codeFUNC_DECL(FUNC_DECL *obj, int indentation) {
-	print("func ");
-	codeID(obj->id);
-	codeFUNC_SIGN(obj->signature);
+	codeFUNC_SIGN(obj->signature, obj->id);
 	print(" {\n");
 	codeSTMT(obj->body, indentation+1);
 	print("}\n\n");
 }
 
-void codeFUNC_SIGN(FUNC_SIGN *obj) {
+void codeFUNC_SIGN(FUNC_SIGN *obj, ID *id) {
+  //return type
+  obj->type ? codeTYPE(obj->type) : print("void");
+  SPACE;
+
+  //name
+  codeID(id);
+
 	print("(");
 
 	if(obj->arg) {
@@ -207,10 +162,6 @@ void codeFUNC_SIGN(FUNC_SIGN *obj) {
 	}
 
 	print(")");
-	if(obj->type) {
-		print(" ");
-		codeTYPE(obj->type);
-	}
 }
 
 void codeFUNC_ARG(FUNC_ARG *obj) {
@@ -220,12 +171,11 @@ void codeFUNC_ARG(FUNC_ARG *obj) {
 		print(", ");
 	}
 
+	codeTYPE(obj->type);
+	SPACE;
 	if(obj->id) {
 		codeID(obj->id);
 	}
-
-	print(" ");
-	codeTYPE(obj->type);
 }
 
 void codeSTMT(STMT *obj, int indentation) {
@@ -255,33 +205,31 @@ void codeSTMT(STMT *obj, int indentation) {
 			break;
 		case printK:
 			printIndentation(indentation);
-			print("print(");
+			print("cout <<");         //std::cout
 			codeEXP(obj->val.printS);
-			print(")");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case printlnK:
 			printIndentation(indentation);
-			print("println(");
+			print("cout <<");
 			codeEXP(obj->val.printlnS);
-			print(")");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
-		case shortvarK:
+		case shortvarK: //TODO
 			if (indentation) printIndentation(indentation);
 			codeEXP(obj->val.shortvarS.left);
 			print(" := ");
 			codeEXP(obj->val.shortvarS.right);
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case returnK:
 			printIndentation(indentation);
 			print("return ");
 			codeEXP(obj->val.returnS);
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case ifK:
-			print("\n");
+			NEWLINE;
 			printIndentation(indentation);
 			print("if ");
 			if(obj->val.ifS.pre_stmt) {
@@ -295,10 +243,10 @@ void codeSTMT(STMT *obj, int indentation) {
 
 			printIndentation(indentation);
 			print("}");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case ifelseK:
-			print("\n");
+			NEWLINE;
 			printIndentation(indentation);
 			print("if ");
 			if(obj->val.ifelseS.pre_stmt) {
@@ -317,32 +265,39 @@ void codeSTMT(STMT *obj, int indentation) {
 
 			printIndentation(indentation);
 			print("}");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case switchK:
-			print("\n");
+			NEWLINE
 			printIndentation(indentation);
-			print("switch ");
+      print("{//switch");
+      indentation += 1;
 			if(obj->val.switchS.pre_stmt) {
+        NEWLINE;
+        printIndentation(indentation);
 				codeSTMT(obj->val.switchS.pre_stmt, 0);
 				print("; ");
 			}
-
 			if(obj->val.switchS.condition) {
+        NEWLINE;
+        printIndentation(indentation);
+        print("if (");
 				codeEXP(obj->val.switchS.condition);
+        print(") {\n");
 			}
-			print(" {\n");
 
 			codeCASE_DECL(obj->val.switchS.body, indentation+1);
 
 			printIndentation(indentation);
-			print("}");
-			if (indentation) print("\n");
+			print("}");//close condition
+      NEWLINE
+			printIndentation(indentation-1);
+      print("}");
+			if (indentation) NEWLINE;
 			break;
 		case forK:
-			print("\n");
+			NEWLINE;
 			printIndentation(indentation);
-			print("for ");
 			codeFOR_CLAUSE(obj->val.forS.for_clause);
 			print("{\n");
 
@@ -350,29 +305,29 @@ void codeSTMT(STMT *obj, int indentation) {
 
 			printIndentation(indentation);
 			print("}");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case breakK:
 			printIndentation(indentation);
 			print("break;");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case continueK:
 			if (indentation) printIndentation(indentation);
 			print("continue");
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case assignK:
 			if (indentation) printIndentation(indentation);
 			codeEXP(obj->val.assignS.left);
 			print(" = ");
 			codeEXP(obj->val.assignS.right);
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 		case expK:
 			if (indentation) printIndentation(indentation);
 			codeEXP(obj->val.expS);
-			if (indentation) print("\n");
+			if (indentation) NEWLINE;
 			break;
 	}
 }
@@ -385,34 +340,49 @@ void codeCASE_DECL(CASE_DECL *obj, int indentation) {
 
 	switch(obj->kind) {
 		case caseK:
-			print("case ");
+			print("if(");
 			codeEXP(obj->val.caseC.condition);
-			print(":\n");
+      print("){");
+      NEWLINE;
 			codeSTMT(obj->val.caseC.stmt, indentation+1);
+      NEWLINE;
+      printIndentation(indentation);
+      print("}");
+      NEWLINE;
 			break;
 		case defaultK:
-			print("default:\n");
+			print("else {");
+      NEWLINE;
 			codeSTMT(obj->val.defaultC, indentation+1);
+      NEWLINE;
+      printIndentation(indentation);
+      print("}");
+      NEWLINE;
 			break;
 	}
 }
 
 void codeFOR_CLAUSE(FOR_CLAUSE *obj) {
-	if(obj->init_stmt) {
-		codeSTMT(obj->init_stmt, 0);
-	}
-	print("; ");
+  //3-part
+  if(obj->init_stmt && obj->condition && obj->post_stmt) {
+    print("for(");
+    codeSTMT(obj->init_stmt,0);
+    codeEXP(obj->condition);
+    codeSTMT(obj->post_stmt, 0);
+    print(")");
+    return;
+  }
 
-	if(obj->condition) {
-		codeEXP(obj->condition);
-	}
-	print("; ");
+  //while loop
+  if (obj->condition) {
+    print("while(");
+    codeEXP(obj->condition);
+    print(")");
+    return;
+  }
 
-	if(obj->post_stmt) {
-		codeSTMT(obj->post_stmt, 0);
-	}
-
-	print(" ");
+  //infinite
+  print("while(0)");
 }
 
 void codeEXP(EXP *obj) {
@@ -421,13 +391,6 @@ void codeEXP(EXP *obj) {
 		codeEXP(obj->next);
 		print(", ");
 	}
-
-  // print type before the expression
-  if (pptype_flag_on) {
-    print("/*");
-    codeTYPE(obj->type);
-    print("*/ ");
-  }
 
 	switch(obj->kind) {
 		case idK:

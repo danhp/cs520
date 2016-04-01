@@ -15,7 +15,7 @@ Target language: C++
 ## Declaration
 
 - Variable declaration:
-  - `type id; [id = exp;]`
+  - `type id [id = exp];`
   - list of decs become multiple separate decs
 
 - typedef
