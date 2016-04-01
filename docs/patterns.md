@@ -20,25 +20,25 @@ Target language: C++
 
 - typedef
 
-      type point struct { x, y float64 } --> typedef struct { float 64 x; float64 y; } point;
+        type point struct { x, y float64 } --> typedef struct { float 64 x; float64 y; } point;
 
 - function declaration
 
-      !!! multiple return values -> wrapper class, list of objects?
+       !!! multiple return values -> wrapper class, list of objects?
 
 ## Types
 
 - types
 
-      int, bool   int, bool
-      float64     double
-      rune        char
-      string      std::string
+        int, bool   int, bool
+        float64     double
+        rune        char
+        string      std::string
 
-      slices      std::list
-          append->push_back
-      arrays
-      structs
+        slices      std::list
+            append->push_back
+        arrays
+        structs
 
 ## Statements
 
@@ -48,26 +48,26 @@ Target language: C++
 - inc/dec -> use +=, -=
 - print
 
-      print_stmt      cout << stmt_1 << stmt_2 << ... << stmt_n;
-      println_stmt    cout << stmt_1 << endl << stmt_2 << endl << ... << stmt_n;
+        print_stmt      cout << stmt_1 << stmt_2 << ... << stmt_n;
+        println_stmt    cout << stmt_1 << endl << stmt_2 << endl << ... << stmt_n;
 
 - return
   - [01] if #exp, nothing to do
 - if, else, else if
 - switch
 
-      switch x:= f() {
-        case x<0: return -x
-        default: return x
-      }
+        switch x:= f() {
+          case x<0: return -x
+          default: return x
+        }
 
-      becomes
+        becomes
 
-      {                     //x is scoped to the switch
-        x = f();
-        if(x<0) return -x;  // use if so we can eval exps
-        else return x;
-      }
+        {                     //x is scoped to the switch
+          x = f();
+          if(x<0) return -x;  // use if so we can eval exps
+          else return x;
+        }
 
 - for
   - infinite: `while(0) {  }`
