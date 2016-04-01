@@ -1,10 +1,10 @@
-package primeNumbers
+package main
 
 // set the iTHprimeNumber variable to know the iTH prime number.
 // make it big to have a long computation time.
 
 func main() {
-  var iTHprimeNumber int = 100
+  var iTHprimeNumber int = 10
 
   var primeNumbers []int
   primeNumbers = append(primeNumbers, 2)
@@ -17,6 +17,7 @@ func main() {
   var i int = 0
   var temp int = 0
   var isPrime int = 1
+  var numPrimes int = 1
 
   for counter < iTHprimeNumber {
     number++
@@ -27,7 +28,7 @@ func main() {
     }
 
     isPrime = 1
-    for i = 0; i<counter; i++ {
+    for i = 0; i<numPrimes; i++ {
       temp = primeNumbers[i]
 
       if temp > sqrt {
@@ -42,7 +43,9 @@ func main() {
 
     if isPrime == 1 {
       primeNumbers = append(primeNumbers, number)
+      numPrimes++
       lastPrime = number
+      counter++
     }
   }
 
