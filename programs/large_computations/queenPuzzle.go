@@ -7,8 +7,9 @@ type point struct {
   x,y int
 }
 
+var chessGridSize int = 8
 var queens []point
-var chessGridSize int
+
 
 //returns 1 if everything is good
 func queenRecursion(index int) int {
@@ -31,6 +32,7 @@ func queenRecursion(index int) int {
     allgood = 1
     for j = 0; j<index; j++ {
       p2 = queens[j]
+
       if p.x == p2.x || p2.y - p.y == p2.x - p.x || p2.y - p.y == p.x - p2.x {
         allgood = 0
         break
@@ -38,6 +40,7 @@ func queenRecursion(index int) int {
     }
 
     if allgood == 1 {
+      queens[index] = p
       if queenRecursion(index+1) == 1 {
         print("(")
         print(p.x)
@@ -54,7 +57,6 @@ func queenRecursion(index int) int {
 }
 
 func main() {
-  chessGridSize = 8
 
   var i int
   for i = 0; i<chessGridSize; i++ {
