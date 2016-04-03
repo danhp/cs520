@@ -1,5 +1,7 @@
 #include "code.h"
 
+//TODO multiple var declarations
+
 void codeSYMBOL(SYMBOL *obj) {
 	print(obj->id);
 }
@@ -22,8 +24,6 @@ void codePROGRAM(PROGRAM *obj, int indentation) {
 
 void codeCPPheader() {
   print("#include <iostream>");
-  NEWLINE;
-  print("using namespace std;");
   NEWLINE; NEWLINE;
 }
 
@@ -56,16 +56,15 @@ void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 	if(!obj) return;
 	if(obj->next) codeVAR_DECL(obj->next, indentation);
 
-	codeTYPE(obj->type);
-	SPACE;
-	codeID(obj->id);
+  // print declared type or else exp type
+  obj->type ? codeTYPE(obj->type) : codeTYPE(obj->exp->type);
+  SPACE;
+  codeID(obj->id);
 
 	if (obj->exp) {
 		print(" = ");
 		codeEXP(obj->exp);
-	}
-  SEMICOLON;
-	NEWLINE;
+  }
 }
 
 void codeTYPE_DECL(TYPE_DECL *obj, int indentation) {
@@ -76,8 +75,6 @@ void codeTYPE_DECL(TYPE_DECL *obj, int indentation) {
 	codeTYPE(obj->type);
   SPACE;
 	codeID(obj->id);
-  SEMICOLON;
-  NEWLINE;
 }
 
 void codeTYPE(TYPE *obj) {
@@ -100,15 +97,16 @@ void codeTYPE(TYPE *obj) {
 			print("char");
 			break;
 		case type_stringK:
-			print("string");  // std::string
+			print("std::string");  // std::string
 			return;
 		case type_arrayK:
-			print("[");
-			printInteger(obj->val.arrayT.size);
-			print("]");
 			if(obj->val.arrayT.type) {
 				codeTYPE(obj->val.arrayT.type);
 			}
+      //TODO name goes here
+			print("[");
+			printInteger(obj->val.arrayT.size);
+			print("]");
 			break;
 		case type_sliceK: //TODO
 			print("[]");
@@ -137,9 +135,9 @@ void codeSTRUCT_DECL(STRUCT_DECL *obj) {
 	}
   SPACE;
 	codeID(obj->id);
-	print("; ");
 }
 
+//TODO main must be int
 void codeFUNC_DECL(FUNC_DECL *obj, int indentation) {
 	codeFUNC_SIGN(obj->signature, obj->id);
 	print(" {\n");
@@ -171,11 +169,16 @@ void codeFUNC_ARG(FUNC_ARG *obj) {
 		print(", ");
 	}
 
-	codeTYPE(obj->type);
-	SPACE;
-	if(obj->id) {
-		codeID(obj->id);
-	}
+  if(obj->id) {
+    ID* tmpid = obj->id;
+    while (tmpid) {
+      codeTYPE(obj->type);
+      SPACE;
+      print(tmpid->name);
+      tmpid = tmpid->next;
+      if (tmpid) print(", ");
+    }
+  }
 }
 
 void codeSTMT(STMT *obj, int indentation) {
@@ -198,21 +201,25 @@ void codeSTMT(STMT *obj, int indentation) {
 		case varK:
 			printIndentation(indentation);
 			codeVAR_DECL(obj->val.varS, indentation);
+      SEMICOLON;NEWLINE;
 			break;
 		case typeK:
 			printIndentation(indentation);
 			codeTYPE_DECL(obj->val.typeS, indentation);
+      SEMICOLON;NEWLINE;
 			break;
 		case printK:
 			printIndentation(indentation);
-			print("cout <<");         //std::cout
+			print("std::cout << ");         //std::cout
 			codeEXP(obj->val.printS);
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 		case printlnK:
 			printIndentation(indentation);
-			print("cout <<");
+			print("std::cout << ");
 			codeEXP(obj->val.printlnS);
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 		case shortvarK: //TODO
@@ -220,12 +227,14 @@ void codeSTMT(STMT *obj, int indentation) {
 			codeEXP(obj->val.shortvarS.left);
 			print(" := ");
 			codeEXP(obj->val.shortvarS.right);
+      SEMICOLON;
 			if (indentation) NEWLINE;
 			break;
 		case returnK:
 			printIndentation(indentation);
 			print("return ");
 			codeEXP(obj->val.returnS);
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 		case ifK:
@@ -309,12 +318,14 @@ void codeSTMT(STMT *obj, int indentation) {
 			break;
 		case breakK:
 			printIndentation(indentation);
-			print("break;");
+			print("break");
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 		case continueK:
 			if (indentation) printIndentation(indentation);
 			print("continue");
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 		case assignK:
@@ -322,11 +333,13 @@ void codeSTMT(STMT *obj, int indentation) {
 			codeEXP(obj->val.assignS.left);
 			print(" = ");
 			codeEXP(obj->val.assignS.right);
+      SEMICOLON;
 			if (indentation) NEWLINE;
 			break;
 		case expK:
 			if (indentation) printIndentation(indentation);
 			codeEXP(obj->val.expS);
+      SEMICOLON;NEWLINE;
 			if (indentation) NEWLINE;
 			break;
 	}
@@ -342,7 +355,7 @@ void codeCASE_DECL(CASE_DECL *obj, int indentation) {
 		case caseK:
 			print("if(");
 			codeEXP(obj->val.caseC.condition);
-      print("){");
+      print(") {");
       NEWLINE;
 			codeSTMT(obj->val.caseC.stmt, indentation+1);
       NEWLINE;
@@ -368,21 +381,22 @@ void codeFOR_CLAUSE(FOR_CLAUSE *obj) {
     print("for(");
     codeSTMT(obj->init_stmt,0);
     codeEXP(obj->condition);
+    SEMICOLON;
     codeSTMT(obj->post_stmt, 0);
-    print(")");
+    print(") ");
     return;
   }
 
   //while loop
   if (obj->condition) {
-    print("while(");
-    codeEXP(obj->condition);
-    print(")");
+    print("while");
+    codeEXP(obj->condition);  //exp will add ()
+    SPACE;
     return;
   }
 
   //infinite
-  print("while(0)");
+  print("while(0) ");
 }
 
 void codeEXP(EXP *obj) {
