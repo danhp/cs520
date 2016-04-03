@@ -1,7 +1,5 @@
 #include "code.h"
 
-//TODO multiple var declarations
-
 void codeSYMBOL(SYMBOL *obj) {
 	print(obj->id);
 }
@@ -59,12 +57,27 @@ void codeVAR_DECL(VAR_DECL *obj, int indentation) {
   // print declared type or else exp type
   obj->type ? codeTYPE(obj->type) : codeTYPE(obj->exp->type);
   SPACE;
-  codeID(obj->id);
 
-	if (obj->exp) {
-		print(" = ");
-		codeEXP(obj->exp);
+  //ID might be a list, so go over it
+  ID* tmpid = obj->id;
+  EXP* tmpexp = obj->exp;
+  while (tmpid) {
+    print(tmpid->name);
+    SPACE;
+    if (tmpexp) {
+      print("=");
+      SPACE;
+      codeEXPsingle(tmpexp);
+      tmpexp = tmpexp->next;
+    }
+    tmpid = tmpid->next;
+    if (tmpid) print(", ");
   }
+
+	/* if (obj->exp) { */
+	/* 	print(" = "); */
+	/* 	codeEXP(obj->exp); */
+  /* } */
 }
 
 void codeTYPE_DECL(TYPE_DECL *obj, int indentation) {
@@ -405,7 +418,10 @@ void codeEXP(EXP *obj) {
 		codeEXP(obj->next);
 		print(", ");
 	}
+  codeEXPsingle(obj);
+}
 
+void codeEXPsingle(EXP *obj) {
 	switch(obj->kind) {
 		case idK:
 			codeID(obj->val.idE);

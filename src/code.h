@@ -22,6 +22,7 @@ void codeID(ID *obj);
 void codeFUNC_DECL(FUNC_DECL *obj, int indentation);
 void codeTYPE(TYPE *obj);
 void codeEXP(EXP *obj);
+void codeEXPsingle(EXP *obj);
 void codeSTRUCT_DECL(STRUCT_DECL *obj);
 void codeFUNC_SIGN(FUNC_SIGN *obj, ID *id);
 void codeSTMT(STMT *obj, int indentation);
