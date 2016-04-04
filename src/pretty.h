@@ -26,4 +26,11 @@ void prettyFUNC_ARG(FUNC_ARG *obj);
 void prettyCASE_DECL(CASE_DECL *obj, int indentation);
 void prettyFOR_CLAUSE(FOR_CLAUSE *obj);
 
+void printInteger(int number);
+void printFloat(float number);
+void printRune(char c);
+void prettySYMBOL(SYMBOL *obj);
+void prettyID(ID *obj);
+void printIndentation(int i);
+
 #endif
