@@ -8,8 +8,10 @@ else
 
   file=$(basename $1);
   pref=${file%.*};
-  cmd=$([ "$#" -ge 2 ] && echo ${2:1} || echo "pretty")
-  output_file=$([ "$cmd" = "dumpsymtab" ] && echo "symtab" || echo "$cmd".go )
+  cmd=$([ "$#" -ge 2 ] && echo ${2:1} || echo "code")
+  output_file=$([ "$cmd" = "dumpsymtab" ] && echo "symtab" ||
+                [ "$cmd" = "code" ] && echo "cpp" ||
+                echo "$cmd".go )
 
   rm outputs/$pref.* > /dev/null 2>&1;
 

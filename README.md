@@ -54,6 +54,10 @@ Run type checker and pretty print with types
 
     $ ./golite pptype file
 
+Generat code
+
+    $ ./golite code file
+
 ## For Vince
 
 Everything can be done from the top directory
@@ -62,11 +66,13 @@ Everything can be done from the top directory
 
     $ ./run
 
-**Pretty print a file**
+**Generate Code**
 
     $ ./run file.go
     $ ls outputs/
-    foo.pretty.go
+    file.cpp
+
+#### *The following commands dont not work in milestone 3*
 
 **[`-pptype`] Pretty print with expression types**
 
