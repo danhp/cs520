@@ -251,6 +251,7 @@ void typeSHORTVAR(EXP *left, EXP *right) {
 	/* Type inference */
 	if (!left->val.idE->symbol->val.type) {
 		left->val.idE->symbol->val.type = right->type;
+		left->type = right->type;
 	} else {
 		checkAssignable(left->type, right->type, right->loc);
 	}

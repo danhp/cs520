@@ -13,8 +13,7 @@ func power(a float64, b float64) float64 {
   var power = exponent(b)
 
   for power > 0.0 {
-    ret = ret * a
-    power = power - 1.0
+    ret, power = ret * a, power - 1.0
   }
 
   return ret
@@ -46,10 +45,9 @@ func main() {
   println("| CALCULATOR |")
   println("'------------'")
 
-  println(compute(0,1.,1.))
-  println(compute(1,5.,4.))
+  println(compute(0,1.,1.), compute(1, 5., 4.))
   println(compute(2,10.,22.0))
   println(compute(3, 19.11, .1))
   println(compute(4, 2., 4.))        /* 2^4 */
-  println(compute(4, -10., 0.))     /* negate -10 */
+  print(compute(4, -10., 0.), "END")     /* negate -10 */
 }

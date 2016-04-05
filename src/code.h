@@ -25,7 +25,12 @@ void codeEXP(EXP *obj);
 void codeEXPsingle(EXP *obj);
 void codeSTRUCT_DECL(STRUCT_DECL *obj);
 void codeFUNC_SIGN(FUNC_SIGN *obj, ID *id);
-void codeSTMT(STMT *obj, int indentation);
+
+void codeSTMT(STMT *obj, int indentation, int isInsideLoop);
+void codeSTMTprint(EXP *exp, int indentation);
+void codeSTMTprintln(EXP *exp, int indentation);
+void codeSTMTassign(EXP *left, EXP *right, int indentation);
+
 void codeSYMBOL(SYMBOL *obj);
 void codeFUNC_ARG(FUNC_ARG *obj);
 void codeCASE_DECL(CASE_DECL *obj, int indentation);
