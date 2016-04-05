@@ -3,7 +3,7 @@
 echo Running valid syntax:
 for file in ../programs/valids/syntax/*
 do
-	./golite type $file 1> /dev/null;
+	./golite parse $file 1> /dev/null;
 	if [ "$?" -eq 0 ]; then
 		printf ".";
 	else

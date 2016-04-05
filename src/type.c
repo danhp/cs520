@@ -147,6 +147,8 @@ void typeSTMT(STMT *stmt) {
 	if (!stmt) return;
 	if (stmt->next) typeSTMT(stmt->next);
 
+	TYPE *t;
+
 	switch (stmt->kind) {
 		case blockK:
 			typeSTMT(stmt->val.blockS);
@@ -177,12 +179,18 @@ void typeSTMT(STMT *stmt) {
 			break;
 		case ifK:
 			typeSTMT(stmt->val.ifS.pre_stmt);
-			typeEXP(stmt->val.ifS.condition);
+			t = typeEXP(stmt->val.ifS.condition);
+			if (t != boolTYPE) {
+				printErrorMsg("type mismatch");
+			}
 			typeSTMT(stmt->val.ifS.body);
 			break;
 		case ifelseK:
 			typeSTMT(stmt->val.ifelseS.pre_stmt);
-			typeEXP(stmt->val.ifelseS.condition);
+			t = typeEXP(stmt->val.ifelseS.condition);
+			if (t != boolTYPE) {
+				printErrorMsg("type mismatch");
+			}
 			typeSTMT(stmt->val.ifelseS.thenpart);
 			typeSTMT(stmt->val.ifelseS.elsepart);
 			break;
@@ -229,7 +237,10 @@ void typeFOR_CLAUSE(FOR_CLAUSE *decl) {
 	}
 
 	if(decl->condition) {
-		typeEXP(decl->condition);
+		TYPE *t = typeEXP(decl->condition);
+		if (t != boolTYPE) {
+			printErrorMsg("type mismatch");
+		}
 	}
 
 	if(decl->post_stmt) {
