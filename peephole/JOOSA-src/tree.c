@@ -14,7 +14,7 @@
 #include <string.h>
 #include "memory.h"
 #include "tree.h"
- 
+
 extern int lineno;
 
 PROGRAM *makePROGRAM(char *name, CLASSFILE *classfile, PROGRAM *next)
@@ -34,7 +34,7 @@ CLASSFILE *makeCLASSFILE(CLASS *class, CLASSFILE *next)
   return c;
 }
 
-CLASS *makeCLASS(char *name, char *parentname, 
+CLASS *makeCLASS(char *name, char *parentname,
                  int external, char *package, ModifierKind modifier,
                  FIELD *fields, CONSTRUCTOR *constructors, METHOD *methods)
 { CLASS *c;
@@ -120,7 +120,7 @@ TYPE *makeTYPEref(char *name)
   return t;
 }
 
-TYPE *makeTYPEextref(char *name, CLASS *c) 
+TYPE *makeTYPEextref(char *name, CLASS *c)
 { TYPE *t;
   t = makeTYPEref(name);
   t->class = c;
@@ -146,7 +146,7 @@ CONSTRUCTOR *makeCONSTRUCTOR(char *name, FORMAL *formals, STATEMENT *statements,
   return c;
 }
 
-METHOD *makeMETHOD(char *name, ModifierKind modifier, TYPE *returntype, 
+METHOD *makeMETHOD(char *name, ModifierKind modifier, TYPE *returntype,
                    FORMAL *formals, STATEMENT *statements, METHOD *next)
 { METHOD *m;
   m = NEW(METHOD);
@@ -270,7 +270,7 @@ STATEMENT *makeSTATEMENTblock(STATEMENT *body)
   s = NEW(STATEMENT);
   s->lineno = lineno;
   s->kind = blockK;
-  s->val.blockS.body = body;  
+  s->val.blockS.body = body;
   return s;
 }
 
@@ -622,7 +622,7 @@ CODE *makeCODEi2c(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEnew(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -632,7 +632,7 @@ CODE *makeCODEnew(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEinstanceof(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -651,7 +651,7 @@ CODE *makeCODEcheckcast(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEimul(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -660,7 +660,7 @@ CODE *makeCODEimul(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEineg(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -669,7 +669,7 @@ CODE *makeCODEineg(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEirem(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -678,7 +678,7 @@ CODE *makeCODEirem(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEisub(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -696,7 +696,7 @@ CODE *makeCODEidiv(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEiadd(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -726,7 +726,7 @@ CODE *makeCODElabel(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEgoto(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -736,7 +736,7 @@ CODE *makeCODEgoto(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEifeq(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -746,7 +746,7 @@ CODE *makeCODEifeq(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEifne(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -756,7 +756,7 @@ CODE *makeCODEifne(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_acmpeq(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -766,7 +766,7 @@ CODE *makeCODEif_acmpeq(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_acmpne(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -796,7 +796,7 @@ CODE *makeCODEifnonnull(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmpeq(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -806,7 +806,7 @@ CODE *makeCODEif_icmpeq(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmpgt(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -816,7 +816,7 @@ CODE *makeCODEif_icmpgt(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmplt(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -826,7 +826,7 @@ CODE *makeCODEif_icmplt(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmple(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -836,7 +836,7 @@ CODE *makeCODEif_icmple(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmpge(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -846,7 +846,7 @@ CODE *makeCODEif_icmpge(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEif_icmpne(int label, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -856,7 +856,7 @@ CODE *makeCODEif_icmpne(int label, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEireturn(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -865,7 +865,7 @@ CODE *makeCODEireturn(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEareturn(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -874,7 +874,7 @@ CODE *makeCODEareturn(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEreturn(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -883,7 +883,7 @@ CODE *makeCODEreturn(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEaload(int arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -903,7 +903,7 @@ CODE *makeCODEastore(int arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEiload(int arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -913,7 +913,7 @@ CODE *makeCODEiload(int arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEistore(int arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -923,7 +923,7 @@ CODE *makeCODEistore(int arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEdup(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -932,7 +932,7 @@ CODE *makeCODEdup(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEpop(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -941,7 +941,7 @@ CODE *makeCODEpop(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEswap(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -950,17 +950,17 @@ CODE *makeCODEswap(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEldc_int(int arg, CODE *next)
 { CODE *c;
-  c = NEW(CODE); 
-  c->kind = ldc_intCK; 
+  c = NEW(CODE);
+  c->kind = ldc_intCK;
   c->visited = 0;
-  c->val.ldc_intC = arg; 
+  c->val.ldc_intC = arg;
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEldc_string(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -970,7 +970,7 @@ CODE *makeCODEldc_string(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEaconst_null(CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -979,7 +979,7 @@ CODE *makeCODEaconst_null(CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEgetfield(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -989,7 +989,7 @@ CODE *makeCODEgetfield(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEputfield(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -999,7 +999,7 @@ CODE *makeCODEputfield(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+
 CODE *makeCODEinvokevirtual(char *arg, CODE *next)
 { CODE *c;
   c = NEW(CODE);
@@ -1019,4 +1019,4 @@ CODE *makeCODEinvokenonvirtual(char *arg, CODE *next)
   c->next = next;
   return c;
 }
- 
+

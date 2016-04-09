@@ -29,7 +29,6 @@ int simplify_multiplication_right(CODE **c)
      else if (k==2) return replace(c,3,makeCODEiload(x,
                                        makeCODEdup(
                                        makeCODEiadd(NULL))));
-     return 0;
   }
   return 0;
 }
@@ -89,6 +88,25 @@ int simplify_addition_left(CODE **c) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
     }
+  }
+  return 0;
+}
+
+int simplify_addition_constants(CODE **c) {
+  int x, y;
+  if (is_ldc_int(*c, &x) &&
+        is_ldc_int(next(*c), &y) &&
+        is_iadd(next(next(*c)))) {
+    if (x + y < 2147483647) {
+      return replace(c, 3, makeCODEldc_int(x + y, NULL));
+    }
+  }
+  return 0;
+}
+
+int simplify_addition_negative(CODE **c) {
+  if (is_ineg(*c) && is_iadd(next(*c))) {
+    return replace(c, 2, makeCODEisub(NULL));
   }
   return 0;
 }
@@ -324,13 +342,15 @@ printf("one less\n");
 }
 
 
-#define OPTS 14
+#define OPTS 16
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_multiplication_left,
                            simplify_division,
                            simplify_addition_right,
                            simplify_addition_left,
+                           simplify_addition_constants,
+                           simplify_addition_negative,
                            simplify_subtraction_right,
                            simplify_subtraction_left,
                            simplify_astore,

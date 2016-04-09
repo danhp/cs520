@@ -2,13 +2,13 @@
 
 # to compile the code
 joosc: clean
-	$(PEEPDIR)/joosc *.java
+	$(PEEPDIR)/joosc -O *.java
 
 java: clean
 	javac *.java
 
-check:	
+check:
 	./check.py
 
-clean:	
+clean:
 	rm -rf *.class *.j
