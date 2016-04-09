@@ -341,8 +341,17 @@ printf("one less\n");
   return toReturn;
 }
 
+/* Don't check cast as they are already done at the typechecker */
+int simplify_checkcast(CODE **c) {
+  char *args;
+  if (is_checkcast(*c, &args)) {
+    return replace(c, 1, NULL);
+  }
+  return 0;
+}
 
-#define OPTS 16
+
+#define OPTS 17
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_multiplication_left,
@@ -359,5 +368,6 @@ OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_goto_goto,
                            simplify_goto_label_label,
                            simplify_istore,
-                           simplify_nop
+                           simplify_nop,
+                           simplify_checkcast
                           };
