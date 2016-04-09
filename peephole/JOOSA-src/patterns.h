@@ -358,8 +358,52 @@ int simplify_checkcast(CODE **c) {
   return 0;
 }
 
+/* ldc x
+ * ldc k  with x=k
+ * ------->
+ * ldc x
+ */
+int simplify_dup_ldc_int(CODE **c) {
+  int k,j;
+  if (is_ldc_int(*c, &k) &&
+      is_ldc_int(next(*c), &j) &&
+      k==j) {
+    return replace(c,2,makeCODEldc_int(k,NULL));
+  }
+  return 0;
+}
 
-#define OPTS 18
+/* iload x
+ * iload y, with y=x
+ * ------->
+ * iload x
+ */
+int simplify_dup_iload(CODE **c) {
+  int x, y ;
+  if (is_iload(*c, &x) &&
+      is_iload(next(*c), &y) &&
+      x==y) {
+    return replace(c,2,makeCODEiload(x,NULL));
+  }
+  return 0;
+}
+
+/* aload x
+ * aload y, with y=x
+ * ------->
+ * aload x
+ */
+int simplify_dup_aload(CODE **c) {
+  int x, y;
+  if (is_aload(*c, &x) &&
+      is_aload(next(*c), &y) &&
+      x==y) {
+    return replace(c,2,makeCODEaload(x,NULL));
+  }
+  return 0;
+}
+
+#define OPTS 21
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_multiplication_left,
@@ -378,5 +422,8 @@ OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_goto_goto,
                            simplify_goto_label_label,
                            simplify_nop,
-                           simplify_checkcast
+                           simplify_checkcast,
+                           simplify_dup_aload,
+                           simplify_dup_iload,
+                           simplify_dup_ldc_int
                           };
