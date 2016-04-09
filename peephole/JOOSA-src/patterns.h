@@ -21,8 +21,8 @@
 
 int simplify_multiplication_right(CODE **c)
 { int x,k;
-  if (is_iload(*c,&x) && 
-      is_ldc_int(next(*c),&k) && 
+  if (is_iload(*c,&x) &&
+      is_ldc_int(next(*c),&k) &&
       is_imul(next(next(*c)))) {
      if (k==0) return replace(c,3,makeCODEldc_int(0,NULL));
      else if (k==1) return replace(c,3,makeCODEiload(x,NULL));
@@ -88,7 +88,7 @@ int simplify_nop(CODE **c)
  * istore x
  * --------->
  * iinc x k
- */ 
+ */
 int positive_increment(CODE **c)
 { int x,y,k;
   if (is_iload(*c,&x) &&
@@ -113,35 +113,14 @@ int positive_increment(CODE **c)
  * L1:    (reference count reduced by 1)
  * goto L2
  * ...
- * L2:    (reference count increased by 1)  
+ * L2:    (reference count increased by 1)
  */
 int simplify_goto_goto(CODE **c)
-{ int l1,l2,l3;
-  int keepLooping;
-  int toReturn;
+{ int l1,l2;
   if (is_goto(*c,&l1) && is_goto(next(destination(l1)),&l2) && l1>l2) {
      droplabel(l1);
      copylabel(l2);
-     replace(c,1,makeCODEgoto(l2,NULL));
-
-     keepLooping = 1;
-     toReturn = 0;
-     while(keepLooping)
-     {
-       c = &((*c)->next);
-       if(is_label(*c, &l3))
-       {
-         if(l1 == l3)
-         {
-           toReturn = replace(c,1,NULL);
-           keepLooping = 0;
-         }
-       }
-     }
-
-     return toReturn;
-  }
-  return 0;
+     return replace(c,1,makeCODEgoto(l2,NULL));
 }
 
 /* goto L1
@@ -152,14 +131,14 @@ int simplify_goto_goto(CODE **c)
  * goto L2
  * ...
  * ...    (reference count reduced by 1)
- * L2:    (reference count increased by 1)  
+ * L2:    (reference count increased by 1)
  */
 int simplify_goto_label_label(CODE **c)
 { int l1,l2,l3;
   int keepLooping;
   int toReturn;
-  if (is_goto(*c,&l1) 
-      && is_label(destination(l1), &l2) 
+  if (is_goto(*c,&l1)
+      && is_label(destination(l1), &l2)
       && is_label(next(destination(l1)),&l3)
       && l1>l3
   ){
