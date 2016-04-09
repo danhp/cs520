@@ -199,9 +199,12 @@ int simplify_inc_astore(CODE **c) {
  * iinc x k
  */
 int simplify_inc_istore(CODE **c) {
-  int x, y, k;
-  if (is_iinc(*c, &x, &k) && is_istore(next(*c), &y)) {
-    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  int x1, x2, x3, k;
+  if (is_iload(*c, &x1) &&
+      is_iinc(next(*c), &x2, &k) &&
+      is_istore(next(next(next(*c))), &x3) &&
+      x1 == x2 && x2 == x3) {
+    return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
   return 0;
 }
