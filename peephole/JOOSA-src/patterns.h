@@ -67,7 +67,8 @@ int simplify_division(CODE **c) {
  * ldc 0       ldc k
  * iadd        iadd
  * ------>     ----->
- * iload x     iinc x k
+ * iload x     iload x
+ *             iinc x k
  */
 int simplify_addition_right(CODE **c) {
   int x, k;
@@ -76,8 +77,6 @@ int simplify_addition_right(CODE **c) {
         is_iadd(next(next(*c)))) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
-    } else if (k < 256) {
-      return replace(c, 3, makeCODEiinc(x, 1, NULL));
     }
   }
   return 0;
@@ -90,7 +89,7 @@ int simplify_addition_left(CODE **c) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
     } else if (k < 256){
-      return replace(c, 3, makeCODEiinc(x, k, NULL));
+      return replace(c, 3, makeCODEiload(x, makeCODEiinc(x, k, NULL)));
     }
   }
   return 0;
@@ -182,9 +181,12 @@ int simplify_istore(CODE **c)
  * iinc x k
  */
 int simplify_inc_astore(CODE **c) {
-  int x, y, k;
-  if (is_iinc(*c, &x, &k) && is_astore(next(*c), &y)) {
-    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  int x1, x2, x3, k;
+  if (is_iload(*c, &x1) &&
+      is_iinc(next(*c), &x2, &k) &&
+      is_astore(next(next(next(*c))), &x3) &&
+      x1 == x2 && x2 == x3) {
+    return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
   return 0;
 }
@@ -195,9 +197,12 @@ int simplify_inc_astore(CODE **c) {
  * iinc x k
  */
 int simplify_inc_istore(CODE **c) {
-  int x, y, k;
-  if (is_iinc(*c, &x, &k) && is_istore(next(*c), &y)) {
-    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  int x1, x2, x3, k;
+  if (is_iload(*c, &x1) &&
+      is_iinc(next(*c), &x2, &k) &&
+      is_istore(next(next(next(*c))), &x3) &&
+      x1 == x2 && x2 == x3) {
+    return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
   return 0;
 }
@@ -403,7 +408,53 @@ int simplify_dup_aload(CODE **c) {
   return 0;
 }
 
-#define OPTS 21
+int simplify_if_then_else(CODE **c)
+{
+  int l1;
+  int c1;
+  int l2;
+  int l3;
+  int c2;
+  int l4;
+  int l5;
+  int t;
+  CODE *code;
+  t=0;
+
+  if(is_ifeq(*c,&l1)){t=1;}
+  else if(is_if_acmpne(*c,&l1)){t=2;}
+  else if(is_if_icmpeq(*c,&l1)){t=3;}
+  else if(is_if_icmpgt(*c,&l1)){t=4;}
+  else if(is_if_icmplt(*c,&l1)){t=5;}
+  else if(is_if_icmple(*c,&l1)){t=6;}
+  else if(is_if_icmpge(*c,&l1)){t=7;}
+
+  if(t>0
+    && is_ldc_int(next(*c),&c1)
+    && is_goto(next(next(*c)),&l2)
+    && is_label(next(next(next(*c))),&l3)
+    && is_ldc_int(next(next(next(next(*c)))),&c2)
+    && is_label(next(next(next(next(next(*c))))),&l4)
+    && is_ifeq(next(next(next(next(next(next(*c)))))),&l5)
+  ){
+    if(l1 == l3 && l2 == l4 && c1==0 && c2==1 && uniquelabel(l3) && uniquelabel(l4))
+    {
+      code = makeCODEgoto(l5,makeCODElabel(l3,NULL));
+
+      if(t==1){return replace(c,7,makeCODEifeq(l1,code));}
+      else if(t==2){return replace(c,7,makeCODEif_acmpne(l1,code));}
+      else if(t==3){return replace(c,7,makeCODEif_icmpeq(l1,code));}
+      else if(t==4){return replace(c,7,makeCODEif_icmpgt(l1,code));}
+      else if(t==5){return replace(c,7,makeCODEif_icmplt(l1,code));}
+      else if(t==6){return replace(c,7,makeCODEif_icmple(l1,code));}
+      else if(t==7){return replace(c,7,makeCODEif_icmpge(l1,code));}
+    }
+  }
+  return 0;
+}
+
+
+#define OPTS 18
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_multiplication_left,
@@ -422,8 +473,5 @@ OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_goto_goto,
                            simplify_goto_label_label,
                            simplify_nop,
-                           simplify_checkcast,
-                           simplify_dup_aload,
-                           simplify_dup_iload,
-                           simplify_dup_ldc_int
+                           simplify_if_then_else
                           };
