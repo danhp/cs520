@@ -1,5 +1,7 @@
 *.o
 *.tab.*
 *.yy.*
+*.j
 
 src/golite
+peephole/JOOSA-src/joos
