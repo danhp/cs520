@@ -67,7 +67,8 @@ int simplify_division(CODE **c) {
  * ldc 0       ldc k
  * iadd        iadd
  * ------>     ----->
- * iload x     iinc x k
+ * iload x     iload x
+ *             iinc x k
  */
 int simplify_addition_right(CODE **c) {
   int x, k;
@@ -77,7 +78,7 @@ int simplify_addition_right(CODE **c) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
     } else if (k < 256) {
-      return replace(c, 3, makeCODEiinc(x, 1, NULL));
+      return replace(c, 3, makeCODEiload(x, makeCODEiinc(x, 1, NULL)));
     }
   }
   return 0;
@@ -182,9 +183,12 @@ int simplify_istore(CODE **c)
  * iinc x k
  */
 int simplify_inc_astore(CODE **c) {
-  int x, y, k;
-  if (is_iinc(*c, &x, &k) && is_astore(next(*c), &y)) {
-    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  int x1, x2, x3, k;
+  if (is_iload(*c, &x1) &&
+      is_iinc(next(*c), &x2, &k) &&
+      is_astore(next(next(next(*c))), &x3) &&
+      x1 == x2 && x2 == x3) {
+    return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
   return 0;
 }
