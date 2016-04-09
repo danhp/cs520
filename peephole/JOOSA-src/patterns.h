@@ -96,11 +96,20 @@ int positive_increment(CODE **c)
       is_iadd(next(next(*c))) &&
       is_istore(next(next(next(*c))),&y) &&
       x==y && 0<=k && k<=127) {
-     return replace(c,4,makeCODEiinc(x,k,NULL));
+    return replace(c,4,makeCODEiinc(x,k,NULL));
   }
   return 0;
 }
 
+
+/* Removes labels with 0 references to it */
+int simplify_deadlabels(CODE **c) {
+  int l;
+  if (is_label(*c, &l) && deadlabel(l)) {
+    return replace(c,1,NULL);
+  }
+  return 0;
+}
 /* goto L1
  * ...
  * L1:
@@ -118,9 +127,11 @@ int positive_increment(CODE **c)
 int simplify_goto_goto(CODE **c)
 { int l1,l2;
   if (is_goto(*c,&l1) && is_goto(next(destination(l1)),&l2) && l1>l2) {
-     droplabel(l1);
-     copylabel(l2);
-     return replace(c,1,makeCODEgoto(l2,NULL));
+    droplabel(l1);
+    copylabel(l2);
+    return replace(c,1,makeCODEgoto(l2,NULL));
+  }
+  return 0;
 }
 
 /* goto L1
@@ -130,38 +141,18 @@ int simplify_goto_goto(CODE **c)
  * --------->
  * goto L2
  * ...
- * ...    (reference count reduced by 1)
+ * L1:    (reference count reduced by 1)
  * L2:    (reference count increased by 1)
  */
 int simplify_goto_label_label(CODE **c)
 { int l1,l2,l3;
-  int keepLooping;
-  int toReturn;
-  if (is_goto(*c,&l1)
-      && is_label(destination(l1), &l2)
-      && is_label(next(destination(l1)),&l3)
-      && l1>l3
-  ){
-     droplabel(l1);
-     copylabel(l3);
-     replace(c,1,makeCODEgoto(l3,NULL));
-
-     keepLooping = 1;
-     toReturn = 0;
-     while(keepLooping)
-     {
-       c = &((*c)->next);
-       if(is_label(*c, &l2))
-       {
-         if(l1 == l2)
-         {
-           toReturn = replace(c,1,NULL);
-           keepLooping = 0;
-         }
-       }
-     }
-
-     return toReturn;
+  if (is_goto(*c,&l1) &&
+      is_label(destination(l1), &l2) &&
+      is_label(next(destination(l1)),&l3) &&
+      l1>l3) {
+    droplabel(l1);
+    copylabel(l3);
+    return replace(c,1,makeCODEgoto(l3,NULL));
   }
   return 0;
 }
@@ -244,13 +235,14 @@ printf("one less\n");
 }
 
 
-#define OPTS 7
+#define OPTS 8
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_astore,
                            positive_increment,
+                           simplify_deadlabels,
                            simplify_goto_goto,
                            simplify_goto_label_label,
                            simplify_istore,
                            simplify_nop
-};
+                          };

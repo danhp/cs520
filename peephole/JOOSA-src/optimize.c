@@ -18,7 +18,7 @@
 /*****  isA  functions,  return true if the instruction pointed to by
  *****  the parameter c is an instruction of the given kind.
  ****   Will return false if c is NULL.
- ****   If the return value is true, will set 
+ ****   If the return value is true, will set
  ****   values all params other than the first as a side-effect.  ****/
 
 int is_nop(CODE *c)
@@ -245,10 +245,10 @@ int is_if_icmpne(CODE *c, int *label)
 
 
 /*
- * is_if - return true if the node is a if statement, 
- * and modify the content of the label pointer to be the value of the label. 
+ * is_if - return true if the node is a if statement,
+ * and modify the content of the label pointer to be the value of the label.
  */
- 
+
 int is_if(CODE **c, int *label)
 {
   if (is_ifeq(*c, label) ||
@@ -409,7 +409,7 @@ int is_empty(CODE *c)
 
 int is_simplepush(CODE *c)
 { if (c==NULL) return 0;
-  return (c->kind==aloadCK) || (c->kind==iloadCK) || (c->kind==ldc_intCK) || 
+  return (c->kind==aloadCK) || (c->kind==iloadCK) || (c->kind==ldc_intCK) ||
          (c->kind==ldc_stringCK) || (c->kind==aconst_nullCK);
 }
 
@@ -433,17 +433,16 @@ CODE * nextby(CODE *c, int by) {
 
 int uses_label(CODE *c, int *label)
 { if (c==NULL) return 0;
-  return is_goto(c,label) || is_ifeq(c,label) || is_ifne(c,label) || 
-         is_if_acmpeq(c,label) || is_if_acmpne(c,label) || 
+  return is_goto(c,label) || is_ifeq(c,label) || is_ifne(c,label) ||
+         is_if_acmpeq(c,label) || is_if_acmpne(c,label) ||
          is_ifnull(c,label) || is_ifnonnull(c,label) ||
-         is_if_icmpeq(c,label) || is_if_icmpgt(c,label) || 
-         is_if_icmplt(c,label) || is_if_icmple(c,label) || 
+         is_if_icmpeq(c,label) || is_if_icmpgt(c,label) ||
+         is_if_icmplt(c,label) || is_if_icmple(c,label) ||
          is_if_icmpge(c,label) || is_if_icmpne(c,label);
 }
 
 LABEL *currentlabels;   /* points to current labels table */
-LABEL **currentlabelstable; /* pointer to field in AST 
-			       pointing to labels table */
+LABEL **currentlabelstable; /* pointer to field in AST pointing to labels table */
 int currentlabelstablesize;
 int _label; /* current offset of last used label */
 
@@ -460,24 +459,24 @@ void droplabel(int label)
 { currentlabels[label].sources--;
 }
 
-int deadlabel(int label)
-{ return currentlabels[label].sources==0;
+int deadlabel(int label) {
+  return currentlabels[label].sources==0;
 }
 
-int uniquelabel(int label)
-{ return currentlabels[label].sources==1;
+int uniquelabel(int label) {
+  return currentlabels[label].sources==1;
 }
 
 /* returns next available index into label table.  If the table is full
  * it doubles the size of the table, copying old entries into the new table
  * and then fixing the pointer from the AST to this new table.
- */  
+ */
 int next_label()
 { int i;
-    
+
   _label++;
   if (_label==currentlabelstablesize)
-    { /* allocate new table, double the size */ 
+    { /* allocate new table, double the size */
       currentlabels=Malloc(currentlabelstablesize*2*sizeof(LABEL));
       /* copy entries to new table */
       for (i=0;i<currentlabelstablesize;i++)
@@ -498,16 +497,16 @@ void INSERTnewlabel(int i,char* name,CODE *target,int count)
 }
 
 
-/***** Helper functions to replace k instructions starting at at c by 
+/***** Helper functions to replace k instructions starting at at c by
        the sequence of Code pointed to by r.   *****/
 
 /* Replaces a sequence of instructions by another.  WARNING: Make sure the
- * k instructions you are removing cannot be branched into from pieces of code 
+ * k instructions you are removing cannot be branched into from pieces of code
  * outside of the part you are removing.
  * If you remove instructions that branch to a label you must explicitly
  * do a droplabel for them.  (see replace_modified below that will do this
  * automatically for you)
- */ 
+ */
 int replace(CODE **c, int k, CODE *r)
 { CODE *p;
   int i;
@@ -523,7 +522,7 @@ int replace(CODE **c, int k, CODE *r)
   return 1;
 }
 
-/*  
+/*
  *  Replace_modified - replaces a sequence of instructions by another one
  *  Changes have been made to automatically drop labels if needed.
  */
@@ -547,7 +546,7 @@ int replace_modified(CODE **c, int k, CODE *r)
   }
   return 1;
 }
- 
+
 /*
  * kill_line - simply removes the line *c from the bytecode, drops labels
  *             if needed.
@@ -560,20 +559,20 @@ int kill_line(CODE **c)
 /*
  * stack_effect -  computes three quantities given a line of code:
  * 1. inc contains the height difference of the stack after the operation.
- * 2. affected contains the lowest element on the stack affected by this 
+ * 2. affected contains the lowest element on the stack affected by this
  *    bytecode.
- * 3. used contains the lowest element on the stack used by this bytecode 
+ * 3. used contains the lowest element on the stack used by this bytecode
  * (Positions are relative to the starting point).
  * e.g
  * For a swap operation inc=0, affected = -2, used=-2.
  * For a load operation, inc=+1, affected = 0, used=0.
- * For a dup operation, inc=1, affected=0, used=-1. 
+ * For a dup operation, inc=1, affected=0, used=-1.
  *
  * Note that we always have :
  * used<=affected.
  * affected<=0
  *
- * The return value of the function tell the user if the the code is of 
+ * The return value of the function tell the user if the the code is of
  * a type which might invalidate stack analysis:
  * 0: normal
  * 1: goto
@@ -586,26 +585,26 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
 {
   char *stringpos;
   if(c!=NULL) {
-    
+
   switch(c->kind) {
     case nopCK:
-	case iincCK:
+    case iincCK:
       *inc=*used=*affected=0;
       break;
-      
-	case instanceofCK:
-    case getfieldCK:	
+
+    case instanceofCK:
+    case getfieldCK:
     case i2cCK:
     case inegCK:
       *inc=0;
       *used=*affected=-1;
       break;
-      
+
     case checkcastCK:
       *inc = *affected =0;
       *used= -1;
       break;
-    
+
     case swapCK:
       *inc=0;
       *used=*affected=-2;
@@ -614,8 +613,8 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
     case labelCK:
       *inc=*used=*affected=0;
       return 3;
-      break; 
-      
+      break;
+
     case newCK:
     case iloadCK:
     case aloadCK:
@@ -625,14 +624,14 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       *inc = +1;
       *affected=*used=0;
       break;
-      
+
     case dupCK:
       *inc=1;
       *affected=0;
       *used=-1;
       break;
-      
-    case popCK:	
+
+    case popCK:
     case istoreCK:
     case astoreCK:
       *inc=*used=*affected= -1;
@@ -646,11 +645,11 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       *inc=-1;
       *used=*affected=-2;
       break;
-      
+
     case putfieldCK:
       *used=*affected=*inc = -2;
       break;
-      
+
     case invokevirtualCK:
     case invokenonvirtualCK:
       *inc=-1; /* receiver */
@@ -658,7 +657,7 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
         stringpos = c->val.invokevirtualC;
       else
         stringpos = c->val.invokenonvirtualC;
-      
+
       while((*stringpos) != '(') stringpos++;
       stringpos++;
 
@@ -671,18 +670,18 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       }
       stringpos++;
 
-      *used = *affected = *inc;	
+      *used = *affected = *inc;
 
       /* if not void, then pushes return value */
       if((*stringpos)!='V')
         (*inc)++;
       break;
-      
+
     case gotoCK:
       *used = *affected = *inc =0;
       return 1;
       break;
-      
+
     case ifeqCK:
     case ifneCK:
     case ifnullCK:
@@ -690,7 +689,7 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       *inc = *used = *affected = -1;
       return 2;
       break;
-      
+
     case if_icmpeqCK:
     case if_icmpneCK:
     case if_icmpgtCK:
@@ -702,7 +701,7 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       *inc = *used = *affected = -2;
       return 2;
       break;
-      
+
     case returnCK:
       *inc = *used = *affected = 0;
       return 4;
@@ -711,14 +710,14 @@ int stack_effect(CODE *c, int *inc, int *affected, int *used)
       *inc = *used = *affected = -1;
       return 4;
       break;
-      
+
     default:
       printf("Stack_Effect: unrecognized code kind\n");
       *inc=*used=*affected=0;
       break;
     }
   }
-  return 0;  
+  return 0;
 }
 
 typedef int(*OPTI)(CODE **);
@@ -749,14 +748,14 @@ int OPTS = 0;
 
 int add_pattern(char *name, OPTI pattern)
 {
-	if (OPTS > MAX_PATTERNS) {
-		printf ("cannot add any more pattern");
-		return 0;
-	}
-	opti_name[OPTS] = name;
-	optimization[OPTS] = pattern;
-	OPTS++;
-	return 1;
+    if (OPTS > MAX_PATTERNS) {
+        printf ("cannot add any more pattern");
+        return 0;
+    }
+    opti_name[OPTS] = name;
+    optimization[OPTS] = pattern;
+    OPTS++;
+    return 1;
 }
 #else
 int frequencies[OPTS];
@@ -774,16 +773,16 @@ void optiCODEtraverse(CODE **c)
      while (change) {
        change = 0;
        for (i=0; i<OPTS; i++) {
-	  int optimized;
-	  optimized = optimization[i](c);
-	  if (optimized) frequencies[i]++;
-          change = change | optimized;
+           int optimized;
+           optimized = optimization[i](c);
+           if (optimized) frequencies[i]++;
+           change = change | optimized;
        }
        optiCHANGE = optiCHANGE || change;
      }
      if (*c!=NULL) optiCODEtraverse(&((*c)->next));
   }
-} 
+}
 
 void optiCODE(CODE **c)
 { optiCHANGE = 1;
@@ -809,7 +808,7 @@ void optiPROGRAM(PROGRAM *p)
 #ifndef OPTS
   init_patterns();
 #endif
-  
+
   if (p!=NULL) {
     optiPROGRAMrec(p->next);
     optiCLASSFILE(p->classfile);
@@ -822,7 +821,7 @@ void optiPROGRAM(PROGRAM *p)
 #else
       printf("%s: %d\n", opti_name[i], frequencies[i]);
 #endif
-  
+
   printf("\n");
 }
 
