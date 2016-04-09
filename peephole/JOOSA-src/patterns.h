@@ -63,11 +63,11 @@ int simplify_division(CODE **c) {
   return 0;
 }
 
-/* iload x
- * ldc 0
- * iadd
- * ------>
- * iload x
+/* iload x     iload x
+ * ldc 0       ldc k
+ * iadd        iadd
+ * ------>     ----->
+ * iload x     iinc x k
  */
 int simplify_addition_right(CODE **c) {
   int x, k;
@@ -76,6 +76,8 @@ int simplify_addition_right(CODE **c) {
         is_iadd(next(next(*c)))) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
+    } else if (k < 256) {
+      return replace(c, 3, makeCODEiinc(x, 1, NULL));
     }
   }
   return 0;
@@ -87,6 +89,8 @@ int simplify_addition_left(CODE **c) {
         is_iadd(next(next(*c)))) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
+    } else if (k < 256){
+      return replace(c, 3, makeCODEiinc(x, k, NULL));
     }
   }
   return 0;
@@ -172,6 +176,31 @@ int simplify_istore(CODE **c)
   return 0;
 }
 
+/* iinc x k
+ * astore x
+ * ----->
+ * iinc x k
+ */
+int simplify_inc_astore(CODE **c) {
+  int x, y, k;
+  if (is_iinc(*c, &x, &k) && is_astore(next(*c), &y)) {
+    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  }
+  return 0;
+}
+
+/* iinc x k
+ * istore x
+ * ----->
+ * iinc x k
+ */
+int simplify_inc_istore(CODE **c) {
+  int x, y, k;
+  if (is_iinc(*c, &x, &k) && is_istore(next(*c), &y)) {
+    return replace(c, 2, makeCODEiinc(x, k, NULL));
+  }
+  return 0;
+}
 
 /* ireturn
  * nop
@@ -186,27 +215,6 @@ int simplify_nop(CODE **c)
   }
   return 0;
 }
-
-
-/* iload x
- * ldc k   (0<=k<=127)
- * iadd
- * istore x
- * --------->
- * iinc x k
- */
-int positive_increment(CODE **c)
-{ int x,y,k;
-  if (is_iload(*c,&x) &&
-      is_ldc_int(next(*c),&k) &&
-      is_iadd(next(next(*c))) &&
-      is_istore(next(next(next(*c))),&y) &&
-      x==y && 0<=k && k<=127) {
-    return replace(c,4,makeCODEiinc(x,k,NULL));
-  }
-  return 0;
-}
-
 
 /* Removes labels with 0 references to it */
 int simplify_deadlabels(CODE **c) {
@@ -351,7 +359,7 @@ int simplify_checkcast(CODE **c) {
 }
 
 
-#define OPTS 17
+#define OPTS 18
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_multiplication_left,
@@ -363,11 +371,12 @@ OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_subtraction_right,
                            simplify_subtraction_left,
                            simplify_astore,
-                           positive_increment,
+                           simplify_istore,
+                           simplify_inc_astore,
+                           simplify_inc_istore,
                            simplify_deadlabels,
                            simplify_goto_goto,
                            simplify_goto_label_label,
-                           simplify_istore,
                            simplify_nop,
                            simplify_checkcast
                           };
