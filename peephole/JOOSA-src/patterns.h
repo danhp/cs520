@@ -78,7 +78,7 @@ int simplify_addition_right(CODE **c) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
     } else if (k < 256) {
-      return replace(c, 3, makeCODEiload(x, makeCODEiinc(x, 1, NULL)));
+      return replace(c, 3, makeCODEiload(x, makeCODEiinc(x, k, NULL)));
     }
   }
   return 0;
@@ -91,7 +91,7 @@ int simplify_addition_left(CODE **c) {
     if (k == 0) {
       return replace(c, 3, makeCODEiload(x, NULL));
     } else if (k < 256){
-      return replace(c, 3, makeCODEiinc(x, k, NULL));
+      return replace(c, 3, makeCODEiload(x, makeCODEiinc(x, k, NULL)));
     }
   }
   return 0;
