@@ -50,6 +50,38 @@ int simplify_astore(CODE **c)
   return 0;
 }
 
+/* dup
+ * istore x
+ * pop
+ * -------->
+ * astore x
+ */
+int simplify_istore(CODE **c)
+{ int x;
+  if (is_dup(*c) &&
+      is_istore(next(*c),&x) &&
+      is_pop(next(next(*c)))) {
+     return replace(c,3,makeCODEistore(x,NULL));
+  }
+  return 0;
+}
+
+
+/* ireturn
+ * nop
+ * -------->
+ * ireturn
+ */
+int simplify_nop(CODE **c)
+{
+  if (is_nop(*c))
+  {
+    return replace(c,1,NULL);
+  }
+  return 0;
+}
+
+
 /* iload x
  * ldc k   (0<=k<=127)
  * iadd
@@ -84,18 +116,162 @@ int positive_increment(CODE **c)
  * L2:    (reference count increased by 1)  
  */
 int simplify_goto_goto(CODE **c)
-{ int l1,l2;
+{ int l1,l2,l3;
+  int keepLooping;
+  int toReturn;
   if (is_goto(*c,&l1) && is_goto(next(destination(l1)),&l2) && l1>l2) {
      droplabel(l1);
      copylabel(l2);
-     return replace(c,1,makeCODEgoto(l2,NULL));
+     replace(c,1,makeCODEgoto(l2,NULL));
+
+     keepLooping = 1;
+     toReturn = 0;
+     while(keepLooping)
+     {
+       c = &((*c)->next);
+       if(is_label(*c, &l3))
+       {
+         if(l1 == l3)
+         {
+           toReturn = replace(c,1,NULL);
+           keepLooping = 0;
+         }
+       }
+     }
+
+     return toReturn;
   }
   return 0;
 }
 
-#define OPTS 4
+/* goto L1
+ * ...
+ * L1:
+ * L2:
+ * --------->
+ * goto L2
+ * ...
+ * ...    (reference count reduced by 1)
+ * L2:    (reference count increased by 1)  
+ */
+int simplify_goto_label_label(CODE **c)
+{ int l1,l2,l3;
+  int keepLooping;
+  int toReturn;
+  if (is_goto(*c,&l1) 
+      && is_label(destination(l1), &l2) 
+      && is_label(next(destination(l1)),&l3)
+      && l1>l3
+  ){
+     droplabel(l1);
+     copylabel(l3);
+     replace(c,1,makeCODEgoto(l3,NULL));
+
+     keepLooping = 1;
+     toReturn = 0;
+     while(keepLooping)
+     {
+       c = &((*c)->next);
+       if(is_label(*c, &l2))
+       {
+         if(l1 == l2)
+         {
+           toReturn = replace(c,1,NULL);
+           keepLooping = 0;
+         }
+       }
+     }
+
+     return toReturn;
+  }
+  return 0;
+}
+
+
+/*int simplify_dup_ifne_pop(CODE **c)
+{
+  int l1;
+  if(is_dup(*c)
+     && is_ifne(next(*c), &l1)
+     && is_pop(next(next(*c)))
+  ){
+    return replace(c,3,makeCODEifne(l1, NULL));
+  }
+  return 0;
+}*/
+
+/*int simplify_icmplt_then_else(CODE **c)
+{
+  CODE *c2;
+  int i;
+  int l1;
+  int l2;
+  int l3;
+  int l4;
+  int l5;
+  if(is_if_icmplt(*c,&l1)
+    && is_goto(next(next(*c)),&l2)
+    && is_label(next(next(next(*c))),&l3)
+    && is_label(next(next(next(next(next(*c))))),&l4)
+    && is_ifeq(next(next(next(next(next(next(*c)))))),&l5)
+  ){
+    if(l1 == l3 && l2 == l4)
+    {
+      for(i=0;i<2;i++)
+      {
+        c = &((*c)->next);
+      }
+      replace(c,1,makeCODEgoto(l5, NULL));
+
+      for(i=0;i<3;i++)
+      {
+        c = &((*c)->next);
+      }
+      return replace(c,2,NULL);
+    }
+  }
+  return 0;
+}*/
+
+int simplify_dup_ifeq_pop(CODE **c)
+{
+  int l1;
+  int l2;
+  int keepLooping;
+  int toReturn;
+  toReturn = 0;
+  if(is_dup(*c)
+     && is_ifeq(next(*c),&l1)
+     && is_pop(next((next(*c))))
+  ){
+printf("one less\n");
+     replace(c,3,makeCODEifeq(l1,NULL));
+     keepLooping = 1;
+     toReturn = 0;
+     while(keepLooping)
+     {
+       c = &((*c)->next);
+       if(is_label(*c, &l2))
+       {
+         if(l1 == l2)
+         {
+           toReturn = replace(c,2,makeCODElabel(l1,makeCODEdup(NULL)));
+           keepLooping = 0;
+         }
+       }
+     }
+  }
+  return toReturn;
+}
+
+
+#define OPTS 7
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
                            simplify_astore,
                            positive_increment,
-                           simplify_goto_goto};
+                           simplify_goto_goto,
+                           simplify_goto_label_label,
+                           simplify_istore,
+                           simplify_nop
+};
