@@ -63,12 +63,12 @@ int simplify_division(CODE **c) {
   return 0;
 }
 
-/* iload x     iload x
- * ldc 0       ldc k
- * iadd        iadd
- * ------>     ----->
- * iload x     iload x
- *             iinc x k
+/* iload x
+ * ldc 0
+ * iadd
+ * ------>
+ * iload x
+ *
  */
 int simplify_addition_right(CODE **c) {
   int x, k;
@@ -175,7 +175,8 @@ int simplify_istore(CODE **c)
   return 0;
 }
 
-/* iinc x k
+/* iload x
+ * iinc x k
  * astore x
  * ----->
  * iinc x k
@@ -184,14 +185,15 @@ int simplify_inc_astore(CODE **c) {
   int x1, x2, x3, k;
   if (is_iload(*c, &x1) &&
       is_iinc(next(*c), &x2, &k) &&
-      is_astore(next(next(next(*c))), &x3) &&
+      is_astore(next(next(*c)), &x3) &&
       x1 == x2 && x2 == x3) {
     return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
   return 0;
 }
 
-/* iinc x k
+/* iload x
+ * iinc x k
  * istore x
  * ----->
  * iinc x k
@@ -200,7 +202,7 @@ int simplify_inc_istore(CODE **c) {
   int x1, x2, x3, k;
   if (is_iload(*c, &x1) &&
       is_iinc(next(*c), &x2, &k) &&
-      is_istore(next(next(next(*c))), &x3) &&
+      is_istore(next(next(*c)), &x3) &&
       x1 == x2 && x2 == x3) {
     return replace(c, 2, makeCODEiinc(x1, k, NULL));
   }
@@ -278,51 +280,6 @@ int simplify_goto_label_label(CODE **c)
 }
 
 
-/*int simplify_dup_ifne_pop(CODE **c)
-{
-  int l1;
-  if(is_dup(*c)
-     && is_ifne(next(*c), &l1)
-     && is_pop(next(next(*c)))
-  ){
-    return replace(c,3,makeCODEifne(l1, NULL));
-  }
-  return 0;
-}*/
-
-/*int simplify_icmplt_then_else(CODE **c)
-{
-  CODE *c2;
-  int i;
-  int l1;
-  int l2;
-  int l3;
-  int l4;
-  int l5;
-  if(is_if_icmplt(*c,&l1)
-    && is_goto(next(next(*c)),&l2)
-    && is_label(next(next(next(*c))),&l3)
-    && is_label(next(next(next(next(next(*c))))),&l4)
-    && is_ifeq(next(next(next(next(next(next(*c)))))),&l5)
-  ){
-    if(l1 == l3 && l2 == l4)
-    {
-      for(i=0;i<2;i++)
-      {
-        c = &((*c)->next);
-      }
-      replace(c,1,makeCODEgoto(l5, NULL));
-
-      for(i=0;i<3;i++)
-      {
-        c = &((*c)->next);
-      }
-      return replace(c,2,NULL);
-    }
-  }
-  return 0;
-}*/
-
 int simplify_dup_ifeq_pop(CODE **c)
 {
   int l1;
@@ -334,7 +291,6 @@ int simplify_dup_ifeq_pop(CODE **c)
      && is_ifeq(next(*c),&l1)
      && is_pop(next((next(*c))))
   ){
-printf("one less\n");
      replace(c,3,makeCODEifeq(l1,NULL));
      keepLooping = 1;
      toReturn = 0;
@@ -352,60 +308,6 @@ printf("one less\n");
      }
   }
   return toReturn;
-}
-
-/* Don't check cast as they are already done at the typechecker */
-int simplify_checkcast(CODE **c) {
-  char *args;
-  if (is_checkcast(*c, &args)) {
-    return replace(c, 1, NULL);
-  }
-  return 0;
-}
-
-/* ldc x
- * ldc k  with x=k
- * ------->
- * ldc x
- */
-int simplify_dup_ldc_int(CODE **c) {
-  int k,j;
-  if (is_ldc_int(*c, &k) &&
-      is_ldc_int(next(*c), &j) &&
-      k==j) {
-    return replace(c,2,makeCODEldc_int(k,NULL));
-  }
-  return 0;
-}
-
-/* iload x
- * iload y, with y=x
- * ------->
- * iload x
- */
-int simplify_dup_iload(CODE **c) {
-  int x, y ;
-  if (is_iload(*c, &x) &&
-      is_iload(next(*c), &y) &&
-      x==y) {
-    return replace(c,2,makeCODEiload(x,NULL));
-  }
-  return 0;
-}
-
-/* aload x
- * aload y, with y=x
- * ------->
- * aload x
- */
-int simplify_dup_aload(CODE **c) {
-  int x, y;
-  if (is_aload(*c, &x) &&
-      is_aload(next(*c), &y) &&
-      x==y) {
-    return replace(c,2,makeCODEaload(x,NULL));
-  }
-  return 0;
 }
 
 int simplify_if_then_else(CODE **c)
