@@ -16,7 +16,7 @@
 typedef enum{noneMod,finalMod,abstractMod,synchronizedMod,staticMod} ModifierKind;
 
 typedef enum{classSym,fieldSym,methodSym,formalSym,localSym} SymbolKind;
- 
+
 typedef struct SYMBOL {
     char *name;
     SymbolKind kind;
@@ -28,7 +28,7 @@ typedef struct SYMBOL {
       struct LOCAL *localS;
     } val;
     struct SYMBOL *next;
-} SYMBOL; 
+} SYMBOL;
 
 typedef struct PROGRAM {
   char *name;
@@ -66,7 +66,7 @@ typedef struct FIELD {
 
 typedef struct TYPE {
   int lineno;
-  enum {intK,boolK,charK,refK,voidK,polynullK} kind;  
+  enum {intK,boolK,charK,refK,voidK,polynullK} kind;
   char *name;
   struct CLASS *class; /* symbol */
 } TYPE;
@@ -92,7 +92,7 @@ typedef struct CONSTRUCTOR {
 typedef struct METHOD {
   int lineno;
   char *name;
-  ModifierKind modifier; 
+  ModifierKind modifier;
   struct TYPE *returntype;
   struct FORMAL *formals;
   struct STATEMENT *statements;
@@ -130,14 +130,14 @@ typedef struct STATEMENT {
     struct EXP *returnS;
     struct {struct STATEMENT *first;
             struct STATEMENT *second;} sequenceS;
-    struct {struct EXP *condition; 
+    struct {struct EXP *condition;
             struct STATEMENT *body;
             int stoplabel; /* resource */} ifS;
     struct {struct EXP *condition;
             struct STATEMENT *thenpart;
             struct STATEMENT *elsepart;
             int elselabel,stoplabel; /* resource */} ifelseS;
-    struct {struct EXP *condition; 
+    struct {struct EXP *condition;
             struct STATEMENT *body;
             int startlabel,stoplabel; /* resource */} whileS;
     struct {struct STATEMENT *body;} blockS;
@@ -155,37 +155,37 @@ typedef struct EXP {
         minusK,timesK,divK,modK,notK,uminusK,thisK,newK,invokeK,intconstK,
         boolconstK,charconstK,stringconstK,nullK,castK,charcastK} kind;
   union {
-    struct {char *name; 
+    struct {char *name;
             SYMBOL *idsym; /* symbol */} idE;
-    struct {char *left; 
-            SYMBOL *leftsym; /* symbol */ 
+    struct {char *left;
+            SYMBOL *leftsym; /* symbol */
             struct EXP *right;} assignE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel; /* resource */} orE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int falselabel; /* resource */} andE;
-    struct {struct EXP *left; 
-            struct EXP *right; 
+    struct {struct EXP *left;
+            struct EXP *right;
             int truelabel,stoplabel; /* resource */} eqE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel,stoplabel; /* resource */} ltE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel,stoplabel; /* resource */} gtE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel,stoplabel; /* resource */} leqE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel,stoplabel; /* resource */} geqE;
-    struct {struct EXP *left; 
+    struct {struct EXP *left;
             struct EXP *right;
             int truelabel,stoplabel; /* resource */} neqE;
-    struct {struct EXP *left; 
-            char *right; 
+    struct {struct EXP *left;
+            char *right;
             struct CLASS *class; /* symbol */} instanceofE;
     struct {struct EXP *left; struct EXP *right;} plusE;
     struct {struct EXP *left; struct EXP *right;} minusE;
@@ -195,19 +195,19 @@ typedef struct EXP {
     struct {struct EXP *not;
             int truelabel,stoplabel; /* resource */} notE;
     struct EXP *uminusE;
-    struct {char *name; 
+    struct {char *name;
             struct CLASS *class; /* symbol */
             struct CONSTRUCTOR *constructor; /* type */
             struct ARGUMENT *args;} newE;
-    struct {struct RECEIVER *receiver; 
-            char *name; 
+    struct {struct RECEIVER *receiver;
+            char *name;
             struct METHOD *method; /* type */
             struct ARGUMENT *args;} invokeE;
     int intconstE;
     int boolconstE;
     char charconstE;
     char *stringconstE;
-    struct {char *left; 
+    struct {char *left;
             struct CLASS *class; /* symbol */
             struct EXP *right;} castE;
     struct EXP *charcastE;
@@ -279,7 +279,7 @@ typedef struct CODE {
 
 PROGRAM *makePROGRAM(char *name, CLASSFILE *classfile, PROGRAM *next);
 CLASSFILE *makeCLASSFILE(CLASS *class, CLASSFILE *next);
-CLASS *makeCLASS(char *name, char *parentname, 
+CLASS *makeCLASS(char *name, char *parentname,
                  int external, char *package, ModifierKind modifier,
                  FIELD *fields, CONSTRUCTOR *constructors, METHOD *methods);
 FIELD *makeFIELD(char *name, TYPE *type, FIELD *next);
@@ -293,7 +293,7 @@ TYPE *makeTYPEref(char *name);
 TYPE *makeTYPEextref(char *name, CLASS *c);
 ID *makeID(char *name, ID *next);
 CONSTRUCTOR *makeCONSTRUCTOR(char *name, FORMAL *formals, STATEMENT *statements, CONSTRUCTOR *next);
-METHOD *makeMETHOD(char *name, ModifierKind modifier, TYPE *returntype, 
+METHOD *makeMETHOD(char *name, ModifierKind modifier, TYPE *returntype,
                    FORMAL *formals, STATEMENT *statements, METHOD *next);
 FORMAL *makeFORMAL(char *name, TYPE *type, FORMAL *next);
 LOCAL *makeLOCAL(char *name, TYPE *type, LOCAL *next);

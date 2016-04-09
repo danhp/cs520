@@ -53,11 +53,11 @@ void code_checkcast(char *arg)
 void code_imul()
 { appendCODE(makeCODEimul(NULL));
 }
- 
+
 void code_ineg()
 { appendCODE(makeCODEineg(NULL));
 }
- 
+
 void code_irem()
 { appendCODE(makeCODEirem(NULL));
 }
@@ -65,7 +65,7 @@ void code_irem()
 void code_isub()
 { appendCODE(makeCODEisub(NULL));
 }
- 
+
 void code_idiv()
 { appendCODE(makeCODEidiv(NULL));
 }
@@ -145,7 +145,7 @@ void code_areturn()
 void code_return()
 { appendCODE(makeCODEreturn(NULL));
 }
- 
+
 void code_aload(int arg)
 { appendCODE(makeCODEaload(arg,NULL));
 }
@@ -408,7 +408,7 @@ void codeSTATEMENT(STATEMENT *s)
             break;
        case superconsK:
             code_aload(0);
-            codeARGUMENT(s->val.superconsS.args); 
+            codeARGUMENT(s->val.superconsS.args);
             code_invokenonvirtual(codeConstructor(currentclass->parent,
                                                   s->val.superconsS.constructor->formals));
             break;
@@ -445,7 +445,7 @@ void codeEXP(EXP *e)
                    code_aload(e->val.idE.idsym->val.localS->offset);
                 } else {
                    code_iload(e->val.idE.idsym->val.localS->offset);
-                }      
+                }
                 break;
            case formalSym:
                 if (e->val.idE.idsym->val.formalS->type->kind==refK) {
