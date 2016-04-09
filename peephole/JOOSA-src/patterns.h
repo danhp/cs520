@@ -34,6 +34,94 @@ int simplify_multiplication_right(CODE **c)
   return 0;
 }
 
+int simplify_multiplication_left(CODE **c) {
+  int x, k;
+  if (is_ldc_int(*c, &k) &&
+        is_iload(next(*c), &x) &&
+        is_imul(next(next(*c)))) {
+    if (k == 0) return replace(c, 3, makeCODEldc_int(0, NULL));
+    else if (k == 1) return replace(c, 3, makeCODEiload(x, NULL));
+    else if (k == 2) return replace(c, 3, makeCODEiload(x,
+                                          makeCODEdup(
+                                          makeCODEiadd(NULL))));
+  }
+  return 0;
+}
+
+/* ldc 1
+ * idiv
+ * ------>
+ * DROP THE INSTUCTIONS
+ */
+int simplify_division(CODE **c) {
+  int k;
+  if (is_ldc_int(*c, &k) &&
+        is_idiv(next(*c))) {
+    if (k == 1) {
+      return replace(c, 2, NULL);
+    }
+  }
+  return 0;
+}
+
+/* iload x
+ * ldc 0
+ * iadd
+ * ------>
+ * iload x
+ */
+int simplify_addition_right(CODE **c) {
+  int x, k;
+  if (is_iload(*c, &x) &&
+        is_ldc_int(next(*c), &k) &&
+        is_iadd(next(next(*c)))) {
+    if (k == 0) {
+      return replace(c, 3, makeCODEiload(x, NULL));
+    }
+  }
+  return 0;
+}
+int simplify_addition_left(CODE **c) {
+  int x, k;
+  if (is_ldc_int(*c, &k) &&
+        is_iload(next(*c), &x) &&
+        is_iadd(next(next(*c)))) {
+    if (k == 0) {
+      return replace(c, 3, makeCODEiload(x, NULL));
+    }
+  }
+  return 0;
+}
+
+/* iload x
+ * ldc 0
+ * isub
+ * ------>
+ * iload x
+ */
+int simplify_subtraction_right(CODE **c) {
+  int x, k;
+  if (is_iload(*c, &x) &&
+        is_ldc_int(next(*c), &k) &&
+        is_isub(next(next(*c)))) {
+    if (k == 0) {
+      return replace(c, 3, makeCODEiload(x, NULL));
+    }
+  }
+  return 0;
+}
+int simplify_subtraction_left(CODE **c) {
+  int x, k;
+  if (is_ldc_int(*c, &k) &&
+        is_iload(next(*c), &x) &&
+        is_isub(next(next(*c)))) {
+    if (k == 0) {
+      return replace(c, 3, makeCODEiload(x, NULL));
+    }
+  }
+  return 0;
+}
+
 /* dup
  * astore x
  * pop
@@ -110,6 +198,7 @@ int simplify_deadlabels(CODE **c) {
   }
   return 0;
 }
+
 /* goto L1
  * ...
  * L1:
@@ -235,9 +324,15 @@ printf("one less\n");
 }
 
 
-#define OPTS 8
+#define OPTS 14
 
 OPTI optimization[OPTS] = {simplify_multiplication_right,
+                           simplify_multiplication_left,
+                           simplify_division,
+                           simplify_addition_right,
+                           simplify_addition_left,
+                           simplify_subtraction_right,
+                           simplify_subtraction_left,
                            simplify_astore,
                            positive_increment,
                            simplify_deadlabels,
