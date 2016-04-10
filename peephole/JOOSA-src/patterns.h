@@ -95,6 +95,12 @@ int simplify_addition_left(CODE **c) {
   return 0;
 }
 
+/* ldc x
+ * ldc y
+ * iadd
+ * ----->
+ * ldc x + y (if x + y smaller than max int)
+ */
 int simplify_addition_constants(CODE **c) {
   int x, y;
   if (is_ldc_int(*c, &x) &&
@@ -107,6 +113,11 @@ int simplify_addition_constants(CODE **c) {
   return 0;
 }
 
+/* ineg
+ * iadd
+ * --->
+ * isub
+ */
 int simplify_addition_negative(CODE **c) {
   if (is_ineg(*c) && is_iadd(next(*c))) {
     return replace(c, 2, makeCODEisub(NULL));
