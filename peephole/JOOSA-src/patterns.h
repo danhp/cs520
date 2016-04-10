@@ -209,10 +209,9 @@ int simplify_inc_istore(CODE **c) {
   return 0;
 }
 
-/* ireturn
- * nop
- * -------->
- * ireturn
+/* nop
+ * --------> (remove the nop)
+ * 
  */
 int simplify_nop(CODE **c)
 {
@@ -280,35 +279,27 @@ int simplify_goto_label_label(CODE **c)
 }
 
 
-int simplify_dup_ifeq_pop(CODE **c)
-{
-  int l1;
-  int l2;
-  int keepLooping;
-  int toReturn;
-  toReturn = 0;
-  if(is_dup(*c)
-     && is_ifeq(next(*c),&l1)
-     && is_pop(next((next(*c))))
-  ){
-     replace(c,3,makeCODEifeq(l1,NULL));
-     keepLooping = 1;
-     toReturn = 0;
-     while(keepLooping)
-     {
-       c = &((*c)->next);
-       if(is_label(*c, &l2))
-       {
-         if(l1 == l2)
-         {
-           toReturn = replace(c,2,makeCODElabel(l1,makeCODEdup(NULL)));
-           keepLooping = 0;
-         }
-       }
-     }
-  }
-  return toReturn;
-}
+/* ifeq L1  (or any other type of if condition)
+ * iconst_0
+ * goto L2
+ * L1:
+ * iconst_1
+ * L2:
+ * ifeq L3
+ * ---------> (we only do this if L2 and L3 is "uniquelabel")
+ * ifeq L1
+ * goto L3
+ * L1:
+ */
+
+/* This is sound because we do not change the stack or the code that gets
+ * executed. the additional ifeq L3 removes the previous iconst in the
+ * original code. The new code just doesnt add them in the first place.
+ * The new code also ends up at the same place as the original code no
+ * matter the type of if conditions used.
+ * And since we check for uniqueness of L2 and L3, removing or changing
+ * them wont break the code.
+ */
 
 int simplify_if_then_else(CODE **c)
 {
