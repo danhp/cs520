@@ -69,6 +69,7 @@ void typeVAR_DECL(VAR_DECL *decl) {
 			id->symbol->val.type = decl->type;
 		} else {
 			id->symbol->val.type = exp->type;
+			decl->type = exp->type;
 		}
 
 		checkAssignable(decl->type, exp->type, decl->loc);
@@ -180,7 +181,7 @@ void typeSTMT(STMT *stmt) {
 		case ifK:
 			typeSTMT(stmt->val.ifS.pre_stmt);
 			t = typeEXP(stmt->val.ifS.condition);
-			if (t != boolTYPE) {
+			if (t->kind != type_boolK) {
 				printErrorMsg("type mismatch");
 			}
 			typeSTMT(stmt->val.ifS.body);
@@ -188,7 +189,7 @@ void typeSTMT(STMT *stmt) {
 		case ifelseK:
 			typeSTMT(stmt->val.ifelseS.pre_stmt);
 			t = typeEXP(stmt->val.ifelseS.condition);
-			if (t != boolTYPE) {
+			if (t->kind != type_boolK) {
 				printErrorMsg("type mismatch");
 			}
 			typeSTMT(stmt->val.ifelseS.thenpart);
@@ -196,8 +197,8 @@ void typeSTMT(STMT *stmt) {
 			break;
 		case switchK:
 			typeSTMT(stmt->val.switchS.pre_stmt);
-			typeEXP(stmt->val.switchS.condition);
-			typeCASE_DECL(stmt->val.switchS.body);
+			TYPE *t = typeEXP(stmt->val.switchS.condition);
+			typeCASE_DECL(stmt->val.switchS.body, t);
 			break;
 		case forK:
 			typeFOR_CLAUSE(stmt->val.forS.for_clause);
@@ -216,13 +217,23 @@ void typeSTMT(STMT *stmt) {
 	}
 }
 
-void typeCASE_DECL(CASE_DECL *decl) {
+void typeCASE_DECL(CASE_DECL *decl, TYPE *conditionType) {
 	if (!decl) return;
-	if (decl->next) typeCASE_DECL(decl->next);
+	if (decl->next) typeCASE_DECL(decl->next, conditionType);
 
+	TYPE *t;
 	switch (decl->kind) {
 		case caseK:
-			typeEXP(decl->val.caseC.condition);
+			t = typeEXP(decl->val.caseC.condition);
+			if (conditionType) {
+				if (t->kind != conditionType->kind) {
+					printErrorType(conditionType, t, decl->loc);
+				}
+			} else {
+				if (t->kind != type_boolK) {
+					printErrorType(boolTYPE, t, decl->loc);
+				}
+			}
 			typeSTMT(decl->val.caseC.stmt);
 			break;
 		case defaultK:
@@ -589,13 +600,19 @@ TYPE *typeEXPindex(EXP *exp, EXP *index) {
 		printErrorType(intTYPE, index->type, index->loc);
 	}
 
-	/* Fixup as exp's type is the enclosing type in most cases*/
+	/* Return enclosed type */
 	switch (exp->type->kind) {
 		case type_arrayK:
-			exp->type = exp->type->val.arrayT.type;
+			return exp->type->val.arrayT.type;
+			if (exp->type->kind == type_refK) {
+				exp->type = exp->type->val.refT->symbol->val.type;
+			}
 			break;
 		case type_sliceK:
 			exp->type = exp->type->val.sliceT;
+			if (exp->type->kind == type_refK) {
+				exp->type = exp->type->val.refT->symbol->val.type;
+			}
 			break;
 		default:
 			break;
@@ -789,7 +806,7 @@ int isTypeAssignble(TYPE *left, TYPE *right) {
 			}
 			break;
 		case type_refK:
-			/* Shoul not longer be in the tree */
+			// TODO: ref type
 			break;
 	}
 	return true;
@@ -824,7 +841,8 @@ int isPrintableType(EXP *exp) {
 	if (!exp) return 1;
 	if (exp->next) isPrintableType(exp->next);
 
-	switch (exp->type->kind) {
+	TYPE *t = exp->type;
+	switch (t->kind) {
 		case type_intK:
 		case type_floatK:
 		case type_runeK:

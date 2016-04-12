@@ -9,10 +9,12 @@ type dummyFloat float64
 type exponent dummyFloat
 
 func power(a float64, b float64) float64 {
+  var check dummyFloat
+  var empty string
   var ret float64 = 1
   var power = exponent(b)
 
-  for power > 0.0 {
+  for power > check {
     ret, power = ret * a, power - 1.0
   }
 
@@ -20,7 +22,7 @@ func power(a float64, b float64) float64 {
 }
 
 func compute(op int, a float64, b float64) float64 {
-  switch op {
+  switch x := 1; op {
   case 0:
     return a+b
   case 1:
@@ -36,6 +38,11 @@ func compute(op int, a float64, b float64) float64 {
   default:
     println("Invalid operator")
     break
+  }
+
+  switch {
+  default:
+      println("hahaha");
   }
   return -1
 }

@@ -28,7 +28,7 @@ void typeReturnsSTMT(STMT *stmt, TYPE *type);
 void typeReturnsCASE(CASE_DECL *decl, TYPE *type);
 
 void typeSTMT(STMT *stmt);
-void typeCASE_DECL(CASE_DECL *decl);
+void typeCASE_DECL(CASE_DECL *decl, TYPE *typeCondition);
 void typeFOR_CLAUSE(FOR_CLAUSE *decl);
 
 TYPE *typeEXP(EXP *decl);

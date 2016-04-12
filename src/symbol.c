@@ -37,15 +37,17 @@ void symVAR_DECL(VAR_DECL *obj) {
 
 	ID *cur = obj->id;
 	while (cur) {
-		cur->symbol = putSymbol(sym, cur->name, obj->type, cur->loc);
 		if (!obj->type) {
+			cur->symbol = putSymbol(sym, cur->name, obj->type, cur->loc);
 			cur->symbol->kind = inferredSym;
 		} else {
 			symTYPE(obj->type);
 			/* Crush type aliases */
-			while (obj->type->kind == type_refK) {
-				obj->type = obj->type->val.refT->symbol->val.type;
+			TYPE *t = obj->type;
+			while (t->kind == type_refK) {
+				t = t->val.refT->symbol->val.type;
 			}
+			cur->symbol = putSymbol(sym, cur->name, t, cur->loc);
 		}
 		cur = cur->next;
 	}
@@ -61,8 +63,9 @@ void symTYPE_DECL(TYPE_DECL *obj) {
 
 	symTYPE(obj->type);
 	/* Crush type aliases */
-	while (obj->type->kind == type_refK) {
-		obj->type = obj->type->val.refT->symbol->val.type;
+	TYPE *t = obj->type;
+	while (t->kind == type_refK) {
+		t = t->val.refT->symbol->val.type;
 	}
 	obj->id->symbol = putSymbol(sym, obj->id->name, obj->type, obj->loc);
 	obj->id->symbol->kind = typeSym;
@@ -83,17 +86,9 @@ void symTYPE(TYPE *obj) {
 			break;
 		case type_arrayK:
 			symTYPE(obj->val.arrayT.type);
-			/* Crush type aliases */
-			while (obj->val.arrayT.type->kind == type_refK) {
-				obj->val.arrayT.type = obj->val.arrayT.type->val.refT->symbol->val.type;
-			}
 			break;
 		case type_sliceK:
 			symTYPE(obj->val.sliceT);
-			/* Crush type aliases */
-			while (obj->val.sliceT->kind == type_refK) {
-				obj->val.sliceT = obj->val.sliceT->val.refT->symbol->val.type;
-			}
 			break;
 		case type_structK:
 			symSTRUCT_DECL(obj->val.structT);
@@ -110,9 +105,9 @@ void symSTRUCT_DECL(STRUCT_DECL *obj) {
 
 	symTYPE(obj->type);
 	/* Crush type aliases */
-	while (obj->type->kind == type_refK) {
-		obj->type = obj->type->val.refT->symbol->val.type;
-	}
+	/* while (obj->type->kind == type_refK) { */
+	/* 	obj->type = obj->type->val.refT->symbol->val.type; */
+	/* } */
 	while (id) {
 		id->symbol = putSymbol(sym, id->name, obj->type, obj->loc);
 		id = id->next;
@@ -147,9 +142,9 @@ void symFUNC_SIGN(FUNC_SIGN *obj) {
 	if (obj->type) {
 		symTYPE(obj->type);
 		/* Crush type aliases */
-		while (obj->type->kind == type_refK) {
-			obj->type = obj->type->val.refT->symbol->val.type;
-		}
+		/* while (obj->type->kind == type_refK) { */
+		/* 	obj->type = obj->type->val.refT->symbol->val.type; */
+		/* } */
 	}
 }
 

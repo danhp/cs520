@@ -17,7 +17,10 @@ func len(set []string) int {
         (((c))) -= 1. * (3. + float64(x.a + i))
     }
     {
-        if ((bool))((!!true)) {
+        if s := 1; true {
+            println("Print out first 9 elements in a square")
+        }
+        if x:= 0; ((bool))((!!true)) {
             return result
         } else {
             return result
@@ -63,14 +66,22 @@ func square(set []string) ([3][3]string) {
     return data
 }
 
-func plus(a, b int) int {
-    if true {
-        if false {
-            return 1
-        } else {
-            return 1
-        }
-    } else {
-        return 0
-    }
+func main() {
+    var s [] string
+    s = (append(s, "a"))
+    s = append(s, "f")
+    s = append(s, "g")
+    s = append(s, "b")
+    s = append(s, "i")
+    s = append(s, "p")
+    s = append(s, "o")
+    s = append(s, "3")
+    s = append(s, "~")
+    s = append(s, "9")
+    s = append(s, ".")
+    s = append(s, "/")
+
+    println(s[0]);
+
+    square(s)
 }
