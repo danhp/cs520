@@ -19,6 +19,15 @@ void initTypes() {
 	boolTYPE->kind = type_boolK;
 }
 
+TYPE *getDeepestType(TYPE *type) {
+	TYPE *t = type;
+	while (t->kind == type_refK) {
+		t = t->val.refT->symbol->val.type;
+	}
+
+	return t;
+}
+
 void typePROGRAM(PROGRAM *p) {
 	initTypes();
 
@@ -60,7 +69,8 @@ void typeVAR_DECL(VAR_DECL *decl) {
 
 		if (id->symbol->kind != varSym &&
 				id->symbol->kind != inferredSym &&
-				id->symbol->kind != blankSym) {
+				id->symbol->kind != blankSym &&
+				!exp->type) {
 			printErrorAssign(id->name, id->loc);
 		}
 
@@ -181,6 +191,7 @@ void typeSTMT(STMT *stmt) {
 		case ifK:
 			typeSTMT(stmt->val.ifS.pre_stmt);
 			t = typeEXP(stmt->val.ifS.condition);
+			t = getDeepestType(t);
 			if (t->kind != type_boolK) {
 				printErrorMsg("type mismatch");
 			}
@@ -189,6 +200,7 @@ void typeSTMT(STMT *stmt) {
 		case ifelseK:
 			typeSTMT(stmt->val.ifelseS.pre_stmt);
 			t = typeEXP(stmt->val.ifelseS.condition);
+			t = getDeepestType(t);
 			if (t->kind != type_boolK) {
 				printErrorMsg("type mismatch");
 			}
@@ -249,7 +261,8 @@ void typeFOR_CLAUSE(FOR_CLAUSE *decl) {
 
 	if(decl->condition) {
 		TYPE *t = typeEXP(decl->condition);
-		if (t != boolTYPE) {
+		t = getDeepestType(t);
+		if (t->kind != type_boolK) {
 			printErrorMsg("type mismatch");
 		}
 	}
@@ -274,6 +287,9 @@ void typeSHORTVAR(EXP *left, EXP *right) {
 	if (!left->val.idE->symbol->val.type) {
 		left->val.idE->symbol->val.type = right->type;
 		left->type = right->type;
+		if (!right->type) {
+			printErrorMsg("Cannot use empty as value in assignenment");
+		}
 	} else {
 		checkAssignable(left->type, right->type, right->loc);
 	}
@@ -396,17 +412,20 @@ TYPE *typeEXPplus(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_stringK:
 		case type_floatK:
 		case type_intK:
 		case type_runeK:
-			if (left->type->kind != right->type->kind) {
-				printErrorOperatorMismatch("+", left->type, right->type, right->loc);
+			if (l->kind != r->kind) {
+				printErrorOperatorMismatch("+", l, r, right->loc);
 			}
 			break;
 		default:
-			printErrorOperator(left->type, "+", left->loc);
+			printErrorOperator(l, "+", left->loc);
 			break;
 	}
 
@@ -418,16 +437,19 @@ TYPE *typeEXPnumeric(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_intK:
 		case type_floatK:
 		case type_runeK:
-			if (left->type->kind != right->type->kind) {
-				printErrorOperatorMismatch("-, *, /, %", left->type, right->type, right->loc);
+			if (l->kind != r->kind) {
+				printErrorOperatorMismatch("-, *, /, %", l, r, right->loc);
 			}
 			break;
 		default:
-			printErrorOperator(left->type, "-, *, /, %", left->loc);
+			printErrorOperator(l, "-, *, /, %", left->loc);
 			break;
 	}
 
@@ -439,15 +461,18 @@ TYPE *typeEXPbit(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_intK:
 		case type_runeK:
-			if (right->type->kind != type_intK && right->type->kind != type_runeK) {
-				printErrorOperator(right->type, "&, |, <<, >>, &^, ^", right->loc);
+			if (r->kind != type_intK && r->kind != type_runeK) {
+				printErrorOperator(r, "&, |, <<, >>, &^, ^", right->loc);
 			}
 			break;
 		default:
-			printErrorOperator(left->type, "&, |, <<, >>, &^, ^", left->loc);
+			printErrorOperator(l, "&, |, <<, >>, &^, ^", left->loc);
 			break;
 	}
 
@@ -458,25 +483,28 @@ TYPE *typeEXPcomparable(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_intK:
 		case type_floatK:
 		case type_runeK:
 		case type_stringK:
 		case type_boolK:
-			if (left->type->kind != right->type->kind) {
-				printErrorType(left->type, right->type, left->loc);
+			if (l->kind != r->kind) {
+				printErrorType(l, r, left->loc);
 			}
 			break;
 		case type_structK:
-			if (!isSameStruct(left->type->val.structT, right->type->val.structT)) {
-				printErrorType(left->type, right->type, left->loc);
+			if (!isSameStruct(l->val.structT, r->val.structT)) {
+				printErrorType(l, r, left->loc);
 			}
 			break;
 		case type_refK:
 		case type_arrayK:
 		case type_sliceK:
-			printErrorOperator(left->type, "==, !=", left->loc);
+			printErrorOperator(l, "==, !=", left->loc);
 			break;
 	}
 
@@ -487,13 +515,16 @@ TYPE *typeEXPordered(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_intK:
 		case type_floatK:
 		case type_runeK:
 		case type_stringK:
-			if (left->type->kind != right->type->kind) {
-				printErrorType(left->type, right->type, left->loc);
+			if (l->kind != r->kind) {
+				printErrorType(l, r, left->loc);
 			}
 			break;
 		case type_boolK:
@@ -501,7 +532,7 @@ TYPE *typeEXPordered(EXP *left, EXP *right) {
 		case type_refK:
 		case type_arrayK:
 		case type_sliceK:
-			printErrorOperator(left->type, "<, <=, >, >=", left->loc);
+			printErrorOperator(l, "<, <=, >, >=", left->loc);
 			break;
 	}
 	return boolTYPE;
@@ -511,14 +542,17 @@ TYPE *typeEXPbool(EXP *left, EXP *right) {
 	left->type = typeEXP(left);
 	right->type = typeEXP(right);
 
-	switch (left->type->kind) {
+	TYPE *l = getDeepestType(left->type);
+	TYPE *r = getDeepestType(right->type);
+
+	switch (l->kind) {
 		case type_boolK:
-			if (right->type->kind != type_boolK) {
-				printErrorType(left->type, right->type, left->loc);
+			if (r->kind != type_boolK) {
+				printErrorType(l, r, left->loc);
 			}
 			break;
 		default:
-			printErrorOperator(left->type, "&&, ||", left->loc);
+			printErrorOperator(l, "&&, ||", left->loc);
 			break;
 	}
 	return boolTYPE;
@@ -526,13 +560,15 @@ TYPE *typeEXPbool(EXP *left, EXP *right) {
 TYPE *typeEXPunumeric(EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	switch (exp->type->kind) {
+	TYPE *t = getDeepestType(exp->type);
+
+	switch (t->kind) {
 		case type_intK:
 		case type_floatK:
 		case type_runeK:
 			break;
 		default:
-			printErrorOperator(exp->type, "unary +, unary -", exp->loc);
+			printErrorOperator(t, "unary +, unary -", exp->loc);
 			break;
 	}
 
@@ -542,8 +578,11 @@ TYPE *typeEXPunumeric(EXP *exp) {
 TYPE *typeEXPubool(EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	if (exp->type->kind != type_boolK) {
-		printErrorOperator(exp->type, "!", exp->loc);
+	TYPE *t = exp->type;
+	t = getDeepestType(t);
+
+	if (t->kind != type_boolK) {
+		printErrorOperator(t, "!", exp->loc);
 	}
 
 	return boolTYPE;
@@ -552,12 +591,15 @@ TYPE *typeEXPubool(EXP *exp) {
 TYPE *typeEXPuint(EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	switch (exp->type->kind) {
+	TYPE *t = exp->type;
+	t = getDeepestType(t);
+
+	switch (t->kind) {
 		case type_intK:
 		case type_runeK:
 			break;
 		default:
-			printErrorOperator(exp->type, "unary ^", exp->loc);
+			printErrorOperator(t, "unary ^", exp->loc);
 			break;
 	}
 
@@ -567,7 +609,12 @@ TYPE *typeEXPuint(EXP *exp) {
 TYPE *typeEXPselector(EXP *exp, ID *id) {
 	exp->type = typeEXP(exp);
 
+	while (exp->type->kind == type_refK) {
+		exp->type = exp->type->val.refT->symbol->val.type;
+	}
+
 	if (exp->type->kind != type_structK) {
+		printf("%d", exp->type->kind);
 		printError("field selector require a struct", exp->loc);
 	}
 
@@ -603,16 +650,10 @@ TYPE *typeEXPindex(EXP *exp, EXP *index) {
 	/* Return enclosed type */
 	switch (exp->type->kind) {
 		case type_arrayK:
-			return exp->type->val.arrayT.type;
-			if (exp->type->kind == type_refK) {
-				exp->type = exp->type->val.refT->symbol->val.type;
-			}
+			exp->type = exp->type->val.arrayT.type;
 			break;
 		case type_sliceK:
 			exp->type = exp->type->val.sliceT;
-			if (exp->type->kind == type_refK) {
-				exp->type = exp->type->val.refT->symbol->val.type;
-			}
 			break;
 		default:
 			break;
@@ -624,11 +665,12 @@ TYPE *typeEXPindex(EXP *exp, EXP *index) {
 TYPE *typeEXPappend(ID *id, EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	if (id->symbol->val.type->kind != type_sliceK) {
+	TYPE *l = getDeepestType(id->symbol->val.type);
+	if (l->kind != type_sliceK) {
 		printError("first argument to append must be a slice", id->loc);
 	}
 
-	TYPE *typeOfSlice = id->symbol->val.type->val.sliceT;
+	TYPE *typeOfSlice = l->val.sliceT;
 	if (!isTypeAssignble(typeOfSlice, exp->type)) {
 		printErrorType(typeOfSlice, exp->type, id->loc);
 	}
@@ -648,7 +690,7 @@ TYPE *typeEXPfunccall(EXP *call) {
 	} else {
 		/* Fix mislabeled conversions */
 		if (exp->val.idE->symbol->kind == typeSym) {
-			return typeEXPcast(exp->val.idE->symbol->val.type, arg);
+			return typeEXPcast(exp->type, arg);
 
 		} else {
 			if (exp->val.idE->symbol->kind == funcSym) {
@@ -690,9 +732,8 @@ TYPE *typeEXPcast(TYPE *type, EXP *exp) {
 	if (!type || !exp) return NULL;
 	exp->type = typeEXP(exp);
 
-	while (type->kind == type_refK) {
-		type = type->val.refT->symbol->val.type;
-	}
+	TYPE *t = type;
+	t = getDeepestType(t);
 
 	switch (type->kind) {
 		case type_intK:
@@ -704,9 +745,7 @@ TYPE *typeEXPcast(TYPE *type, EXP *exp) {
 			printError("conversions can only be of basic types", exp->loc);
 	}
 
-	if (!isTypeAssignble(type, exp->type)) {
-		printErrorType(type, exp->type, exp->loc);
-	}
+	checkCastable(type, exp->type, exp->loc);
 
 	return type;
 }
@@ -754,9 +793,76 @@ int isTypeAssignble(TYPE *left, TYPE *right) {
 	if (!left || !right) return false;
 
 	switch (left->kind) {
+		case type_intK:
+		case type_runeK:
+			if (right->kind != type_intK && right->kind != type_runeK) {
+				return false;
+			}
+			break;
 		case type_floatK:
-			if (right->kind != type_intK &&
-					right->kind != type_floatK &&
+		case type_boolK:
+		case type_stringK:
+			if (right->kind != left->kind) {
+				return false;
+			}
+			break;
+		case type_arrayK:
+			if (right->kind != type_arrayK) {
+				return false;
+			} else {
+				if (!isTypeAssignble(left->val.arrayT.type, right->val.arrayT.type) ||
+						left->val.arrayT.size != right->val.arrayT.size) {
+					return false;
+				}
+			}
+			break;
+		case type_sliceK:
+			if (right->kind != type_sliceK) {
+				return false;
+			} else {
+				if (!isTypeAssignble(left->val.sliceT, right->val.sliceT)) {
+					return false;
+				}
+			}
+			break;
+		case type_structK:
+			if (right->kind != type_structK) {
+				return false;
+			} else {
+				if (!isSameStruct(left->val.structT, right->val.structT)) {
+					return false;
+				}
+			}
+			break;
+		case type_refK:
+			// TODO: Check for errors
+			if (right->kind != type_refK) {
+				return false;
+			} else {
+				if (left != right) {
+					false;
+				}
+			}
+			break;
+	}
+	return true;
+}
+
+void checkCastable(TYPE *left, TYPE *right, YYLTYPE loc) {
+	if (!left || !right) return;
+
+	if (!isTypeCastable(left, right)) {
+		printErrorType(left, right, loc);
+	}
+}
+
+int isTypeCastable(TYPE *left, TYPE *right) {
+	if (!left || !right) return false;
+
+	switch (left->kind) {
+		case type_floatK:
+			if (right->kind != type_floatK &&
+					right->kind != type_intK &&
 					right->kind != type_runeK) {
 				return false;
 			}
@@ -806,7 +912,6 @@ int isTypeAssignble(TYPE *left, TYPE *right) {
 			}
 			break;
 		case type_refK:
-			// TODO: ref type
 			break;
 	}
 	return true;
@@ -842,6 +947,9 @@ int isPrintableType(EXP *exp) {
 	if (exp->next) isPrintableType(exp->next);
 
 	TYPE *t = exp->type;
+	while(t->kind == type_refK) {
+		t = exp->type->val.refT->symbol->val.type;
+	}
 	switch (t->kind) {
 		case type_intK:
 		case type_floatK:

@@ -1,9 +1,5 @@
 #include "code.h"
 
-void codeSYMBOL(SYMBOL *obj) {
-	print(obj->id);
-}
-
 void codeID(ID *obj) {
 	if (obj->next != NULL) {
 		codeID(obj->next);
@@ -13,6 +9,7 @@ void codeID(ID *obj) {
 }
 
 void codeIDsingle(ID *id) {
+	print("_");
 	print(id->name);
 }
 
@@ -71,7 +68,7 @@ void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 	ID* tmpid = obj->id;
 	EXP* tmpexp = obj->exp;
 	while (tmpid) {
-		print(tmpid->name);
+		codeIDsingle(tmpid);
 		if (tmpexp) {
 			print(" = ");
 			codeEXPsingle(tmpexp);
@@ -264,7 +261,7 @@ void codeFUNC_ARG(FUNC_ARG *obj) {
 		while (tmpid) {
 			codeTYPE(obj->type);
 			SPACE;
-			print(tmpid->name);
+			codeIDsingle(tmpid);
 			tmpid = tmpid->next;
 			if (tmpid) print(", ");
 		}
@@ -766,7 +763,7 @@ void codeEXPsingle(EXP *obj) {
 			codeEXP(obj->val.indexE.index);
 			print(")");
 			break;
-		case selectorK: // TODO
+		case selectorK:
 			codeEXP(obj->val.selectorE.exp);
 			print(".");
 			codeID(obj->val.selectorE.id);

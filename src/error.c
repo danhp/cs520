@@ -79,6 +79,7 @@ void pTYPE(TYPE *obj) {
 
 	switch(obj->kind) {
 		case type_refK:
+			fprintf(stderr, "%s", obj->val.refT->symbol->id);
 			return;
 		case type_intK:
 			fprintf(stderr, "%s", "int");

@@ -39,6 +39,18 @@ do
 done
 
 echo
+echo Running valid milestone 2 test cases:
+for file in ../grading/typing/valid/*
+do
+	./golite type $file 1> /dev/null;
+	if [ "$?" -eq 0 ]; then
+		printf ".";
+	else
+		echo Failed: $file;
+	fi
+done
+
+echo
 echo Running invalid syntax:
 for file in ../programs/invalids/syntax/*
 do
@@ -77,3 +89,14 @@ do
 	fi
 done
 
+echo
+echo Running invalid milestone 2 test cases:
+for file in ../grading/typing/invalid/*
+do
+	./golite type $file > /dev/null 2>&1;
+	if [ "$?" -eq 1 ]; then
+		printf ".";
+	else
+		echo Failed: $file;
+	fi
+done

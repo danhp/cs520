@@ -7,6 +7,7 @@ func main() {
   var iTHprimeNumber int = 10
 
   var primeNumbers []int
+  var p [3]int
   primeNumbers = append(primeNumbers, 2)
 
   var sqrt int = 2

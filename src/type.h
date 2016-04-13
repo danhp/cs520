@@ -56,6 +56,8 @@ int isSameType(TYPE *t1, TYPE *t2);
 int isSameStruct(STRUCT_DECL *d1, STRUCT_DECL *d2);
 void checkAssignable(TYPE *left, TYPE *right, YYLTYPE loc);
 int isTypeAssignble(TYPE *left, TYPE *right);
+void checkCastable(TYPE *left, TYPE *right, YYLTYPE loc);
+int isTypeCastable(TYPE *left, TYPE *right);
 int isSameLength(FUNC_ARG *arg, EXP *exp);
 int isPrintableType(EXP *exp);
 

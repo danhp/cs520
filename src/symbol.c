@@ -42,12 +42,7 @@ void symVAR_DECL(VAR_DECL *obj) {
 			cur->symbol->kind = inferredSym;
 		} else {
 			symTYPE(obj->type);
-			/* Crush type aliases */
-			TYPE *t = obj->type;
-			while (t->kind == type_refK) {
-				t = t->val.refT->symbol->val.type;
-			}
-			cur->symbol = putSymbol(sym, cur->name, t, cur->loc);
+			cur->symbol = putSymbol(sym, cur->name, obj->type, cur->loc);
 		}
 		cur = cur->next;
 	}
@@ -62,11 +57,6 @@ void symTYPE_DECL(TYPE_DECL *obj) {
 	if(obj->next) symTYPE_DECL(obj->next);
 
 	symTYPE(obj->type);
-	/* Crush type aliases */
-	TYPE *t = obj->type;
-	while (t->kind == type_refK) {
-		t = t->val.refT->symbol->val.type;
-	}
 	obj->id->symbol = putSymbol(sym, obj->id->name, obj->type, obj->loc);
 	obj->id->symbol->kind = typeSym;
 }
@@ -77,6 +67,9 @@ void symTYPE(TYPE *obj) {
 	switch(obj->kind) {
 		case type_refK:
 			obj->val.refT->symbol = getSymbol(sym, obj->val.refT->name, obj->loc);
+			if (obj->val.refT->symbol->kind != typeSym) {
+				printErrorMsg("Refered value is not a type");
+			}
 			return;
 		case type_intK:
 		case type_floatK:
@@ -91,7 +84,9 @@ void symTYPE(TYPE *obj) {
 			symTYPE(obj->val.sliceT);
 			break;
 		case type_structK:
+			sym = scopeSymbolTable(sym);
 			symSTRUCT_DECL(obj->val.structT);
+			sym = unscopeSymbolTable(sym, obj->loc.first_line);
 			return;
 	}
 }
@@ -100,19 +95,13 @@ void symSTRUCT_DECL(STRUCT_DECL *obj) {
 	if (!obj) return;
 	if (obj->next) symSTRUCT_DECL(obj->next);
 
-	sym = scopeSymbolTable(sym);
 	ID *id = obj->id;
 
 	symTYPE(obj->type);
-	/* Crush type aliases */
-	/* while (obj->type->kind == type_refK) { */
-	/* 	obj->type = obj->type->val.refT->symbol->val.type; */
-	/* } */
 	while (id) {
 		id->symbol = putSymbol(sym, id->name, obj->type, obj->loc);
 		id = id->next;
 	}
-	sym = unscopeSymbolTable(sym, obj->loc.first_line);
 }
 
 /* 1)Add function type to top-level symbol table
@@ -141,10 +130,6 @@ void symFUNC_SIGN(FUNC_SIGN *obj) {
 
 	if (obj->type) {
 		symTYPE(obj->type);
-		/* Crush type aliases */
-		/* while (obj->type->kind == type_refK) { */
-		/* 	obj->type = obj->type->val.refT->symbol->val.type; */
-		/* } */
 	}
 }
 
@@ -152,6 +137,7 @@ void symFUNC_ARG(FUNC_ARG *obj)
 { if (!obj) return;
   if(obj->next) { symFUNC_ARG(obj->next); }
 
+  symTYPE(obj->type);
   ID *cur = obj->id;
   while (cur) {
     SYMBOL *s = putSymbol(sym, cur->name, obj->type, obj->loc);
@@ -326,11 +312,7 @@ void symEXP(EXP *obj)
       break;
     case appendK:
       obj->val.appendE.id->symbol = getSymbol(sym, obj->val.appendE.id->name, obj->loc);
-      /* Crush type aliases */
       TYPE *t = obj->val.appendE.id->symbol->val.type;
-      while (t->kind == type_refK) {
-        t = t->val.refT->symbol->val.type;
-      }
       obj->val.appendE.id->symbol->val.type = t;
       symEXP(obj->val.appendE.exp);
       break;
@@ -351,13 +333,17 @@ void symSHORTVAR(EXP *id) {
 	YYLTYPE loc = id->loc;
 	int foundNewDeclaration = 0;
 	while (id) {
-		if (isInTopFrame(sym, id->val.idE->name)) {
-			id->val.idE->symbol = getSymbol(sym, id->val.idE->name, id->loc);
-		} else {
-			foundNewDeclaration = 1;
-			id->val.idE->symbol = putSymbol(sym, id->val.idE->name, NULL, id->loc);
-			id->val.idE->symbol->kind = inferredSym;
-		}
+			if (isInTopFrame(sym, id->val.idE->name)) {
+				if (strcmp(id->val.idE->name, "_")) {
+					id->val.idE->symbol = blank();
+				} else {
+					id->val.idE->symbol = getSymbol(sym, id->val.idE->name, id->loc);
+				}
+			} else {
+				foundNewDeclaration = 1;
+				id->val.idE->symbol = putSymbol(sym, id->val.idE->name, NULL, id->loc);
+				id->val.idE->symbol->kind = inferredSym;
+			}
 		id = id->next;
 	}
 

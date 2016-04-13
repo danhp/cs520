@@ -21,6 +21,7 @@ SYMBOL *TREE_addVariable(REDBLACKTREE *tree, char *id, TYPE *type, YYLTYPE loc) 
 
 int TREE_addSYMBOL( REDBLACKTREE *tree, SYMBOL *node) {
   if(tree->root == NULL) {
+    setBlack(node);
     tree->root = node;
     return 1;
   } else {
@@ -139,6 +140,7 @@ void treeRotation(SYMBOL *node)
   else if(isRed(node->parent))
   {
     treeRotation(node->parent);
+    return;
   }
 
   if(isRed(node))
@@ -338,4 +340,3 @@ void printSyms(SYMBOL *s) {
 		printSyms(s->rightChild);
 	}
 }
-

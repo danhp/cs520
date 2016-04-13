@@ -33,7 +33,6 @@ void codeSTMTprint(EXP *exp, int indentation);
 void codeSTMTprintln(EXP *exp, int indentation);
 void codeSTMTassign(EXP *left, EXP *right, int indentation);
 
-void codeSYMBOL(SYMBOL *obj);
 void codeFUNC_ARG(FUNC_ARG *obj);
 void codeCASE_DECLcase(CASE_DECL *obj, EXP *condition, int indentation);
 void codeCASE_DECLdefault(CASE_DECL *obj, int indentation);
