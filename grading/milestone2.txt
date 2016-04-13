@@ -1,0 +1,33 @@
+Members
+═══════
+
+  • Justin Domingue - 260588454
+  • Daniel Pham - 260526252
+  • Seguei Nevarko - 260583807
+
+
+Q1
+══
+
+  • Grade: 10/10
+
+
+Q2
+══
+
+  • Grade: 20.2/30
+    • Valid: 8/15
+      • Recognized as valid: 8/15
+      • Recognized as invalid: 7/15
+    • Invalid: 12.2/15
+      • Recognized as invalid: 48/59
+      • Recognized as valid: 11/59
+
+
+Q3
+══
+
+  • Grade: 8/10
+    • Would have liked more information on typechecking, e.g. where are
+      the types of expressions stored (in the tree or in an auxiliary
+      table)?

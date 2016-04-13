@@ -1,0 +1,8 @@
+• Good job, but try and make sure everyone participates in the creation
+  of the code generator; there's going to be a question about that on
+  the final and you want all team members to know what's up.
+• What does your code generator do for type aliases? Use the base type
+  or create a new type in C++?
+• Tip: what if a GoLite program uses a C++ keyword as a variable name,
+  e.g. var typedef int = 3
+
