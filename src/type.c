@@ -152,6 +152,7 @@ void typeReturnsCASE(CASE_DECL *decl, TYPE *type) {
 
 void typeSTRUCT_DECL(STRUCT_DECL *decl) {
 	/* Nothing to do */
+	printErrorMsg("dissalowed in line struct decl");
 }
 
 void typeSTMT(STMT *stmt) {
@@ -561,7 +562,6 @@ TYPE *typeEXPunumeric(EXP *exp) {
 	exp->type = typeEXP(exp);
 
 	TYPE *t = getDeepestType(exp->type);
-
 	switch (t->kind) {
 		case type_intK:
 		case type_floatK:
@@ -578,9 +578,7 @@ TYPE *typeEXPunumeric(EXP *exp) {
 TYPE *typeEXPubool(EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	TYPE *t = exp->type;
-	t = getDeepestType(t);
-
+	TYPE *t = getDeepestType(exp->type);
 	if (t->kind != type_boolK) {
 		printErrorOperator(t, "!", exp->loc);
 	}
@@ -591,9 +589,7 @@ TYPE *typeEXPubool(EXP *exp) {
 TYPE *typeEXPuint(EXP *exp) {
 	exp->type = typeEXP(exp);
 
-	TYPE *t = exp->type;
-	t = getDeepestType(t);
-
+	TYPE *t = getDeepestType(exp->type);
 	switch (t->kind) {
 		case type_intK:
 		case type_runeK:
@@ -609,17 +605,14 @@ TYPE *typeEXPuint(EXP *exp) {
 TYPE *typeEXPselector(EXP *exp, ID *id) {
 	exp->type = typeEXP(exp);
 
-	while (exp->type->kind == type_refK) {
-		exp->type = exp->type->val.refT->symbol->val.type;
-	}
 
-	if (exp->type->kind != type_structK) {
-		printf("%d", exp->type->kind);
+	TYPE *t = getDeepestType(exp->type);
+	if (t->kind != type_structK) {
 		printError("field selector require a struct", exp->loc);
 	}
 
 	/* Find type for field */
-	STRUCT_DECL *decl = exp->type->val.structT;
+	STRUCT_DECL *decl = t->val.structT;
 	ID *field = decl->id;
 	while (decl) {
 		while (field) {
@@ -732,9 +725,6 @@ TYPE *typeEXPcast(TYPE *type, EXP *exp) {
 	if (!type || !exp) return NULL;
 	exp->type = typeEXP(exp);
 
-	TYPE *t = type;
-	t = getDeepestType(t);
-
 	switch (type->kind) {
 		case type_intK:
 		case type_floatK:
@@ -826,6 +816,7 @@ int isTypeAssignble(TYPE *left, TYPE *right) {
 			}
 			break;
 		case type_structK:
+			right = getDeepestType(right);
 			if (right->kind != type_structK) {
 				return false;
 			} else {
@@ -903,6 +894,7 @@ int isTypeCastable(TYPE *left, TYPE *right) {
 			}
 			break;
 		case type_structK:
+			right = getDeepestType(right);
 			if (right->kind != type_structK) {
 				return false;
 			} else {
@@ -946,10 +938,7 @@ int isPrintableType(EXP *exp) {
 	if (!exp) return 1;
 	if (exp->next) isPrintableType(exp->next);
 
-	TYPE *t = exp->type;
-	while(t->kind == type_refK) {
-		t = exp->type->val.refT->symbol->val.type;
-	}
+	TYPE *t = getDeepestType(exp->type);
 	switch (t->kind) {
 		case type_intK:
 		case type_floatK:

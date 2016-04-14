@@ -14,7 +14,8 @@ typedef struct SYMBOL {
 	union {
 		struct FUNC_SIGN *funcSignature;
 		struct TYPE *type;
-	}val;
+	} val;
+	int shortVarNew;
 	struct SYMBOL *next;
 
 	/* for red black tree */

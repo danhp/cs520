@@ -9,7 +9,10 @@ void codeID(ID *obj) {
 }
 
 void codeIDsingle(ID *id) {
-	print("_");
+	/* Don't tag golang keywords */
+	if (strcmp(id->name, "true") && strcmp(id->name, "false")) {
+		print("_");
+	}
 	print(id->name);
 }
 
@@ -65,40 +68,29 @@ void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 	SPACE;
 
 	// ID might be a list, so go over it
-	ID* tmpid = obj->id;
-	EXP* tmpexp = obj->exp;
-	while (tmpid) {
-		codeIDsingle(tmpid);
-		if (tmpexp) {
-			print(" = ");
-			codeEXPsingle(tmpexp);
-			tmpexp = tmpexp->next;
-		} else {
-			switch (obj->type->kind) {
-				case type_refK:
-					break;
-				case type_intK:
-				case type_floatK:
-				case type_boolK:
-				case type_stringK:
-				case type_runeK:
-					print(" = ");
-					codeEXPdefaultValue(obj->type);
-					break;
-				case type_sliceK:
-					// Slice are not initialized in golang.
-					break;
-				case type_arrayK:
-					print(" = {");
-					codeEXPdefaultValue(obj->type->val.arrayT.type);
-					print("}");
-					break;
-				case type_structK:
-					break;
-			}
+	ID* id = obj->id;
+	EXP* exp = obj->exp;
+
+	while (id) {
+		if (strcmp(id->name, "_") == 0) {
+			id = id->next;
+			exp = exp->next;
 		}
-		tmpid = tmpid->next;
-		if (tmpid) print(", ");
+
+		if (id) {
+			if (id->next && strcmp(id->next->name, "_") != 0) {
+				print(", ");
+			}
+			codeIDsingle(id);
+			if (exp) {
+				print(" = ");
+				codeEXPsingle(exp);
+				exp = exp->next;
+			} else {
+				codeEXPdefaultValueWithEqual(id->symbol->val.type);
+			}
+			id = id->next;
+		}
 	}
 }
 
@@ -191,27 +183,7 @@ void codeSTRUCT_DECLsingle(ID *id, TYPE *type) {
 	}
 
 	codeIDsingle(id);
-	switch (type->kind) {
-		case type_refK:
-		case type_intK:
-		case type_floatK:
-		case type_boolK:
-		case type_stringK:
-		case type_runeK:
-			print(" = ");
-			codeEXPdefaultValue(type);
-			break;
-		case type_sliceK:
-			// Slice are not initialized in golang.
-			break;
-		case type_arrayK:
-			print(" = {");
-			codeEXPdefaultValue(type->val.arrayT.type);
-			print("}");
-			break;
-		case type_structK:
-			break;
-	}
+	codeEXPdefaultValueWithEqual(type);
 }
 
 void codeFUNC_DECL(FUNC_DECL *obj, int indentation) {
@@ -314,24 +286,33 @@ void codeSTMT(STMT *obj, int indentation) {
 			break;
 
 		case shortvarK:
-			if (indentation) printIndentation(indentation);
+			/* Dummy expression */
+			if (indentation) printIndentation(0);
+
 			EXP *left = obj->val.shortvarS.left;
 			EXP *right = obj->val.shortvarS.right;
 
-			left->type ? codeTYPE(left->type) : codeTYPE(right->type);
-			SPACE;
-
 			// Traverse the list
 			while (left) {
-				codeEXPsingle(left);
-				print(" = ");
-				codeEXPsingle(right);
-				left = left->next;
-				right = right->next;
-				if (left) print(", ");
-			}
-			if (indentation) {
-				SEMICOLON; NEWLINE;
+				if (strcmp(left->val.idE->name, "_") == 0) {
+					left = left->next;
+					right = right->next;
+				}
+				if (left && right) {
+					if (indentation) { printIndentation(indentation); }
+					if (left->val.idE->symbol->shortVarNew) {
+						left->type ? codeTYPE(left->type) : codeTYPE(right->type);
+						SPACE;
+					}
+					codeEXPsingle(left);
+					print(" = ");
+					codeEXPsingle(right);
+					SEMICOLON;
+					if (indentation) { NEWLINE; }
+
+					left = left->next;
+					right = right->next;
+				}
 			}
 			break;
 
@@ -793,13 +774,40 @@ void codeEXPsingle(EXP *obj) {
 			break;
 	}
 }
+void codeEXPdefaultValueWithEqual(TYPE *type) {
+	if (!type) return;
+
+	switch (type->kind) {
+		case type_refK:
+			codeEXPdefaultValueWithEqual(type->val.refT->symbol->val.type);
+			return;
+		case type_intK:
+		case type_floatK:
+		case type_boolK:
+		case type_stringK:
+		case type_runeK:
+			print(" = ");
+			codeEXPdefaultValue(type);
+			break;
+		case type_sliceK:
+			// Slice are not initialized in golang.
+			break;
+		case type_arrayK:
+			print(" = {");
+			codeEXPdefaultValue(type->val.arrayT.type);
+			print("}");
+			break;
+		case type_structK:
+			break;
+	}
+}
 
 void codeEXPdefaultValue(TYPE *type) {
 	if (!type) return;
 
 	switch(type->kind) {
 		case type_refK:
-			// TODO: Check occurances
+			// Should not be called as thise are unwrapped in parent call.
 			return;
 		case type_intK:
 			print("0");
@@ -816,7 +824,6 @@ void codeEXPdefaultValue(TYPE *type) {
 		case type_stringK:
 			print("\"\"");
 			return;
-
 		case type_arrayK:
 			print("{");
 			codeEXPdefaultValue(type->val.arrayT.type);
@@ -825,7 +832,8 @@ void codeEXPdefaultValue(TYPE *type) {
 		case type_sliceK:
 			// Slices are not initialized in golang
 			break;
-		case type_structK: // TODO: deep init
-			return;
+		case type_structK:
+			// Don't need to init as they are done in the typedef.
+			break;
 	}
 }

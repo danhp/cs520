@@ -11,6 +11,7 @@
 
 #include "tree.h"
 #include "pretty.h"
+#include "type.h"
 
 void codePROGRAM(PROGRAM *obj, int indentation);
 void codeCPPheader();
@@ -38,6 +39,7 @@ void codeCASE_DECLcase(CASE_DECL *obj, EXP *condition, int indentation);
 void codeCASE_DECLdefault(CASE_DECL *obj, int indentation);
 void codeFOR_CLAUSE(FOR_CLAUSE *obj);
 
+void codeEXPdefaultValueWithEqual(TYPE *type);
 void codeEXPdefaultValue(TYPE *type);
 
 #endif

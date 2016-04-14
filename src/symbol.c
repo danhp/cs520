@@ -343,6 +343,7 @@ void symSHORTVAR(EXP *id) {
 				foundNewDeclaration = 1;
 				id->val.idE->symbol = putSymbol(sym, id->val.idE->name, NULL, id->loc);
 				id->val.idE->symbol->kind = inferredSym;
+				id->val.idE->symbol->shortVarNew = 1;
 			}
 		id = id->next;
 	}
