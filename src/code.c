@@ -665,60 +665,44 @@ void codeEXPsingle(EXP *obj) {
 			print(")");
 			break;
 		case eqK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" == ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case neqK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" != ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case leK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" < ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case leqK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" <= ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case geK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" > ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case geqK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" >= ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case orK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" || ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case andK:
-			print("(");
 			codeEXP(obj->val.binaryE.left);
 			print(" && ");
 			codeEXP(obj->val.binaryE.right);
-			print(")");
 			break;
 		case unotK:
 			print("!");
