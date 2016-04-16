@@ -1,6 +1,13 @@
 package main
 
 func main() {
-    a, b := 1, 2
-    b, c := 3, 5
+    var (
+        a int
+        b float64
+        c rune
+        d string
+        e bool
+        f [3][2] struct {a int}
+        g struct {a, b float64; c struct {a int;};}
+    )
 }

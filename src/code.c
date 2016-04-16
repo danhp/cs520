@@ -61,7 +61,12 @@ void codeTOP_DECL(TOP_DECL *obj, int indentation) {
 // type id [id = exp]
 void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 	if(!obj) return;
-	if(obj->next) codeVAR_DECL(obj->next, indentation);
+	if(obj->next) {
+		codeVAR_DECL(obj->next, indentation);
+		SEMICOLON; NEWLINE;
+	}
+
+	printIndentation(indentation);
 
 	// print declared type or else exp type
 	obj->type ? codeTYPE(obj->type) : codeTYPE(obj->exp->type);
@@ -96,7 +101,12 @@ void codeVAR_DECL(VAR_DECL *obj, int indentation) {
 
 void codeTYPE_DECL(TYPE_DECL *obj, int indentation) {
 	if(!obj) return;
-	if(obj->next) codeTYPE_DECL(obj->next, indentation);
+	if(obj->next) {
+		codeTYPE_DECL(obj->next, indentation);
+		SEMICOLON; NEWLINE;
+	}
+
+	printIndentation(indentation);
 
 	if (obj->type->kind != type_structK) {
 		print("typedef ");
@@ -259,7 +269,6 @@ void codeSTMT(STMT *obj, int indentation) {
 			break;
 
 		case varK:
-			printIndentation(indentation);
 			codeVAR_DECL(obj->val.varS, indentation);
 			if (indentation) {
 				SEMICOLON;NEWLINE;
@@ -267,7 +276,6 @@ void codeSTMT(STMT *obj, int indentation) {
 			break;
 
 		case typeK:
-			printIndentation(indentation);
 			codeTYPE_DECL(obj->val.typeS, indentation);
 			if (indentation) {
 				SEMICOLON;NEWLINE;
