@@ -74,19 +74,19 @@ Everything can be done from the top directory
 
 **[`-pptype`] Pretty print with expression types**
 
-    $ ./run file.go -pptype
+    $ ./run  -pptype file.go
     $ ls outputs/
     foo.pptype.go
 
 **[`-dumpsymtab`] Dump top-most frame of the symbol table each time a scope is exited**
 
-    $ ./run file.go -dumpsymtab
+    $ ./run  -dumpsymtab file.go
     $ ls outputs
     foo.symtab
 
 **``pptype`` and `dumpsymtab` can be used together**
 
-    $ ./run file.go -pptype -dumpsymtab
+    $ ./run  -pptype -dumpsymtab file.go
     $ ls outputs/
     foo.symtab  foo.pptype.go
 
