@@ -26,7 +26,7 @@ else
         ;;
       -pptype)
         cmd="pptype"
-        output_file="pptype"
+        output_file="pptype.go"
         shift
         file=$1
         ;;
@@ -49,10 +49,5 @@ else
   # # Only write if successful
   if [ "$?" -eq 0 ]; then
     ./src/golite $cmd $file 1> "outputs/$pref.$output_file";
-    if [ "$#" -eq 3 ]; then
-      cmd=${3:1}
-      output_file=$([ "$cmd" = "dumpsymtab" ] && echo "symtab" || echo "$cmd".go )
-      ./src/golite $cmd $file 1> outputs/$pref.$output_file;
-    fi
   fi
 fi
