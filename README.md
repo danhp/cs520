@@ -54,7 +54,7 @@ Run type checker and pretty print with types
 
     $ ./golite pptype file
 
-Generat code
+Generate code
 
     $ ./golite code file
 
@@ -66,11 +66,11 @@ Everything can be done from the top directory
 
     $ ./run
 
-**Generate Code**
+**[`-pretty`] Pretty print the input file**
 
-    $ ./run file.go
+    $ ./run  -pretty file.go
     $ ls outputs/
-    file.cpp
+    foo.pretty.go
 
 **[`-pptype`] Pretty print with expression types**
 
@@ -84,11 +84,19 @@ Everything can be done from the top directory
     $ ls outputs
     foo.symtab
 
-**``pptype`` and `dumpsymtab` can be used together**
+**[`-code`] Generate Code**
+
+    $ ./run -code file.go
+    $ ls outputs/
+    file.cpp
+
+**Flags can be used together**
 
     $ ./run  -pptype -dumpsymtab file.go
     $ ls outputs/
     foo.symtab  foo.pptype.go
+
+**If no flags are provided, the run command will attempt to generate all the files**
 
 #### Comments
 

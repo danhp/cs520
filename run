@@ -5,16 +5,14 @@ function run {
   # # Only write if successful
   if [ "$?" -eq 0 ]; then
     ./src/golite $2 $1 1> "outputs/$pref.$3";
+  else
+    exit
   fi
 }
 
 if [ "$#" -eq 0 ]; then
   make -C src/
 else
-  # assumes the script was called like one of the following:
-  #   a) ./run file [-pptype | -dumpsymtab] ---> golite flag file
-  #   b) ./run file                         ---> golite pretty
-
   # find filename
   for last; do true; done
 
@@ -29,12 +27,17 @@ else
     p="$1"
     case $p in
       -h|--help)
-        echo "./run [-h|-v|-dumpsymtab|-pptype] filename"
+        echo "./run [-h|-v|-pretty|-dumpsymtab|-pptype|-code] filename"
+        echo "if no flag is given, will generate all files to output/"
         exit
         ;;
       -v|--version)
         echo "version 4"
         exit
+        ;;
+      -pretty)
+        code="false"
+        run $last "pretty" "pretty.go"
         ;;
       -dumpsymtab)
         code="false"
@@ -44,9 +47,16 @@ else
         code="false"
         run  $last "pptype" "pptype.go"
         ;;
-      *)    #unknown option - assume it's filename
-        if [ "$code" = true  ] ; then
-          run $p "code" "cpp"
+      -code)
+        code="false"
+        run $last "code" "cpp"
+        ;;
+      *)    #unknown option / incorrectly assumes that there was nothing and create all files
+        if [ "$code" = true ]; then
+          run $last "pretty" "pretty.go"
+          run $last "dumpsymtab" "symtab"
+          run $last "pptype" "pptype.go"
+          run $last "code" "cpp"
         fi
         ;;
     esac

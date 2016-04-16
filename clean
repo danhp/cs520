@@ -1,0 +1,4 @@
+#!/bin/bash
+rm outputs/*.go
+rm outputs/*.cpp
+rm outputs/*.symtab
