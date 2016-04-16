@@ -84,11 +84,7 @@ Everything can be done from the top directory
     $ ls outputs
     foo.symtab
 
-**``pptype`` and `dumpsymtab` can be used together**
-
-    $ ./run file.go -pptype -dumpsymtab
-    $ ls outputs/
-    foo.symtab  foo.pptype.go
+**``pptype`` and `dumpsymtab` cannot be used together**
 
 #### Comments
 
