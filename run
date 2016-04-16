@@ -1,10 +1,5 @@
 #!/bin/bash
 function run {
-  base=$(basename $1})
-  pref=${base%.*};
-
-  rm outputs/$pref.* > /dev/null 2>&1;
-
   # # call golite with command and filename
   ./src/golite $2 $1  1> /dev/null;
   # # Only write if successful
@@ -20,24 +15,41 @@ else
   #   a) ./run file [-pptype | -dumpsymtab] ---> golite flag file
   #   b) ./run file                         ---> golite pretty
 
-  p="$1"
-  case $p in
-    -h|--help)
-      echo "./run [-h|-v|-dumpsymtab|-pptype] filename"
-      exit
-      ;;
-    -v|--version)
-      echo "version 4"
-      exit
-      ;;
-    -dumpsymtab)
-      run $2 "dumpsymtab" "symtab"
-      ;;
-    -pptype)
-      run $2 "pptype" "pptype.go"
-      ;;
-    *)    #unknown option - assume it's filename
-      run $p "code" "cpp"
-      ;;
-  esac
+  # find filename
+  for last; do true; done
+
+  code=true
+
+  base=$(basename $last})
+  pref=${base%.*};
+  rm outputs/$pref.* > /dev/null 2>&1;
+
+  while [[ $# > 0 ]]
+  do
+    p="$1"
+    case $p in
+      -h|--help)
+        echo "./run [-h|-v|-dumpsymtab|-pptype] filename"
+        exit
+        ;;
+      -v|--version)
+        echo "version 4"
+        exit
+        ;;
+      -dumpsymtab)
+        code="false"
+        run $last "dumpsymtab" "symtab"
+        ;;
+      -pptype)
+        code="false"
+        run  $last "pptype" "pptype.go"
+        ;;
+      *)    #unknown option - assume it's filename
+        if [ "$code" = true  ] ; then
+          run $p "code" "cpp"
+        fi
+        ;;
+    esac
+    shift
+  done
 fi
