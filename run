@@ -1,4 +1,18 @@
 #!/bin/bash
+function run {
+  base=$(basename $1})
+  pref=${base%.*};
+
+  rm outputs/$pref.* > /dev/null 2>&1;
+
+  # # call golite with command and filename
+  ./src/golite $2 $1  1> /dev/null;
+  # # Only write if successful
+  if [ "$?" -eq 0 ]; then
+    ./src/golite $2 $1 1> "outputs/$pref.$3";
+  fi
+}
+
 if [ "$#" -eq 0 ]; then
   make -C src/
 else
@@ -6,48 +20,24 @@ else
   #   a) ./run file [-pptype | -dumpsymtab] ---> golite flag file
   #   b) ./run file                         ---> golite pretty
 
-  while [[ $# > 0 ]]
-  do
-    p="$1"
-    case $p in
-      -h|--help)
-        echo "./run [-h|-v|-dumpsymtab|-pptype] filename"
-        exit
-        ;;
-      -v|--version)
-        echo "version 4"
-        exit
-        ;;
-      -dumpsymtab)
-        cmd="dumpsymtab"
-        output_file="symtab"
-        shift
-        file=$1
-        ;;
-      -pptype)
-        cmd="pptype"
-        output_file="pptype.go"
-        shift
-        file=$1
-        ;;
-      *)    #unknown option - assume it's filename
-        file=$p
-        output_file="cpp"
-        cmd="code"
-        ;;
-    esac
-    shift
-  done
-
-  base=$(basename $file})
-  pref=${base%.*};
-
-  rm outputs/$pref.* > /dev/null 2>&1;
-
-  # # call golite with command and filename
-  ./src/golite $cmd $file  1> /dev/null;
-  # # Only write if successful
-  if [ "$?" -eq 0 ]; then
-    ./src/golite $cmd $file 1> "outputs/$pref.$output_file";
-  fi
+  p="$1"
+  case $p in
+    -h|--help)
+      echo "./run [-h|-v|-dumpsymtab|-pptype] filename"
+      exit
+      ;;
+    -v|--version)
+      echo "version 4"
+      exit
+      ;;
+    -dumpsymtab)
+      run $2 "dumpsymtab" "symtab"
+      ;;
+    -pptype)
+      run $2 "pptype" "pptype.go"
+      ;;
+    *)    #unknown option - assume it's filename
+      run $p "code" "cpp"
+      ;;
+  esac
 fi
