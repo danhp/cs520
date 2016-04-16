@@ -72,8 +72,6 @@ Everything can be done from the top directory
     $ ls outputs/
     file.cpp
 
-#### *The following commands dont not work in milestone 3*
-
 **[`-pptype`] Pretty print with expression types**
 
     $ ./run file.go -pptype
