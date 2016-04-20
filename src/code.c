@@ -265,21 +265,15 @@ void codeSTMT(STMT *obj, int indentation) {
 			print("{\n");
 			codeSTMT(obj->val.blockS, indentation + 1);
 			printIndentation(indentation);
-			print("}\n");
+			print("}");
 			break;
 
 		case varK:
 			codeVAR_DECL(obj->val.varS, indentation);
-			if (indentation) {
-				SEMICOLON;NEWLINE;
-			}
 			break;
 
 		case typeK:
 			codeTYPE_DECL(obj->val.typeS, indentation);
-			if (indentation) {
-				SEMICOLON;NEWLINE;
-			}
 			break;
 
 		case printK:
@@ -288,9 +282,9 @@ void codeSTMT(STMT *obj, int indentation) {
 
 		case printlnK:
 			codeSTMTprintln(obj->val.printlnS, indentation);
+			SEMICOLON; NEWLINE;
 			printIndentation(indentation);
-			print("cout << \"\\n\";");
-			NEWLINE;
+			print("cout << \"\\n\"");
 			break;
 
 		case shortvarK:
@@ -307,7 +301,7 @@ void codeSTMT(STMT *obj, int indentation) {
 					right = right->next;
 				}
 				if (left && right) {
-					if (indentation) { printIndentation(indentation); }
+					printIndentation(indentation);
 					if (left->val.idE->symbol->shortVarNew) {
 						left->type ? codeTYPE(left->type) : codeTYPE(right->type);
 						SPACE;
@@ -315,8 +309,9 @@ void codeSTMT(STMT *obj, int indentation) {
 					codeEXPsingle(left);
 					print(" = ");
 					codeEXPsingle(right);
-					SEMICOLON;
-					if (indentation) { NEWLINE; }
+					if (left->next) {
+						SEMICOLON; NEWLINE;
+					}
 
 					left = left->next;
 					right = right->next;
@@ -328,7 +323,6 @@ void codeSTMT(STMT *obj, int indentation) {
 			printIndentation(indentation);
 			print("return ");
 			codeEXPsingle(obj->val.returnS);
-			SEMICOLON; NEWLINE;
 			break;
 
 		case ifK:
@@ -346,11 +340,12 @@ void codeSTMT(STMT *obj, int indentation) {
 			print(") {\n");
 			codeSTMT(obj->val.ifS.body, indentation + 1);
 			printIndentation(indentation);
-			print("}\n");
+			print("}");
 
 			if (obj->val.ifS.pre_stmt) {
+				print("\n");
 				printIndentation(indentation - 1);
-				print("} // close scope for if prestatement\n");
+				print("} // close scope for if prestatement");
 			}
 			break;
 
@@ -372,11 +367,12 @@ void codeSTMT(STMT *obj, int indentation) {
 			print("} else {\n");
 			codeSTMT(obj->val.ifelseS.elsepart, indentation + 1);
 			printIndentation(indentation);
-			print("}\n");
+			print("}");
 
 			if (obj->val.ifelseS.pre_stmt) {
+				print("\n");
 				printIndentation(indentation - 1);
-				print("} // close scope for ifelse prestatement\n");
+				print("} // close scope for ifelse prestatement");
 			}
 			break;
 
@@ -395,7 +391,7 @@ void codeSTMT(STMT *obj, int indentation) {
 			codeCASE_DECLdefault(obj->val.switchS.body, indentation + 1);
 
 			printIndentation(indentation);
-			print("}\n");
+			print("}");
 			break;
 
 		case forK:
@@ -405,33 +401,31 @@ void codeSTMT(STMT *obj, int indentation) {
 			print("{\n");
 			codeSTMT(obj->val.forS.body, indentation + 1);
 			printIndentation(indentation);
-			print("}\n");
+			print("}");
 			break;
 
 		case breakK:
 			if (indentation) printIndentation(indentation);
-			print("break;\n");
+			print("break");
 			break;
 
 		case continueK:
 			if (indentation) printIndentation(indentation);
-			print("continue;\n");
+			print("continue");
 			break;
 
 		case assignK:
 			codeSTMTassign(obj->val.assignS.left, obj->val.assignS.right, indentation);
-			if (indentation) {
-				SEMICOLON; NEWLINE;
-			}
 			break;
 
 		case expK:
 			if (indentation) printIndentation(indentation);
 			codeEXPsingle(obj->val.expS);
-			if (indentation) {
-				SEMICOLON; NEWLINE;
-			}
 			break;
+	}
+
+	if (indentation) {
+		SEMICOLON;NEWLINE;
 	}
 }
 
@@ -516,19 +510,19 @@ void codeSTMTprint(EXP *exp, int indentation) {
 	if (!exp) return;
 	if (exp->next) {
 		codeSTMTprint(exp->next, indentation);
+		SEMICOLON; NEWLINE;
 	}
 
 	printIndentation(indentation);
 	print("cout << ");
 	codeEXPsingle(exp);
-	SEMICOLON;
-	NEWLINE;
 }
 
 void codeSTMTprintln(EXP *exp, int indentation) {
 	if (!exp) return;
 	if (exp->next) {
 		codeSTMTprintln(exp->next, indentation);
+		SEMICOLON; NEWLINE;
 	}
 
 	printIndentation(indentation);
@@ -538,9 +532,7 @@ void codeSTMTprintln(EXP *exp, int indentation) {
 	NEWLINE;
 
 	printIndentation(indentation);
-	print("cout << \" \";");
-	printIndentation(indentation);
-	NEWLINE;
+	print("cout << \" \"");
 }
 
 void codeSTMTassign(EXP *left, EXP *right, int indentation) {
@@ -572,6 +564,8 @@ void codeEXP(EXP *obj) {
 }
 
 void codeEXPsingle(EXP *obj) {
+	if (!obj) return;
+
 	switch(obj->kind) {
 		case idK:
 			codeID(obj->val.idE);
